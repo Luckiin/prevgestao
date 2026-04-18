@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Scale, Eye, EyeOff, ShieldCheck, Loader2, KeyRound } from "lucide-react";
 
-export default function EntrarPage() {
+function EntrarContent() {
   const router       = useRouter();
   const params       = useSearchParams();
   const next         = params.get("next") || "/home";
@@ -211,3 +211,12 @@ export default function EntrarPage() {
     </div>
   );
 }
+
+export default function EntrarPage() {
+  return (
+    <Suspense fallback={null}>
+      <EntrarContent />
+    </Suspense>
+  );
+}
+

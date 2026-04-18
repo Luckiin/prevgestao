@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Badge from "@/components/ui/Badge";
@@ -13,7 +13,7 @@ const ANOS = Array.from({ length: ANO_ATUAL - 2019 + 3 }, (_, i) => 2020 + i);
 
 const statusVariant = { "Ativo": "ativo", "Inativo": "inativo", "Concluído": "concluido" };
 
-export default function PorAnoPage() {
+function PorAnoContent() {
   const searchParams = useSearchParams();
   const router       = useRouter();
 
@@ -189,3 +189,16 @@ export default function PorAnoPage() {
     </div>
   );
 }
+
+export default function PorAnoPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center py-20">
+        <div className="w-7 h-7 border-2 border-brand-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    }>
+      <PorAnoContent />
+    </Suspense>
+  );
+}
+
