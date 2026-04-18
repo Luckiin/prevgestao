@@ -1,0 +1,389 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import Badge from "@/components/ui/Badge";
+import Button from "@/components/ui/Button";
+import Modal from "@/components/ui/Modal";
+import ClienteForm from "@/components/clientes/ClienteForm";
+import Input, { Select } from "@/components/ui/Input";
+import {
+  formatCPF, formatData, formatDataHora, formatMoeda, diasRestantes, corPrazo,
+} from "@/lib/utils";
+import {
+  User, Shield, FileText, CalendarClock, FolderOpen, Clock,
+  Plus, Trash2, CheckCircle, Upload, History, ArrowLeft, Eye, EyeOff,
+} from "lucide-react";
+
+const statusVariant = { "Ativo": "ativo", "Inativo": "inativo", "Concluído": "concluido" };
+
+function TabBtn({ active, onClick, children }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`px-4 py-2 text-sm font-medium rounded-xl transition-all ${
+        active
+          ? "bg-brand-600/20 text-brand-300 border border-brand-600/30"
+          : "text-ink-400 hover:text-ink-200 hover:bg-white/[0.04]"
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
+
+export default function ClienteDetalhePage() {
+  const { id }  = useParams();
+  const router  = useRouter();
+
+  const [cliente, setCliente]       = useState(null);
+  const [historico, setHistorico]   = useState([]);
+  const [prazos, setPrazos]         = useState([]);
+  const [documentos, setDocumentos] = useState([]);
+  const [auditoria, setAuditoria]   = useState([]);
+  const [tab, setTab]               = useState("dados");
+  const [loading, setLoading]       = useState(true);
+  const [editModal, setEditModal]   = useState(false);
+  const [saving, setSaving]         = useState(false);
+  const [mostraSenha, setMostraSenha] = useState(false);
+
+  // Novo prazo
+  const [novoPrazo, setNovoPrazo] = useState({ descricao: "", data_prazo: "" });
+  const [addingPrazo, setAddingPrazo] = useState(false);
+
+  async function carregar() {
+    setLoading(true);
+    const [c, h, a] = await Promise.all([
+      fetch(`/api/clientes/${id}`).then(r => r.json()),
+      fetch(`/api/clientes/${id}?historico=1`).then(r => r.json()),
+      fetch(`/api/auditoria?registro_id=${id}`).then(r => r.json()),
+    ]);
+    setCliente(c);
+    setPrazos(c.prazos || []);
+    setDocumentos(c.documentos || []);
+    setHistorico(h);
+    setAuditoria(a);
+    setLoading(false);
+  }
+
+  useEffect(() => { carregar(); }, [id]);
+
+  async function handleSalvar(payload) {
+    setSaving(true);
+    const res = await fetch(`/api/clientes/${id}`, {
+      method:  "PUT",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify(payload),
+    });
+    if (res.ok) { setEditModal(false); carregar(); }
+    else alert("Erro ao salvar");
+    setSaving(false);
+  }
+
+  async function handleAddPrazo(e) {
+    e.preventDefault();
+    if (!novoPrazo.descricao || !novoPrazo.data_prazo) return;
+    setAddingPrazo(true);
+    const res = await fetch("/api/prazos", {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({ ...novoPrazo, cliente_id: id }),
+    });
+    if (res.ok) { setNovoPrazo({ descricao: "", data_prazo: "" }); carregar(); }
+    setAddingPrazo(false);
+  }
+
+  async function togglePrazo(prazoId, concluido) {
+    await fetch(`/api/prazos/${prazoId}`, {
+      method:  "PUT",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({ concluido: !concluido }),
+    });
+    carregar();
+  }
+
+  async function excluirPrazo(prazoId) {
+    await fetch(`/api/prazos/${prazoId}`, { method: "DELETE" });
+    carregar();
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="w-8 h-8 border-2 border-brand-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (!cliente || cliente.erro) {
+    return (
+      <div className="p-6 text-center text-ink-500">
+        Cliente não encontrado.
+        <br />
+        <Button variant="ghost" onClick={() => router.back()} className="mt-4">← Voltar</Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="p-6 max-w-5xl mx-auto space-y-5">
+      {/* Header */}
+      <div className="flex items-start justify-between flex-wrap gap-4">
+        <div className="flex items-center gap-3">
+          <button onClick={() => router.back()} className="text-ink-500 hover:text-ink-200 transition-colors">
+            <ArrowLeft size={18} />
+          </button>
+          <div>
+            <h1 className="text-xl font-bold text-ink-100">{cliente.nome}</h1>
+            <p className="text-sm text-ink-500 font-mono">{formatCPF(cliente.cpf)}</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-3">
+          <Badge variant={statusVariant[cliente.status] || "neutro"}>{cliente.status}</Badge>
+          <span className="text-xs bg-dark-100/60 text-ink-400 px-2.5 py-1 rounded-lg">
+            Ano {cliente.ano_referencia}
+          </span>
+          <Button size="sm" onClick={() => setEditModal(true)}>Editar</Button>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex flex-wrap gap-2">
+        {[
+          { id: "dados",      label: "Dados" },
+          { id: "prazos",     label: `Prazos (${prazos.length})` },
+          { id: "documentos", label: `Documentos (${documentos.length})` },
+          { id: "historico",  label: "Histórico Anual" },
+          { id: "auditoria",  label: "Auditoria" },
+        ].map(t => (
+          <TabBtn key={t.id} active={tab === t.id} onClick={() => setTab(t.id)}>
+            {t.label}
+          </TabBtn>
+        ))}
+      </div>
+
+      {/* Tab: Dados */}
+      {tab === "dados" && (
+        <div className="glass-card rounded-2xl p-6 grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <Campo label="Data de nascimento" value={formatData(cliente.data_nascimento)} />
+          <Campo label="Idade" value={cliente.idade ? `${cliente.idade} anos` : "—"} />
+          <Campo label="Tipo de processo" value={cliente.tipo_processo?.charAt(0).toUpperCase() + cliente.tipo_processo?.slice(1)} />
+          <Campo label="Subdivisão" value={cliente.subdivisoes?.nome} />
+          <Campo label="Número do processo" value={cliente.numero_processo || "—"} />
+          <Campo label="Valor estimado" value={formatMoeda(cliente.valor_beneficio)} />
+          <Campo label="Data de entrada" value={formatDataHora(cliente.data_entrada)} />
+          <Campo label="Última atualização" value={formatDataHora(cliente.atualizado_em)} />
+
+          {/* Credenciais INSS */}
+          <div className="sm:col-span-2 pt-2 border-t border-white/[0.05]">
+            <p className="text-xs font-medium text-ink-500 mb-3 flex items-center gap-2">
+              <Shield size={12} /> Credenciais INSS (criptografadas)
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Campo label="Login INSS" value={cliente.login_inss || "—"} />
+              <div>
+                <p className="text-xs text-ink-500 mb-1">Senha INSS</p>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-ink-200 font-mono">
+                    {mostraSenha ? (cliente.senha_inss || "—") : "••••••••"}
+                  </span>
+                  {cliente.senha_inss && (
+                    <button
+                      onClick={() => setMostraSenha(v => !v)}
+                      className="text-ink-500 hover:text-ink-300 transition-colors"
+                    >
+                      {mostraSenha ? <EyeOff size={14} /> : <Eye size={14} />}
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {cliente.observacoes && (
+            <div className="sm:col-span-2">
+              <p className="text-xs text-ink-500 mb-1">Observações</p>
+              <p className="text-sm text-ink-200 whitespace-pre-line">{cliente.observacoes}</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Tab: Prazos */}
+      {tab === "prazos" && (
+        <div className="space-y-4">
+          {/* Adicionar prazo */}
+          <div className="glass-card rounded-2xl p-5">
+            <h3 className="text-sm font-semibold text-ink-200 mb-4">Adicionar prazo</h3>
+            <form onSubmit={handleAddPrazo} className="flex flex-wrap gap-3">
+              <input
+                value={novoPrazo.descricao}
+                onChange={e => setNovoPrazo(p => ({ ...p, descricao: e.target.value }))}
+                placeholder="Descrição do prazo..."
+                className="flex-1 min-w-[200px] bg-dark-300 border border-dark-50 rounded-xl px-3.5 py-2 text-sm text-ink-100 placeholder-ink-600
+                           focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500/20"
+                required
+              />
+              <input
+                type="date"
+                value={novoPrazo.data_prazo}
+                onChange={e => setNovoPrazo(p => ({ ...p, data_prazo: e.target.value }))}
+                className="bg-dark-300 border border-dark-50 rounded-xl px-3.5 py-2 text-sm text-ink-100
+                           focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500/20"
+                required
+              />
+              <Button type="submit" loading={addingPrazo} size="md">
+                <Plus size={14} /> Adicionar
+              </Button>
+            </form>
+          </div>
+
+          {/* Lista de prazos */}
+          <div className="glass-card rounded-2xl overflow-hidden">
+            {prazos.length === 0 ? (
+              <p className="text-sm text-ink-500 p-6 text-center">Nenhum prazo cadastrado.</p>
+            ) : (
+              <div className="divide-y divide-white/[0.03]">
+                {prazos.map(p => {
+                  const dias = diasRestantes(p.data_prazo);
+                  return (
+                    <div key={p.id} className={`flex items-center gap-4 px-5 py-3.5 ${p.concluido ? "opacity-50" : ""}`}>
+                      <button
+                        onClick={() => togglePrazo(p.id, p.concluido)}
+                        className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
+                          p.concluido
+                            ? "bg-success-500 border-success-500 text-white"
+                            : "border-ink-600 hover:border-brand-500"
+                        }`}
+                      >
+                        {p.concluido && <CheckCircle size={12} />}
+                      </button>
+                      <div className="flex-1">
+                        <p className={`text-sm ${p.concluido ? "line-through text-ink-500" : "text-ink-200"}`}>
+                          {p.descricao}
+                        </p>
+                        <p className="text-xs text-ink-500 mt-0.5">por {p.criado_por || "—"}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className={`text-xs font-medium ${p.concluido ? "text-ink-500" : corPrazo(dias)}`}>
+                          {formatData(p.data_prazo)}
+                        </p>
+                        {!p.concluido && (
+                          <p className={`text-[11px] ${corPrazo(dias)}`}>
+                            {dias === 0 ? "Hoje" : dias < 0 ? `${Math.abs(dias)}d atraso` : `${dias}d restantes`}
+                          </p>
+                        )}
+                      </div>
+                      <button
+                        onClick={() => excluirPrazo(p.id)}
+                        className="text-ink-600 hover:text-danger-500 transition-colors ml-2"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Tab: Documentos */}
+      {tab === "documentos" && (
+        <div className="glass-card rounded-2xl p-6">
+          <p className="text-sm text-ink-400">
+            Upload de documentos disponível na implementação com Supabase Storage conectado.
+            <br />
+            <span className="text-ink-500 text-xs">
+              Caminho: <code className="bg-dark-100/40 px-1.5 py-0.5 rounded">/api/documentos/upload-url</code>
+            </span>
+          </p>
+          {documentos.length > 0 && (
+            <div className="mt-4 divide-y divide-white/[0.03]">
+              {documentos.map(d => (
+                <div key={d.id} className="flex items-center gap-3 py-3">
+                  <FileText size={14} className="text-brand-400" />
+                  <div className="flex-1">
+                    <p className="text-sm text-ink-200">{d.nome}</p>
+                    <p className="text-xs text-ink-500">{d.pasta} · {formatDataHora(d.criado_em)}</p>
+                  </div>
+                  <Button variant="ghost" size="sm" onClick={async () => {
+                    const res  = await fetch(`/api/documentos/${d.id}`);
+                    const json = await res.json();
+                    if (json.url) window.open(json.url, "_blank");
+                  }}>
+                    Download
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Tab: Histórico Anual */}
+      {tab === "historico" && (
+        <div className="glass-card rounded-2xl p-5">
+          <h3 className="text-sm font-semibold text-ink-200 mb-4 flex items-center gap-2">
+            <History size={15} /> Migrações de Ano de Referência
+          </h3>
+          {historico.length === 0 ? (
+            <p className="text-sm text-ink-500">Nenhuma migração registrada. Cliente está no ano original de cadastro.</p>
+          ) : (
+            <div className="space-y-2">
+              {historico.map(h => (
+                <div key={h.id} className="flex items-start gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/[0.04]">
+                  <div className="flex items-center gap-1.5 text-xs font-medium">
+                    <span className="text-ink-500">{h.ano_anterior}</span>
+                    <span className="text-ink-600">→</span>
+                    <span className="text-brand-400">{h.ano_novo}</span>
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-xs text-ink-400">{h.motivo}</p>
+                    <p className="text-[11px] text-ink-600 mt-0.5">{formatDataHora(h.migrado_em)}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Tab: Auditoria */}
+      {tab === "auditoria" && (
+        <div className="glass-card rounded-2xl overflow-hidden">
+          {auditoria.length === 0 ? (
+            <p className="p-6 text-sm text-ink-500 text-center">Nenhum registro de auditoria.</p>
+          ) : (
+            <div className="divide-y divide-white/[0.03]">
+              {auditoria.map(a => (
+                <div key={a.id} className="px-5 py-3 flex items-start gap-3">
+                  <div className="flex-1">
+                    <p className="text-xs font-medium text-ink-200">{a.acao}</p>
+                    <p className="text-[11px] text-ink-500 mt-0.5">{a.usuario_email || "sistema"}</p>
+                  </div>
+                  <p className="text-[11px] text-ink-600 whitespace-nowrap">{formatDataHora(a.criado_em)}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Modal de edição */}
+      <Modal open={editModal} onClose={() => setEditModal(false)} title="Editar cliente" size="lg">
+        <ClienteForm inicial={cliente} onSubmit={handleSalvar} loading={saving} />
+      </Modal>
+    </div>
+  );
+}
+
+function Campo({ label, value }) {
+  return (
+    <div>
+      <p className="text-xs text-ink-500 mb-1">{label}</p>
+      <p className="text-sm text-ink-200">{value ?? "—"}</p>
+    </div>
+  );
+}

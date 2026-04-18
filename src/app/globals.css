@@ -1,0 +1,79 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Base ─────────────────────────────────────────────────── */
+:root {
+  --scrollbar-bg:    #0c1320;
+  --scrollbar-thumb: #1e2740;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: #0c1320;
+  color: #e8eef8;
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Scrollbar customizado ───────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-bg);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #2563eb44;
+}
+
+/* ── Animações de entrada ─────────────────────────────────── */
+.page-enter {
+  animation: fadeIn 0.35s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Utilitários de formulário ────────────────────────────── */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px #101828 inset !important;
+  -webkit-text-fill-color: #e8eef8 !important;
+  caret-color: #e8eef8;
+}
+
+/* ── Tabela ──────────────────────────────────────────────── */
+.table-row-hover:hover {
+  background-color: rgba(37, 99, 235, 0.04);
+}
+
+/* ── Card de glass ────────────────────────────────────────── */
+.glass-card {
+  background: rgba(16, 24, 40, 0.6);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* ── Tooltip base ─────────────────────────────────────────── */
+[title] {
+  cursor: help;
+}
