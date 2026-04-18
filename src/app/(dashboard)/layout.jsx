@@ -3,34 +3,47 @@
 import { useState } from "react";
 import { AuthProvider } from "@/context/AuthContext";
 import Sidebar from "@/components/dashboard/Sidebar";
-import { Menu, Bell } from "lucide-react";
+import { Menu } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
-import "../globals.css";
 
 function TopBar({ onMenuOpen }) {
   const { usuario } = useAuth();
-  const nome = usuario?.nome ?? "Usuário";
+  const nome    = usuario?.nome ?? "Usuário";
+  const inicial = nome.charAt(0).toUpperCase();
 
   return (
-    <header className="h-14 bg-dark-400/70 backdrop-blur-xl border-b border-white/[0.05] flex items-center gap-3 px-4 sm:px-6 sticky top-0 z-30">
-      <button
-        onClick={onMenuOpen}
-        className="lg:hidden w-9 h-9 flex items-center justify-center rounded-xl hover:bg-white/[0.06] text-ink-500 hover:text-ink-100 transition-all"
-      >
+    <header style={{
+      height: 56, display: "flex", alignItems: "center", gap: 12,
+      padding: "0 24px", position: "sticky", top: 0, zIndex: 30,
+      background: "rgba(8,1,3,.92)", backdropFilter: "blur(20px)",
+      borderBottom: "1px solid rgba(201,169,110,.07)",
+    }}>
+      {/* Burger mobile */}
+      <button onClick={onMenuOpen} className="topbar-burger"
+        style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(201,169,110,.5)", display: "flex", alignItems: "center", padding: 8 }}>
         <Menu size={18} />
       </button>
 
-      <div className="flex-1" />
+      <div style={{ height: 18, width: 1, background: "rgba(201,169,110,.2)" }} className="topbar-divider" />
+      <span style={{ fontSize: 12, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(201,169,110,.35)" }} className="topbar-label">
+        Área Interna
+      </span>
 
-      <button className="relative w-9 h-9 flex items-center justify-center rounded-xl hover:bg-white/[0.06] text-ink-500 hover:text-ink-100 transition-all">
-        <Bell size={16} />
-      </button>
+      <div style={{ flex: 1 }} />
 
-      <div className="flex items-center gap-2 bg-white/[0.04] border border-white/[0.06] rounded-xl px-3 py-2">
-        <div className="w-5 h-5 bg-gradient-to-br from-brand-500 to-brand-700 rounded-md flex items-center justify-center text-white text-[9px] font-black">
-          {nome.charAt(0).toUpperCase()}
-        </div>
-        <span className="text-[13px] font-medium text-ink-300 hidden sm:block truncate max-w-[120px]">
+      {/* Avatar */}
+      <div style={{
+        display: "flex", alignItems: "center", gap: 10,
+        padding: "7px 14px", background: "rgba(201,169,110,.05)",
+        border: "1px solid rgba(201,169,110,.1)", borderRadius: 4,
+      }}>
+        <div style={{
+          width: 26, height: 26, borderRadius: 2,
+          background: "linear-gradient(135deg, #6B1530, #3d0a1a)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          color: "#C9A96E", fontSize: 11, fontWeight: 700, flexShrink: 0,
+        }}>{inicial}</div>
+        <span style={{ fontSize: 12, color: "rgba(245,240,232,.6)", whiteSpace: "nowrap" }} className="topbar-nome">
           {nome}
         </span>
       </div>
@@ -42,11 +55,13 @@ function DashboardInner({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-dark-300 flex">
-      <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-      <div className="flex-1 lg:ml-64 min-w-0 flex flex-col min-h-screen">
+    <div style={{ minHeight: "100vh", background: "#0d0307" }}>
+      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <div className="dashboard-main" style={{ transition: "margin-left .3s" }}>
         <TopBar onMenuOpen={() => setSidebarOpen(true)} />
-        <div className="flex-1 w-full page-enter">{children}</div>
+        <main style={{ padding: 0 }}>
+          {children}
+        </main>
       </div>
     </div>
   );

@@ -1,6 +1,5 @@
 /**
- * relatorioService.js
- * Dados para relatórios e dashboard
+ * relatorioService.js — otimizado para performance
  */
 
 /** Resumo anual (via view v_resumo_anual) */
@@ -8,7 +7,6 @@ export async function resumoAnual(supabase) {
   const { data, error } = await supabase
     .from("v_resumo_anual")
     .select("*");
-
   if (error) throw error;
   return data;
 }
@@ -22,63 +20,83 @@ export async function clientesPorAno(supabase, ano, { limit = 200, offset = 0, b
     .order("atualizado_em", { ascending: false })
     .range(offset, offset + limit - 1);
 
-  if (busca) {
-    query = query.or(`nome.ilike.%${busca}%,cpf.ilike.%${busca}%`);
-  }
+  if (busca) query = query.or(`nome.ilike.%${busca}%,cpf.ilike.%${busca}%`);
 
   const { data, error, count } = await query;
   if (error) throw error;
   return { data, total: count };
 }
 
-/** Estatísticas gerais para o dashboard */
+/**
+ * Estatísticas do dashboard — queries otimizadas:
+ * - Usa `head: true` (só count, sem dados) onde possível
+ * - Agrega valor_total com range limitado
+ * - Remove query de porSubdivisao desnecessária
+ */
 export async function estatisticasDashboard(supabase) {
   const anoAtual = new Date().getFullYear();
+  const hoje = new Date().toISOString().split("T")[0];
 
   const [
-    { count: totalAtivos },
-    { count: totalAnoAtual },
-    { count: prazosHoje },
-    { data: valorTotal },
-    { data: porSubdivisao },
+    { count: totalAtivos,   error: e1 },
+    { count: totalAnoAtual, error: e2 },
+    { count: prazosVencidos, error: e3 },
+    { data:  valorRows,     error: e4 },
   ] = await Promise.all([
-    supabase.from("clientes").select("*", { count: "exact", head: true }).eq("status", "Ativo"),
-    supabase.from("clientes").select("*", { count: "exact", head: true }).eq("ano_referencia", anoAtual),
-    supabase.from("prazos").select("*", { count: "exact", head: true })
-      .eq("concluido", false)
-      .lte("data_prazo", new Date().toISOString().split("T")[0]),
-    supabase.from("clientes").select("valor_beneficio").eq("status", "Ativo"),
-    supabase
-      .from("clientes")
-      .select("subdivisoes(nome), status")
+    // COUNT apenas — sem baixar registros
+    supabase.from("clientes")
+      .select("*", { count: "exact", head: true })
       .eq("status", "Ativo"),
+
+    supabase.from("clientes")
+      .select("*", { count: "exact", head: true })
+      .eq("ano_referencia", anoAtual),
+
+    supabase.from("prazos")
+      .select("*", { count: "exact", head: true })
+      .eq("concluido", false)
+      .lte("data_prazo", hoje),
+
+    // Só o campo necessário, limitado a 2000 registros
+    supabase.from("clientes")
+      .select("valor_beneficio")
+      .eq("status", "Ativo")
+      .not("valor_beneficio", "is", null)
+      .limit(2000),
   ]);
 
-  const valorTotalAtivos = (valorTotal || []).reduce(
+  if (e1 || e2 || e3 || e4) {
+    const err = e1 || e2 || e3 || e4;
+    throw new Error(err.message);
+  }
+
+  const valorTotal = (valorRows || []).reduce(
     (acc, c) => acc + (c.valor_beneficio || 0), 0
   );
 
   return {
-    total_ativos:     totalAtivos || 0,
-    total_ano_atual:  totalAnoAtual || 0,
-    prazos_vencidos:  prazosHoje || 0,
-    valor_total:      valorTotalAtivos,
-    por_subdivisao:   porSubdivisao || [],
+    total_ativos:    totalAtivos    || 0,
+    total_ano_atual: totalAnoAtual  || 0,
+    prazos_vencidos: prazosVencidos || 0,
+    valor_total:     valorTotal,
   };
 }
 
-/** Prazos próximos (view v_prazos_proximos) */
+/** Prazos próximos */
 export async function prazosProximos(supabase, dias = 30) {
-  const ate = new Date();
+  const hoje = new Date().toISOString().split("T")[0];
+  const ate  = new Date();
   ate.setDate(ate.getDate() + dias);
+  const ateStr = ate.toISOString().split("T")[0];
 
   const { data, error } = await supabase
     .from("prazos")
-    .select("*, clientes(id, nome, cpf, status)")
+    .select("id, descricao, data_prazo, concluido, clientes(id, nome, cpf, status)")
     .eq("concluido", false)
-    .lte("data_prazo", ate.toISOString().split("T")[0])
-    .gte("data_prazo", new Date().toISOString().split("T")[0])
-    .order("data_prazo");
+    .gte("data_prazo", hoje)
+    .lte("data_prazo", ateStr)
+    .order("data_prazo")
+    .limit(50);
 
   if (error) throw error;
   return data;

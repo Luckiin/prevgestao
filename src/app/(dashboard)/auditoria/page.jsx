@@ -6,7 +6,7 @@ import { ScrollText, Search } from "lucide-react";
 
 const ACOES_CORES = {
   INSERT:        "text-success-500 bg-success-500/10",
-  UPDATE:        "text-brand-400 bg-brand-500/10",
+  UPDATE:        "text-gold-500 bg-wine-800/10",
   DELETE:        "text-danger-500 bg-danger-500/10",
   LOGIN:         "text-gold-500 bg-gold-500/10",
   LOGIN_2FA:     "text-gold-500 bg-gold-500/10",
@@ -56,14 +56,14 @@ export default function AuditoriaPage() {
             onChange={e => setBusca(e.target.value)}
             placeholder="Buscar por ação, usuário, tabela..."
             className="w-full bg-dark-300 border border-dark-50 rounded-xl pl-9 pr-3.5 py-2 text-sm text-ink-100 placeholder-ink-600
-                       focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500/20"
+                       focus:outline-none focus:border-gold-500 focus:ring-1 focus:ring-gold-500/20"
           />
         </div>
 
         <select
           value={filtroTabela}
           onChange={e => setFiltroTabela(e.target.value)}
-          className="bg-dark-300 border border-dark-50 rounded-xl px-3 py-2 text-sm text-ink-300 focus:outline-none focus:border-brand-500"
+          className="bg-dark-300 border border-dark-50 rounded-xl px-3 py-2 text-sm text-ink-300 focus:outline-none focus:border-gold-500"
         >
           <option value="">Todas as tabelas</option>
           <option value="clientes">Clientes</option>
@@ -80,7 +80,7 @@ export default function AuditoriaPage() {
       <div className="glass-card rounded-2xl overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center py-20">
-            <div className="w-7 h-7 border-2 border-brand-500 border-t-transparent rounded-full animate-spin" />
+            <div className="w-7 h-7 border-2 border-gold-500 border-t-transparent rounded-full animate-spin" />
           </div>
         ) : filtrados.length === 0 ? (
           <p className="p-8 text-center text-sm text-ink-500">Nenhum registro encontrado.</p>

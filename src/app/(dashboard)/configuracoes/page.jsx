@@ -11,16 +11,15 @@ import { useAuth } from "@/context/AuthContext";
 export default function ConfiguracoesPage() {
   const { usuario } = useAuth();
   const [subdivisoes, setSubdivisoes] = useState([]);
-  const [loading, setLoading]         = useState(true);
-  const [modal, setModal]             = useState(false);
-  const [editando, setEditando]       = useState(null);
-  const [saving, setSaving]           = useState(false);
-  const [form, setForm]               = useState({ nome: "", tipo: "administrativo" });
+  const [loading, setLoading] = useState(true);
+  const [modal, setModal] = useState(false);
+  const [editando, setEditando] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const [form, setForm] = useState({ nome: "", tipo: "administrativo" });
 
   async function carregar() {
     setLoading(true);
     const res = await fetch("/api/subdivisoes?tipo=");
-    // Busca todas (sem filtro de tipo)
     const resAdm = await fetch("/api/subdivisoes?tipo=administrativo");
     const resJud = await fetch("/api/subdivisoes?tipo=judicial");
     const [adm, jud] = await Promise.all([resAdm.json(), resJud.json()]);
@@ -33,12 +32,12 @@ export default function ConfiguracoesPage() {
   async function handleSalvar(e) {
     e.preventDefault();
     setSaving(true);
-    const url    = editando ? `/api/subdivisoes/${editando.id}` : "/api/subdivisoes";
+    const url = editando ? `/api/subdivisoes/${editando.id}` : "/api/subdivisoes";
     const method = editando ? "PUT" : "POST";
-    const res    = await fetch(url, {
+    const res = await fetch(url, {
       method,
       headers: { "Content-Type": "application/json" },
-      body:    JSON.stringify(form),
+      body: JSON.stringify(form),
     });
     if (res.ok) { setModal(false); setEditando(null); setForm({ nome: "", tipo: "administrativo" }); carregar(); }
     else alert("Erro ao salvar");
@@ -47,9 +46,9 @@ export default function ConfiguracoesPage() {
 
   async function toggleAtivo(s) {
     await fetch(`/api/subdivisoes/${s.id}`, {
-      method:  "PUT",
+      method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body:    JSON.stringify({ ativo: !s.ativo }),
+      body: JSON.stringify({ ativo: !s.ativo }),
     });
     carregar();
   }
@@ -87,7 +86,7 @@ export default function ConfiguracoesPage() {
 
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <div className="w-6 h-6 border-2 border-brand-500 border-t-transparent rounded-full animate-spin" />
+            <div className="w-6 h-6 border-2 border-gold-500 border-t-transparent rounded-full animate-spin" />
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-white/[0.05]">
@@ -121,30 +120,6 @@ export default function ConfiguracoesPage() {
             ))}
           </div>
         )}
-      </div>
-
-      {/* Usuário atual */}
-      <div className="glass-card rounded-2xl p-5">
-        <h2 className="text-sm font-semibold text-ink-200 mb-4 flex items-center gap-2">
-          <Shield size={15} className="text-brand-400" />
-          Usuário atual
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <p className="text-xs text-ink-500 mb-1">Nome</p>
-            <p className="text-sm text-ink-200">{usuario?.nome || "—"}</p>
-          </div>
-          <div>
-            <p className="text-xs text-ink-500 mb-1">E-mail</p>
-            <p className="text-sm text-ink-200">{usuario?.email || "—"}</p>
-          </div>
-        </div>
-        <div className="mt-4 p-3 rounded-xl bg-brand-500/5 border border-brand-500/10">
-          <p className="text-xs text-ink-400">
-            Para habilitar o <strong className="text-ink-200">2FA (TOTP)</strong>, acesse o painel do Supabase → Authentication → MFA e ative para seu usuário.
-            Na próxima vez que fizer login, o sistema solicitará o código do app autenticador.
-          </p>
-        </div>
       </div>
 
       {/* Modal de subdivisão */}

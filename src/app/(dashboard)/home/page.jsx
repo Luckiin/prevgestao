@@ -36,7 +36,7 @@ export default function HomePage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-2 border-brand-500 border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-gold-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -88,7 +88,7 @@ export default function HomePage() {
               <h2 className="text-sm font-semibold text-ink-200">Clientes por Ano</h2>
               <p className="text-xs text-ink-500 mt-0.5">Distribuição histórica</p>
             </div>
-            <TrendingUp size={16} className="text-brand-400" />
+            <TrendingUp size={16} className="text-gold-500" />
           </div>
 
           {anual.length > 0 ? (
@@ -174,7 +174,7 @@ export default function HomePage() {
 
           <Link
             href="/prazos"
-            className="mt-4 flex items-center justify-center gap-1.5 text-xs text-brand-400 hover:text-brand-300 transition-colors"
+            className="mt-4 flex items-center justify-center gap-1.5 text-xs text-gold-500 hover:text-gold-500 transition-colors"
           >
             Ver todos os prazos <ArrowRight size={12} />
           </Link>
@@ -184,7 +184,7 @@ export default function HomePage() {
       {/* Link módulo anual */}
       <Link
         href={`/por-ano?ano=${ANO_ATUAL}`}
-        className="glass-card rounded-2xl p-5 flex items-center gap-4 hover:border-brand-500/30 transition-all group"
+        className="glass-card rounded-2xl p-5 flex items-center gap-4 hover:border-gold-500/30 transition-all group"
       >
         <div className="w-10 h-10 rounded-xl bg-gold-500/10 flex items-center justify-center text-gold-500">
           <CalendarDays size={18} />
@@ -197,7 +197,7 @@ export default function HomePage() {
             {stats?.total_ano_atual ?? 0} cliente(s) com atividade em {ANO_ATUAL}
           </p>
         </div>
-        <ArrowRight size={16} className="text-ink-500 group-hover:text-brand-400 transition-colors" />
+        <ArrowRight size={16} className="text-ink-500 group-hover:text-gold-500 transition-colors" />
       </Link>
     </div>
   );

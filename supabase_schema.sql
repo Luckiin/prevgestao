@@ -81,6 +81,8 @@ create table public.clientes (
   subdivisao_id    uuid        references public.subdivisoes(id) on delete set null,
   status           text        not null default 'Ativo'
                                check (status in ('Ativo', 'Inativo', 'Concluído')),
+  situacao         text        not null default 'Pendente'
+                               check (situacao in ('Pendente', 'Finalizado')),
   numero_processo  text,
   valor_beneficio  numeric(12,2),
   observacoes      text,
@@ -96,6 +98,7 @@ create table public.clientes (
 
 create index idx_clientes_cpf           on public.clientes (cpf);
 create index idx_clientes_status        on public.clientes (status);
+create index idx_clientes_situacao      on public.clientes (situacao);
 create index idx_clientes_ano           on public.clientes (ano_referencia);
 create index idx_clientes_subdivisao    on public.clientes (subdivisao_id);
 create index idx_clientes_tipo_processo on public.clientes (tipo_processo);
@@ -367,6 +370,7 @@ select
   s.nome  as subdivisao,
   s.tipo  as subdivisao_tipo,
   c.status,
+  c.situacao,
   c.ano_referencia,
   c.numero_processo,
   c.valor_beneficio,

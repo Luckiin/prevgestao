@@ -10,6 +10,7 @@ export async function GET(request) {
     const resultado = await listarClientes(supabase, {
       status:         searchParams.get("status")         || undefined,
       tipo_processo:  searchParams.get("tipo_processo")  || undefined,
+      situacao:       searchParams.get("situacao")       || undefined,
       subdivisao_id:  searchParams.get("subdivisao_id")  || undefined,
       ano_referencia: searchParams.get("ano_referencia") || undefined,
       busca:          searchParams.get("busca")          || undefined,

@@ -1,16 +1,19 @@
-import "../globals.css";
-
-export const metadata = { title: "Entrar | PrevGestão" };
+export const metadata = { title: "Entrar | Deise Lisboa Advocacia" };
 
 export default function AuthLayout({ children }) {
   return (
-    <div className="min-h-screen bg-dark-400 flex items-center justify-center p-4">
-      {/* Gradiente de fundo */}
-      <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-brand-700/20 rounded-full blur-[120px]" />
-        <div className="absolute bottom-0 right-0 w-[400px] h-[300px] bg-gold-500/5 rounded-full blur-[100px]" />
+    <div style={{
+      minHeight: "100vh", background: "#080102",
+      display: "flex", alignItems: "center", justifyContent: "center",
+      padding: 24, position: "relative", overflow: "hidden",
+    }}>
+      <div style={{ position: "fixed", inset: 0, pointerEvents: "none" }}>
+        <div style={{ position: "absolute", top: "-5%", left: "50%", transform: "translateX(-50%)", width: 700, height: 500, background: "radial-gradient(ellipse, rgba(107,21,48,.45) 0%, transparent 70%)", filter: "blur(40px)" }} />
+        <div style={{ position: "absolute", bottom: "-10%", right: "-5%", width: 500, height: 400, background: "radial-gradient(ellipse, rgba(107,21,48,.2) 0%, transparent 70%)", filter: "blur(60px)" }} />
       </div>
-      <div className="relative z-10 w-full max-w-sm">{children}</div>
+      <div style={{ position: "relative", zIndex: 10, width: "100%", maxWidth: 420 }}>
+        {children}
+      </div>
     </div>
   );
 }

@@ -22,7 +22,7 @@ export default function Input({
           "focus:outline-none focus:ring-1 transition-all",
           error
             ? "border-danger-500 focus:border-danger-500 focus:ring-danger-500/20"
-            : "border-dark-50 focus:border-brand-500 focus:ring-brand-500/20",
+            : "border-dark-50 focus:border-gold-500 focus:ring-gold-500/20",
           className
         )}
         {...props}
@@ -48,7 +48,7 @@ export function Select({ label, error, children, containerClassName, className, 
           "focus:outline-none focus:ring-1 transition-all appearance-none",
           error
             ? "border-danger-500 focus:border-danger-500 focus:ring-danger-500/20"
-            : "border-dark-50 focus:border-brand-500 focus:ring-brand-500/20",
+            : "border-dark-50 focus:border-gold-500 focus:ring-gold-500/20",
           className
         )}
         {...props}
@@ -75,7 +75,7 @@ export function Textarea({ label, error, containerClassName, className, ...props
           "focus:outline-none focus:ring-1 transition-all",
           error
             ? "border-danger-500 focus:border-danger-500 focus:ring-danger-500/20"
-            : "border-dark-50 focus:border-brand-500 focus:ring-brand-500/20",
+            : "border-dark-50 focus:border-gold-500 focus:ring-gold-500/20",
           className
         )}
         {...props}

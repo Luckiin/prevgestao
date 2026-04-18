@@ -19,6 +19,7 @@ export default function ClienteForm({ inicial, onSubmit, loading }) {
     tipo_processo:   "administrativo",
     subdivisao_id:   "",
     status:          "Ativo",
+    situacao:        "Pendente",
     numero_processo: "",
     valor_beneficio: "",
     observacoes:     "",
@@ -117,7 +118,7 @@ export default function ClienteForm({ inicial, onSubmit, loading }) {
               onChange={e => set("senha_inss", e.target.value)}
               placeholder="••••••••"
               className="w-full bg-dark-300 border border-dark-50 rounded-xl px-3.5 py-2.5 pr-10 text-sm text-ink-100 placeholder-ink-600
-                         focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500/20 transition-all"
+                         focus:outline-none focus:border-gold-500 focus:ring-1 focus:ring-gold-500/20 transition-all"
             />
             <button
               type="button"
@@ -184,6 +185,15 @@ export default function ClienteForm({ inicial, onSubmit, loading }) {
           placeholder="0,00"
           hint="R$"
         />
+
+        <Select
+          label="Situação"
+          value={form.situacao}
+          onChange={e => set("situacao", e.target.value)}
+        >
+          <option value="Pendente">Pendente</option>
+          <option value="Finalizado">Finalizado</option>
+        </Select>
       </div>
 
       <Textarea

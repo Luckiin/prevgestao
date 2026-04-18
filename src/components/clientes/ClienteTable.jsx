@@ -15,7 +15,8 @@ export default function ClienteTable({ clientes, onEdit, onDelete, loading }) {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="w-7 h-7 border-2 border-brand-500 border-t-transparent rounded-full animate-spin" />
+        <div className="w-7 h-7 border-2 border-t-transparent rounded-full animate-spin"
+          style={{ borderColor: "rgba(201,169,110,.3)", borderTopColor: "#C9A96E" }} />
       </div>
     );
   }
@@ -33,7 +34,7 @@ export default function ClienteTable({ clientes, onEdit, onDelete, loading }) {
       <table className="w-full text-sm border-collapse">
         <thead>
           <tr className="border-b border-white/[0.05]">
-            {["Cliente", "CPF", "Tipo / Subdivisão", "Status", "Ano", "Próx. Prazo", ""].map((h) => (
+            {["Cliente", "CPF", "Tipo / Subdivisão", "Status", "Situação", "Ano", "Próx. Prazo", ""].map((h) => (
               <th key={h} className="text-left px-4 py-3 text-xs font-medium text-ink-500 whitespace-nowrap">
                 {h}
               </th>
@@ -68,6 +69,12 @@ export default function ClienteTable({ clientes, onEdit, onDelete, loading }) {
               </td>
 
               <td className="px-4 py-3">
+                <Badge variant={c.situacao === "Finalizado" ? "ativo" : "aviso"}>
+                  {c.situacao || "Pendente"}
+                </Badge>
+              </td>
+
+              <td className="px-4 py-3">
                 <span className="text-xs text-ink-400 bg-dark-100/60 px-2 py-0.5 rounded-lg">
                   {c.ano_referencia}
                 </span>
@@ -88,21 +95,21 @@ export default function ClienteTable({ clientes, onEdit, onDelete, loading }) {
                 <div className="flex items-center gap-1 justify-end">
                   <Link
                     href={`/clientes/${c.id}`}
-                    className="w-7 h-7 flex items-center justify-center rounded-lg text-ink-500 hover:text-brand-400 hover:bg-brand-500/10 transition-all"
+                    className="w-7 h-7 flex items-center justify-center rounded text-ink-500 hover:text-gold-500 hover:bg-gold-500/10 transition-all"
                     title="Ver detalhes"
                   >
                     <Eye size={13} />
                   </Link>
                   <button
                     onClick={() => onEdit?.(c)}
-                    className="w-7 h-7 flex items-center justify-center rounded-lg text-ink-500 hover:text-gold-500 hover:bg-gold-500/10 transition-all"
+                    className="w-7 h-7 flex items-center justify-center rounded text-ink-500 hover:text-gold-500 hover:bg-gold-500/10 transition-all"
                     title="Editar"
                   >
                     <Pencil size={13} />
                   </button>
                   <button
                     onClick={() => onDelete?.(c)}
-                    className="w-7 h-7 flex items-center justify-center rounded-lg text-ink-500 hover:text-danger-500 hover:bg-danger-500/10 transition-all"
+                    className="w-7 h-7 flex items-center justify-center rounded text-ink-500 hover:text-danger-500 hover:bg-danger-500/10 transition-all"
                     title="Excluir"
                   >
                     <Trash2 size={13} />

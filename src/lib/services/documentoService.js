@@ -22,10 +22,10 @@ export async function listarDocumentos(supabase, clienteId, pasta) {
 }
 
 /** Gera URL temporária para download (1 hora de validade) */
-export async function gerarUrlDownload(supabase, storagePath) {
+export async function gerarUrlDownload(supabase, storagePath, download = false) {
   const { data, error } = await supabase.storage
     .from(BUCKET)
-    .createSignedUrl(storagePath, 3600);
+    .createSignedUrl(storagePath, 3600, download ? { download: true } : {});
 
   if (error) throw error;
   return data.signedUrl;

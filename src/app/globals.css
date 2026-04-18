@@ -1,13 +1,11 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 /* ── Base ─────────────────────────────────────────────────── */
 :root {
-  --scrollbar-bg:    #0c1320;
-  --scrollbar-thumb: #1e2740;
+  --scrollbar-bg:    #080102;
+  --scrollbar-thumb: #2a0d14;
 }
 
 * {
@@ -19,8 +17,8 @@ html {
 }
 
 body {
-  background-color: #0c1320;
-  color: #e8eef8;
+  background-color: #0d0307;
+  color: #f5f0e8;
   font-family: 'Inter', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -39,7 +37,7 @@ body {
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #2563eb44;
+  background: rgba(201,169,110,.25);
 }
 
 /* ── Animações de entrada ─────────────────────────────────── */
@@ -56,24 +54,210 @@ body {
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus {
-  -webkit-box-shadow: 0 0 0 1000px #101828 inset !important;
-  -webkit-text-fill-color: #e8eef8 !important;
-  caret-color: #e8eef8;
+  -webkit-box-shadow: 0 0 0 1000px #1e0d12 inset !important;
+  -webkit-text-fill-color: #f5f0e8 !important;
+  caret-color: #f5f0e8;
 }
 
 /* ── Tabela ──────────────────────────────────────────────── */
 .table-row-hover:hover {
-  background-color: rgba(37, 99, 235, 0.04);
+  background-color: rgba(201, 169, 110, 0.04);
 }
 
 /* ── Card de glass ────────────────────────────────────────── */
 .glass-card {
-  background: rgba(16, 24, 40, 0.6);
+  background: rgba(20, 5, 10, 0.7);
   backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(201, 169, 110, 0.08);
 }
 
-/* ── Tooltip base ─────────────────────────────────────────── */
+/* Tooltips nativas usam cursor padrão ou pointer no dash */
 [title] {
-  cursor: help;
+  cursor: default;
+}
+.sidebar-root [title], 
+.table-row-hover [title],
+button [title] {
+  cursor: pointer;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   SITE INSTITUCIONAL — classes específicas da landing page
+───────────────────────────────────────────────────────────── */
+
+/* Responsivo header site */
+.hidden-mobile { display: flex; }
+.show-mobile   { display: none; }
+@media (max-width: 768px) {
+  .hidden-mobile { display: none !important; }
+  .show-mobile   { display: flex !important; }
+}
+
+/* ── Dashboard layout ─────────────────────────────────────── */
+/* Sidebar sempre visível em desktop */
+@media (min-width: 1024px) {
+  .sidebar-root       { transform: translateX(0) !important; }
+  .sidebar-close-btn  { display: none !important; }
+  .dashboard-main     { margin-left: 256px; }
+  .topbar-burger      { display: none !important; }
+  .topbar-divider,
+  .topbar-label       { display: flex !important; }
+}
+@media (max-width: 1023px) {
+  .dashboard-main     { margin-left: 0 !important; }
+  .topbar-divider,
+  .topbar-label,
+  .topbar-nome        { display: none !important; }
+}
+
+/* Grid responsivo depoimentos */
+@media (max-width: 768px) {
+  #depoimentos [style*="grid-template-columns: 1fr 2fr"] {
+    grid-template-columns: 1fr !important;
+  }
+  #contato [style*="grid-template-columns: 1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+  #areas [style*="grid-template-columns: 1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+  #quem-somos [style*="grid-template-columns: 1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Scroll reveal — estado inicial (invisível, deslocado) */
+.site-hidden {
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 0.75s ease-out, transform 0.75s ease-out;
+}
+.site-hidden-left {
+  opacity: 0;
+  transform: translateX(-32px);
+  transition: opacity 0.75s ease-out, transform 0.75s ease-out;
+}
+.site-hidden-right {
+  opacity: 0;
+  transform: translateX(32px);
+  transition: opacity 0.75s ease-out, transform 0.75s ease-out;
+}
+
+/* Scroll reveal — estado final (visível) */
+.site-visible {
+  opacity: 1 !important;
+  transform: translate(0) !important;
+}
+
+/* Atraso escalonado para cards em grid */
+.site-delay-1 { transition-delay: 0.1s; }
+.site-delay-2 { transition-delay: 0.2s; }
+.site-delay-3 { transition-delay: 0.3s; }
+.site-delay-4 { transition-delay: 0.4s; }
+.site-delay-5 { transition-delay: 0.5s; }
+.site-delay-6 { transition-delay: 0.6s; }
+.site-delay-7 { transition-delay: 0.7s; }
+.site-delay-8 { transition-delay: 0.8s; }
+
+/* Linha decorativa ouro */
+.oro-line::after {
+  content: '';
+  display: block;
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(90deg, #C9A96E, #e8d5a3);
+  margin-top: 14px;
+  border-radius: 2px;
+}
+.oro-line-center::after {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Texto com shimmer dourado */
+.oro-shimmer {
+  background: linear-gradient(90deg, #C9A96E 0%, #e8d5a3 40%, #C9A96E 60%, #b08840 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 3s linear infinite;
+}
+
+/* Glass card site — fundo vinho semitransparente */
+.wine-card {
+  background: rgba(107, 21, 48, 0.15);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(201, 169, 110, 0.15);
+  transition: border-color 0.3s ease, background 0.3s ease;
+}
+.wine-card:hover {
+  background: rgba(107, 21, 48, 0.25);
+  border-color: rgba(201, 169, 110, 0.35);
+}
+
+/* Botão primário do site */
+.site-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 32px;
+  background: linear-gradient(135deg, #C9A96E, #b08840);
+  color: #1a0309;
+  font-weight: 700;
+  font-size: 0.9rem;
+  letter-spacing: 0.05em;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+}
+.site-btn-primary:hover {
+  background: linear-gradient(135deg, #e8d5a3, #C9A96E);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(201, 169, 110, 0.35);
+}
+
+/* Botão secundário (outline ouro) */
+.site-btn-outline {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 32px;
+  border: 1.5px solid #C9A96E;
+  color: #C9A96E;
+  font-weight: 600;
+  font-size: 0.9rem;
+  letter-spacing: 0.05em;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+}
+.site-btn-outline:hover {
+  background: rgba(201, 169, 110, 0.1);
+  transform: translateY(-2px);
+}
+
+/* Separador decorativo */
+.site-divider {
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(201,169,110,0.3), transparent);
+}
+
+/* Shimmer dourado */
+.oro-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+.oro-shimmer::after {
+  content: "";
+  position: absolute;
+  top: 0; left: -100%;
+  width: 60%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(201,169,110,.15), transparent);
+  animation: shimmer 3s infinite;
+}
+@keyframes shimmer {
+  0%   { left: -100%; }
+  100% { left: 200%;  }
 }

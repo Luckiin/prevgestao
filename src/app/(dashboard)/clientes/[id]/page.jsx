@@ -12,7 +12,7 @@ import {
 } from "@/lib/utils";
 import {
   User, Shield, FileText, CalendarClock, FolderOpen, Clock,
-  Plus, Trash2, CheckCircle, Upload, History, ArrowLeft, Eye, EyeOff,
+  Plus, Trash2, CheckCircle, Upload, History, ArrowLeft, Eye, EyeOff, Download,
 } from "lucide-react";
 
 const statusVariant = { "Ativo": "ativo", "Inativo": "inativo", "Concluído": "concluido" };
@@ -23,7 +23,7 @@ function TabBtn({ active, onClick, children }) {
       onClick={onClick}
       className={`px-4 py-2 text-sm font-medium rounded-xl transition-all ${
         active
-          ? "bg-brand-600/20 text-brand-300 border border-brand-600/30"
+          ? "bg-wine-800/20 text-gold-500 border border-gold-600/30"
           : "text-ink-400 hover:text-ink-200 hover:bg-white/[0.04]"
       }`}
     >
@@ -46,6 +46,9 @@ export default function ClienteDetalhePage() {
   const [editModal, setEditModal]   = useState(false);
   const [saving, setSaving]         = useState(false);
   const [mostraSenha, setMostraSenha] = useState(false);
+  const [uploading, setUploading]   = useState(false);
+  const [docExcluindo, setDocExcluindo] = useState(null);
+  const [prazoExcluindo, setPrazoExcluindo] = useState(null);
 
   // Novo prazo
   const [novoPrazo, setNovoPrazo] = useState({ descricao: "", data_prazo: "" });
@@ -102,15 +105,96 @@ export default function ClienteDetalhePage() {
     carregar();
   }
 
-  async function excluirPrazo(prazoId) {
-    await fetch(`/api/prazos/${prazoId}`, { method: "DELETE" });
+  async function handleExcluirPrazo() {
+    if (!prazoExcluindo) return;
+    await fetch(`/api/prazos/${prazoExcluindo.id}`, { method: "DELETE" });
+    setPrazoExcluindo(null);
     carregar();
+  }
+
+  async function handleUpload(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      // 1. Pede URL assinada para o Supabase
+      const resUrl = await fetch("/api/documentos/upload-url", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cliente_id: id, nome_arquivo: file.name }),
+      });
+      const dataUrl = await resUrl.json();
+      if (!resUrl.ok) throw new Error(dataUrl.erro);
+
+      // 2. Upload direto para o Storage
+      const resUpload = await fetch(dataUrl.signedUrl, {
+        method: "PUT",
+        body: file,
+        headers: { "Content-Type": file.type },
+      });
+      if (!resUpload.ok) throw new Error("Falha no upload para o storage");
+
+      // 3. Registra no banco de dados local
+      const resReg = await fetch("/api/documentos", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          cliente_id: id,
+          nome: file.name,
+          tipo_mime: file.type,
+          tamanho: file.size,
+          storage_path: dataUrl.path,
+          pasta: "Geral",
+        }),
+      });
+      if (!resReg.ok) throw new Error("Erro ao registrar metadados do arquivo");
+
+      carregar();
+    } catch (err) {
+      alert("Erro no upload: " + err.message);
+    } finally {
+      setUploading(false);
+      e.target.value = ""; // limpa input
+    }
+  }
+
+  async function downloadDocumento(docId, force = false) {
+    const url = `/api/documentos/${docId}${force ? "?download=1" : ""}`;
+    const res = await fetch(url);
+    const json = await res.json();
+    if (json.url) {
+      if (force) {
+        // Cria link invisível para forçar download
+        const a = document.createElement("a");
+        a.href = json.url;
+        a.download = ""; // O browser tentará baixar
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      } else {
+        window.open(json.url, "_blank");
+      }
+    } else {
+      alert("Erro ao buscar link");
+    }
+  }
+
+  async function handleExcluirDocumento() {
+    if (!docExcluindo) return;
+    const res = await fetch(`/api/documentos/${docExcluindo.id}`, { method: "DELETE" });
+    if (res.ok) {
+      setDocExcluindo(null);
+      carregar();
+    } else {
+      alert("Erro ao excluir documento");
+    }
   }
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-2 border-brand-500 border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-gold-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -221,7 +305,7 @@ export default function ClienteDetalhePage() {
                 onChange={e => setNovoPrazo(p => ({ ...p, descricao: e.target.value }))}
                 placeholder="Descrição do prazo..."
                 className="flex-1 min-w-[200px] bg-dark-300 border border-dark-50 rounded-xl px-3.5 py-2 text-sm text-ink-100 placeholder-ink-600
-                           focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500/20"
+                           focus:outline-none focus:border-gold-500 focus:ring-1 focus:ring-gold-500/20"
                 required
               />
               <input
@@ -229,7 +313,7 @@ export default function ClienteDetalhePage() {
                 value={novoPrazo.data_prazo}
                 onChange={e => setNovoPrazo(p => ({ ...p, data_prazo: e.target.value }))}
                 className="bg-dark-300 border border-dark-50 rounded-xl px-3.5 py-2 text-sm text-ink-100
-                           focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500/20"
+                           focus:outline-none focus:border-gold-500 focus:ring-1 focus:ring-gold-500/20"
                 required
               />
               <Button type="submit" loading={addingPrazo} size="md">
@@ -253,7 +337,7 @@ export default function ClienteDetalhePage() {
                         className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
                           p.concluido
                             ? "bg-success-500 border-success-500 text-white"
-                            : "border-ink-600 hover:border-brand-500"
+                            : "border-ink-600 hover:border-gold-500"
                         }`}
                       >
                         {p.concluido && <CheckCircle size={12} />}
@@ -275,7 +359,7 @@ export default function ClienteDetalhePage() {
                         )}
                       </div>
                       <button
-                        onClick={() => excluirPrazo(p.id)}
+                        onClick={() => setPrazoExcluindo(p)}
                         className="text-ink-600 hover:text-danger-500 transition-colors ml-2"
                       >
                         <Trash2 size={13} />
@@ -291,34 +375,65 @@ export default function ClienteDetalhePage() {
 
       {/* Tab: Documentos */}
       {tab === "documentos" && (
-        <div className="glass-card rounded-2xl p-6">
-          <p className="text-sm text-ink-400">
-            Upload de documentos disponível na implementação com Supabase Storage conectado.
-            <br />
-            <span className="text-ink-500 text-xs">
-              Caminho: <code className="bg-dark-100/40 px-1.5 py-0.5 rounded">/api/documentos/upload-url</code>
-            </span>
-          </p>
-          {documentos.length > 0 && (
-            <div className="mt-4 divide-y divide-white/[0.03]">
-              {documentos.map(d => (
-                <div key={d.id} className="flex items-center gap-3 py-3">
-                  <FileText size={14} className="text-brand-400" />
-                  <div className="flex-1">
-                    <p className="text-sm text-ink-200">{d.nome}</p>
-                    <p className="text-xs text-ink-500">{d.pasta} · {formatDataHora(d.criado_em)}</p>
-                  </div>
-                  <Button variant="ghost" size="sm" onClick={async () => {
-                    const res  = await fetch(`/api/documentos/${d.id}`);
-                    const json = await res.json();
-                    if (json.url) window.open(json.url, "_blank");
-                  }}>
-                    Download
-                  </Button>
-                </div>
-              ))}
+        <div className="space-y-4">
+          <div className="glass-card rounded-2xl p-6 flex items-center justify-between">
+            <div>
+              <h1 className="text-md font-semibold text-ink-100">Documentos do Cliente</h1>
+              <p className="text-xs text-ink-500">Anexe PDFs, imagens ou outros arquivos relevantes.</p>
             </div>
-          )}
+            <div className="relative">
+              <input
+                type="file"
+                id="file-upload"
+                className="hidden"
+                onChange={handleUpload}
+                disabled={uploading}
+              />
+              <Button
+                onClick={() => document.getElementById("file-upload").click()}
+                loading={uploading}
+              >
+                <div className="flex items-center gap-2 cursor-pointer">
+                  <Upload size={14} />
+                  {uploading ? "Enviando..." : "Anexar Documento"}
+                </div>
+              </Button>
+            </div>
+          </div>
+
+          <div className="glass-card rounded-2xl overflow-hidden divide-y divide-white/[0.03]">
+            {documentos.length === 0 ? (
+              <p className="p-10 text-center text-sm text-ink-500">Nenhum documento anexado.</p>
+            ) : (
+              documentos.map(d => (
+                <div key={d.id} className="flex items-center gap-4 px-5 py-4 group hover:bg-white/[0.01] transition-all">
+                  <div className="w-10 h-10 rounded-xl bg-gold-500/5 flex items-center justify-center text-gold-500">
+                    <FileText size={18} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-ink-200 truncate">{d.nome}</p>
+                    <p className="text-[11px] text-ink-500 mt-0.5">
+                      {(d.tamanho / 1024).toFixed(1)} KB · {formatDataHora(d.criado_em)}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button variant="ghost" size="sm" onClick={() => downloadDocumento(d.id, false)} title="Visualizar">
+                      <Eye size={13} className="mr-1.5" /> Ver
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={() => downloadDocumento(d.id, true)} title="Baixar arquivo">
+                      <Download size={13} className="mr-1.5" /> Download
+                    </Button>
+                    <button
+                      onClick={() => setDocExcluindo(d)}
+                      className="w-8 h-8 flex items-center justify-center text-ink-500 hover:text-danger-500 hover:bg-danger-500/10 rounded-lg transition-all"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
         </div>
       )}
 
@@ -337,7 +452,7 @@ export default function ClienteDetalhePage() {
                   <div className="flex items-center gap-1.5 text-xs font-medium">
                     <span className="text-ink-500">{h.ano_anterior}</span>
                     <span className="text-ink-600">→</span>
-                    <span className="text-brand-400">{h.ano_novo}</span>
+                    <span className="text-gold-500">{h.ano_novo}</span>
                   </div>
                   <div className="flex-1">
                     <p className="text-xs text-ink-400">{h.motivo}</p>
@@ -373,7 +488,31 @@ export default function ClienteDetalhePage() {
 
       {/* Modal de edição */}
       <Modal open={editModal} onClose={() => setEditModal(false)} title="Editar cliente" size="lg">
-        <ClienteForm inicial={cliente} onSubmit={handleSalvar} loading={saving} />
+        <ClienteForm key={cliente?.id} inicial={cliente} onSubmit={handleSalvar} loading={saving} />
+      </Modal>
+
+      {/* Confirmação de exclusão de documento */}
+      <Modal open={!!docExcluindo} onClose={() => setDocExcluindo(null)} title="Excluir documento" size="sm">
+        <p className="text-sm text-ink-300 mb-6">
+          Tem certeza que deseja excluir o documento <strong className="text-ink-100">{docExcluindo?.nome}</strong>?
+          Esta ação removerá o arquivo permanentemente.
+        </p>
+        <div className="flex gap-3 justify-end">
+          <Button variant="secondary" onClick={() => setDocExcluindo(null)}>Cancelar</Button>
+          <Button variant="danger" onClick={handleExcluirDocumento}>Excluir Agora</Button>
+        </div>
+      </Modal>
+
+      {/* Confirmação de exclusão de prazo */}
+      <Modal open={!!prazoExcluindo} onClose={() => setPrazoExcluindo(null)} title="Excluir prazo" size="sm">
+        <p className="text-sm text-ink-300 mb-6">
+          Tem certeza que deseja excluir o prazo <strong className="text-ink-100">{prazoExcluindo?.descricao}</strong>?
+          Esta ação não pode ser desfeita.
+        </p>
+        <div className="flex gap-3 justify-end">
+          <Button variant="secondary" onClick={() => setPrazoExcluindo(null)}>Cancelar</Button>
+          <Button variant="danger" onClick={handleExcluirPrazo}>Excluir Agora</Button>
+        </div>
       </Modal>
     </div>
   );

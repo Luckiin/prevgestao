@@ -9,6 +9,9 @@ import Button from "@/components/ui/Button";
 import { Select } from "@/components/ui/Input";
 import { Plus, Search, X } from "lucide-react";
 
+const ANO_ATUAL = new Date().getFullYear();
+const ANOS = Array.from({ length: ANO_ATUAL - 2020 + 3 }, (_, i) => 2020 + i).reverse();
+
 export default function ClientesPage() {
   const [clientes, setClientes] = useState([]);
   const [total, setTotal]       = useState(0);
@@ -22,20 +25,25 @@ export default function ClientesPage() {
   const [busca, setBusca]               = useState("");
   const [filtroStatus, setFiltroStatus] = useState("");
   const [filtroTipo, setFiltroTipo]     = useState("");
+  const [filtroSituacao, setFiltroSituacao] = useState("");
+  const [filtroAno, setFiltroAno]       = useState(String(ANO_ATUAL));
+  const [carregandoDetalhe, setCarregandoDetalhe] = useState(false);
 
   const carregar = useCallback(async () => {
     setLoading(true);
     const params = new URLSearchParams();
-    if (busca)        params.set("busca", busca);
+    if (busca)         params.set("busca", busca);
     if (filtroStatus) params.set("status", filtroStatus);
     if (filtroTipo)   params.set("tipo_processo", filtroTipo);
+    if (filtroSituacao) params.set("situacao", filtroSituacao);
+    if (filtroAno && filtroAno !== "todos") params.set("ano_referencia", filtroAno);
 
     const res = await fetch(`/api/clientes?${params}`);
     const json = await res.json();
     setClientes(json.data || []);
     setTotal(json.total || 0);
     setLoading(false);
-  }, [busca, filtroStatus, filtroTipo]);
+  }, [busca, filtroStatus, filtroTipo, filtroSituacao, filtroAno]);
 
   useEffect(() => { carregar(); }, [carregar]);
 
@@ -72,9 +80,18 @@ export default function ClientesPage() {
     setModalOpen(true);
   }
 
-  function abrirEditar(c) {
-    setEditando(c);
-    setModalOpen(true);
+  async function abrirEditar(c) {
+    setCarregandoDetalhe(true);
+    try {
+      const res = await fetch(`/api/clientes/${c.id}`);
+      const full = await res.json();
+      setEditando(full);
+      setModalOpen(true);
+    } catch (err) {
+      alert("Erro ao carregar dados do cliente");
+    } finally {
+      setCarregandoDetalhe(false);
+    }
   }
 
   return (
@@ -91,22 +108,22 @@ export default function ClientesPage() {
       </div>
 
       {/* Filtros */}
-      <div className="glass-card rounded-2xl p-4 flex flex-wrap gap-3">
+      <div className="glass-card rounded p-4 flex flex-wrap gap-3">
         <div className="relative flex-1 min-w-[200px]">
           <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-500" />
           <input
             value={busca}
             onChange={e => setBusca(e.target.value)}
             placeholder="Buscar por nome, CPF ou processo..."
-            className="w-full bg-dark-300 border border-dark-50 rounded-xl pl-9 pr-3.5 py-2 text-sm text-ink-100 placeholder-ink-600
-                       focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500/20"
+            className="w-full bg-dark-300 border border-dark-50 rounded pl-9 pr-3.5 py-2 text-sm text-ink-100 placeholder-ink-600
+                       focus:outline-none focus:border-gold-500 focus:ring-1 focus:ring-gold-500/15"
           />
         </div>
 
         <select
           value={filtroStatus}
           onChange={e => setFiltroStatus(e.target.value)}
-          className="bg-dark-300 border border-dark-50 rounded-xl px-3 py-2 text-sm text-ink-300 focus:outline-none focus:border-brand-500"
+          className="bg-dark-300 border border-dark-50 rounded px-3 py-2 text-sm text-ink-300 focus:outline-none focus:border-gold-500"
         >
           <option value="">Todos os status</option>
           <option value="Ativo">Ativo</option>
@@ -117,16 +134,37 @@ export default function ClientesPage() {
         <select
           value={filtroTipo}
           onChange={e => setFiltroTipo(e.target.value)}
-          className="bg-dark-300 border border-dark-50 rounded-xl px-3 py-2 text-sm text-ink-300 focus:outline-none focus:border-brand-500"
+          className="bg-dark-300 border border-dark-50 rounded px-3 py-2 text-sm text-ink-300 focus:outline-none focus:border-gold-500"
         >
           <option value="">Todos os tipos</option>
           <option value="administrativo">Administrativo</option>
           <option value="judicial">Judicial</option>
         </select>
 
-        {(busca || filtroStatus || filtroTipo) && (
+        <select
+          value={filtroSituacao}
+          onChange={e => setFiltroSituacao(e.target.value)}
+          className="bg-dark-300 border border-dark-50 rounded px-3 py-2 text-sm text-ink-300 focus:outline-none focus:border-gold-500"
+        >
+          <option value="">A situação (Todos)</option>
+          <option value="Pendente">Pendente</option>
+          <option value="Finalizado">Finalizado</option>
+        </select>
+
+        <select
+          value={filtroAno}
+          onChange={e => setFiltroAno(e.target.value)}
+          className="bg-dark-300 border border-dark-50 rounded px-3 py-2 text-sm text-ink-300 focus:outline-none focus:border-gold-500"
+        >
+          <option value="todos">Todos os anos</option>
+          {ANOS.map(year => (
+            <option key={year} value={year}>{year}{year === ANO_ATUAL ? " (Atual)" : ""}</option>
+          ))}
+        </select>
+
+        {(busca || filtroStatus || filtroTipo || filtroSituacao || filtroAno !== String(ANO_ATUAL)) && (
           <button
-            onClick={() => { setBusca(""); setFiltroStatus(""); setFiltroTipo(""); }}
+            onClick={() => { setBusca(""); setFiltroStatus(""); setFiltroTipo(""); setFiltroSituacao(""); setFiltroAno(String(ANO_ATUAL)); }}
             className="flex items-center gap-1 text-xs text-ink-500 hover:text-ink-200 transition-colors px-2"
           >
             <X size={13} /> Limpar
@@ -135,10 +173,10 @@ export default function ClientesPage() {
       </div>
 
       {/* Tabela */}
-      <div className="glass-card rounded-2xl overflow-hidden">
+      <div className="glass-card rounded overflow-hidden">
         <ClienteTable
           clientes={clientes}
-          loading={loading}
+          loading={loading || carregandoDetalhe}
           onEdit={abrirEditar}
           onDelete={setExcluindo}
         />
@@ -151,11 +189,7 @@ export default function ClientesPage() {
         title={editando ? "Editar cliente" : "Novo cliente"}
         size="lg"
       >
-        <ClienteForm
-          inicial={editando || {}}
-          onSubmit={handleSalvar}
-          loading={saving}
-        />
+        <ClienteForm key={editando?.id || "novo"} inicial={editando || {}} onSubmit={handleSalvar} loading={saving} />
       </Modal>
 
       {/* Modal de confirmação de exclusão */}

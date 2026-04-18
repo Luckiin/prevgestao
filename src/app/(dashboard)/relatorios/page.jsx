@@ -35,7 +35,7 @@ export default function RelatoriosPage() {
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       <div>
         <h1 className="text-xl font-bold text-ink-100 flex items-center gap-2">
-          <BarChart3 size={20} className="text-brand-400" />
+          <BarChart3 size={20} className="text-gold-500" />
           Relatórios
         </h1>
         <p className="text-sm text-ink-500 mt-0.5">Análise anual e comparativos</p>
@@ -43,7 +43,7 @@ export default function RelatoriosPage() {
 
       {loading ? (
         <div className="flex items-center justify-center py-20">
-          <div className="w-8 h-8 border-2 border-brand-500 border-t-transparent rounded-full animate-spin" />
+          <div className="w-8 h-8 border-2 border-gold-500 border-t-transparent rounded-full animate-spin" />
         </div>
       ) : (
         <>
@@ -63,14 +63,14 @@ export default function RelatoriosPage() {
                 </thead>
                 <tbody className="divide-y divide-white/[0.03]">
                   {anual.map(r => (
-                    <tr key={r.ano} className={`table-row-hover ${r.ano === ANO_ATUAL ? "bg-brand-500/[0.03]" : ""}`}>
+                    <tr key={r.ano} className={`table-row-hover ${r.ano === ANO_ATUAL ? "bg-wine-800/[0.03]" : ""}`}>
                       <td className="px-4 py-3 font-semibold text-ink-100">
                         {r.ano}
                         {r.ano === ANO_ATUAL && <span className="ml-2 text-[10px] text-gold-500">atual</span>}
                       </td>
                       <td className="px-4 py-3 text-ink-200">{r.total_clientes}</td>
                       <td className="px-4 py-3 text-success-500">{r.ativos}</td>
-                      <td className="px-4 py-3 text-brand-400">{r.concluidos}</td>
+                      <td className="px-4 py-3 text-gold-500">{r.concluidos}</td>
                       <td className="px-4 py-3 text-ink-400">{r.inativos}</td>
                       <td className="px-4 py-3 text-ink-300">{r.administrativos}</td>
                       <td className="px-4 py-3 text-ink-300">{r.judiciais}</td>
@@ -87,7 +87,7 @@ export default function RelatoriosPage() {
             {/* Clientes por ano */}
             <div className="glass-card rounded-2xl p-5">
               <h3 className="text-sm font-semibold text-ink-200 mb-5 flex items-center gap-2">
-                <Users size={15} className="text-brand-400" />
+                <Users size={15} className="text-gold-500" />
                 Clientes por Ano
               </h3>
               <ResponsiveContainer width="100%" height={220}>

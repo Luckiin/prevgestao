@@ -5,7 +5,9 @@ import { excluirDocumento, gerarUrlDownload } from "@/lib/services/documentoServ
 export async function GET(request, { params }) {
   try {
     const supabase = await createServerClient();
-    const { id } = await params;
+    const { id }   = await params;
+    const { searchParams } = new URL(request.url);
+    const download = searchParams.get("download") === "1";
 
     const { data: doc } = await supabase
       .from("documentos")
@@ -15,7 +17,7 @@ export async function GET(request, { params }) {
 
     if (!doc) return NextResponse.json({ erro: "Documento não encontrado" }, { status: 404 });
 
-    const url = await gerarUrlDownload(supabase, doc.storage_path);
+    const url = await gerarUrlDownload(supabase, doc.storage_path, download);
     return NextResponse.json({ url });
   } catch (err) {
     return NextResponse.json({ erro: err.message }, { status: 500 });

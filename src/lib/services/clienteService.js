@@ -9,9 +9,18 @@ import { registrarAuditoria } from "./auditService";
 const SELECT_COMPLETO = `
   id, nome, cpf, data_nascimento,
   login_inss, senha_inss,
-  tipo_processo, status, ano_referencia,
+  tipo_processo, subdivisao_id, status, situacao, ano_referencia,
   numero_processo, valor_beneficio, observacoes,
   data_entrada, criado_em, atualizado_em,
+  subdivisoes (id, nome, tipo)
+`;
+
+// Para listagens — sem credenciais, mais leve
+const SELECT_LISTA = `
+  id, nome, cpf, data_nascimento,
+  tipo_processo, subdivisao_id, status, situacao, ano_referencia,
+  numero_processo, valor_beneficio,
+  atualizado_em,
   subdivisoes (id, nome, tipo)
 `;
 
@@ -19,6 +28,7 @@ const SELECT_COMPLETO = `
 export async function listarClientes(supabase, {
   status,
   tipo_processo,
+  situacao,
   subdivisao_id,
   ano_referencia,
   busca,
@@ -27,13 +37,14 @@ export async function listarClientes(supabase, {
 } = {}) {
   let query = supabase
     .from("clientes")
-    .select(SELECT_COMPLETO, { count: "exact" })
+    .select(SELECT_LISTA, { count: "exact" })
     .order("atualizado_em", { ascending: false })
     .range(offset, offset + limit - 1);
 
-  if (status)        query = query.eq("status", status);
-  if (tipo_processo) query = query.eq("tipo_processo", tipo_processo);
-  if (subdivisao_id) query = query.eq("subdivisao_id", subdivisao_id);
+  if (status)         query = query.eq("status", status);
+  if (tipo_processo)  query = query.eq("tipo_processo", tipo_processo);
+  if (situacao)       query = query.eq("situacao", situacao);
+  if (subdivisao_id)  query = query.eq("subdivisao_id", subdivisao_id);
   if (ano_referencia) query = query.eq("ano_referencia", Number(ano_referencia));
   if (busca) {
     query = query.or(
@@ -44,11 +55,9 @@ export async function listarClientes(supabase, {
   const { data, error, count } = await query;
   if (error) throw error;
 
+  // Sem decrypt na listagem — credenciais só são carregadas no detalhe do cliente
   return {
-    data: data.map((c) => ({
-      ...decryptCredenciais(c),
-      idade: calcIdade(c.data_nascimento),
-    })),
+    data: data.map((c) => ({ ...c, idade: calcIdade(c.data_nascimento) })),
     total: count,
   };
 }
@@ -132,7 +141,7 @@ export async function atualizarCliente(supabase, id, payload, usuarioEmail, usua
     registro_id:      id,
     acao:             "UPDATE",
     dados_anteriores: anterior,
-    dados_novos:      { nome: data.nome, status: data.status, ano_referencia: data.ano_referencia },
+    dados_novos:      { nome: data.nome, status: data.status, situacao: data.situacao, ano_referencia: data.ano_referencia },
     usuario_email:    usuarioEmail,
     usuario_nome:     usuarioNome,
   });
