@@ -79,7 +79,10 @@ export async function buscarCliente(supabase, id) {
 
 /** Cria novo cliente */
 export async function criarCliente(supabase, payload, usuarioEmail, usuarioNome) {
-  const { login_inss, senha_inss, ...resto } = payload;
+  const { 
+    login_inss, senha_inss, documentos, prazos, subdivisoes, idade, 
+    id, criado_em, atualizado_em, data_entrada, ...resto 
+  } = payload;
   const credencias = encryptCredenciais({ login_inss, senha_inss });
 
   const { data, error } = await supabase
@@ -112,14 +115,21 @@ export async function criarCliente(supabase, payload, usuarioEmail, usuarioNome)
 
 /** Atualiza cliente */
 export async function atualizarCliente(supabase, id, payload, usuarioEmail, usuarioNome) {
-  // Busca antes para auditoria
+  // Busca antes para auditoria (quase todos os campos para um diff completo)
   const { data: anterior } = await supabase
     .from("clientes")
-    .select("nome, cpf, status, ano_referencia")
+    .select(`
+      nome, cpf, data_nascimento, tipo_processo, subdivisao_id, status, situacao, 
+      numero_processo, valor_beneficio, observacoes, ano_referencia,
+      subdivisoes (nome)
+    `)
     .eq("id", id)
     .single();
 
-  const { login_inss, senha_inss, ...resto } = payload;
+  const { 
+    login_inss, senha_inss, documentos, prazos, subdivisoes, idade, 
+    id: _id, criado_em, atualizado_em, data_entrada, ...resto 
+  } = payload;
   const updates = { ...resto };
 
   // Só recriptografa se os campos foram enviados
@@ -142,8 +152,18 @@ export async function atualizarCliente(supabase, id, payload, usuarioEmail, usua
     registro_id:      id,
     entidade_id:      id,
     acao:             "UPDATE",
-    dados_anteriores: anterior,
-    dados_novos:      { nome: data.nome, status: data.status, situacao: data.situacao, ano_referencia: data.ano_referencia },
+    dados_anteriores: { 
+      ...anterior,
+      subdivisao_nome: anterior.subdivisoes?.nome 
+    },
+    dados_novos:      { 
+      nome: data.nome, cpf: data.cpf, data_nascimento: data.data_nascimento,
+      tipo_processo: data.tipo_processo, subdivisao_id: data.subdivisao_id,
+      subdivisao_nome: data.subdivisoes?.nome,
+      status: data.status, situacao: data.situacao, numero_processo: data.numero_processo,
+      valor_beneficio: data.valor_beneficio, observacoes: data.observacoes,
+      ano_referencia: data.ano_referencia
+    },
     usuario_email:    usuarioEmail,
     usuario_nome:     usuarioNome,
   });

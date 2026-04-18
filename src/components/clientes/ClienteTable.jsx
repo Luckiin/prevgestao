@@ -5,6 +5,23 @@ import Badge from "@/components/ui/Badge";
 import { formatCPF, formatData, formatMoeda, corStatus } from "@/lib/utils";
 import { Eye, Pencil, Trash2, CalendarClock } from "lucide-react";
 
+import { motion } from "framer-motion";
+
+const container = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.05
+    }
+  }
+};
+
+const item = {
+  hidden: { opacity: 0, y: 10 },
+  show: { opacity: 1, y: 0 }
+};
+
 const statusVariant = {
   "Ativo":     "ativo",
   "Inativo":   "inativo",
@@ -41,9 +58,14 @@ export default function ClienteTable({ clientes, onEdit, onDelete, loading }) {
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-white/[0.03]">
+        <motion.tbody 
+          variants={container}
+          initial="hidden"
+          animate="show"
+          className="divide-y divide-white/[0.03]"
+        >
           {clientes.map((c) => (
-            <tr key={c.id} className="table-row-hover transition-colors">
+            <motion.tr key={c.id} variants={item} className="table-row-hover transition-colors">
               <td className="px-4 py-3">
                 <p className="font-medium text-ink-100 leading-none">{c.nome}</p>
                 <p className="text-[11px] text-ink-500 mt-1">{c.idade ? `${c.idade} anos` : ""}</p>
@@ -116,9 +138,9 @@ export default function ClienteTable({ clientes, onEdit, onDelete, loading }) {
                   </button>
                 </div>
               </td>
-            </tr>
+            </motion.tr>
           ))}
-        </tbody>
+        </motion.tbody>
       </table>
     </div>
   );

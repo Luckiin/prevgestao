@@ -11,19 +11,19 @@ const TIPO_OPTS     = ["administrativo", "judicial"];
 
 export default function ClienteForm({ inicial, onSubmit, loading }) {
   const [form, setForm]           = useState({
-    nome:            "",
-    cpf:             "",
-    data_nascimento: "",
-    login_inss:      "",
-    senha_inss:      "",
-    tipo_processo:   "administrativo",
-    subdivisao_id:   "",
-    status:          "Ativo",
-    situacao:        "Pendente",
-    numero_processo: "",
-    valor_beneficio: "",
-    observacoes:     "",
     ...inicial,
+    nome:            inicial?.nome || "",
+    cpf:             inicial?.cpf || "",
+    data_nascimento: inicial?.data_nascimento || "",
+    login_inss:      inicial?.login_inss || "",
+    senha_inss:      inicial?.senha_inss || "",
+    tipo_processo:   inicial?.tipo_processo || "administrativo",
+    subdivisao_id:   inicial?.subdivisao_id || "",
+    status:          inicial?.status || "Ativo",
+    situacao:        inicial?.situacao || "Pendente",
+    numero_processo: inicial?.numero_processo || "",
+    valor_beneficio: inicial?.valor_beneficio || "",
+    observacoes:     inicial?.observacoes || "",
   });
   const [subdivisoes, setSubdivisoes] = useState([]);
   const [erros, setErros]             = useState({});

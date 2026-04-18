@@ -5,16 +5,16 @@ import Image from "next/image";
 import { Menu, X, MessageCircle } from "lucide-react";
 
 const NAV = [
-  { label: "Início",           href: "#inicio"      },
-  { label: "Quem Somos",       href: "#quem-somos"  },
-  { label: "Áreas de Atuação", href: "#areas"        },
-  { label: "Depoimentos",      href: "#depoimentos"  },
-  { label: "Contato",          href: "#contato"      },
+  { label: "Início", href: "#inicio" },
+  { label: "Quem Somos", href: "#quem-somos" },
+  { label: "Áreas de Atuação", href: "#areas" },
+  { label: "Depoimentos", href: "#depoimentos" },
+  { label: "Contato", href: "#contato" },
 ];
 
 export default function SiteHeader() {
-  const [scrolled,  setScrolled]  = useState(false);
-  const [menuOpen,  setMenuOpen]  = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 40);
@@ -58,14 +58,14 @@ export default function SiteHeader() {
         </nav>
 
         {/* CTA */}
-        <a href="https://wa.me/5571987806608?text=Ol%C3%A1%2C%20gostaria%20de%20uma%20consulta%20gratuita."
+        <a href="https://wa.me/5571987806608?text=Ol%C3%A1%2C%20gostaria%20de%20uma%20consulta%20."
           target="_blank" rel="noopener noreferrer"
           className="hidden-mobile"
           style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 22px", background: "#C9A96E", color: "#0a0102", fontWeight: 700, fontSize: 12, letterSpacing: "0.08em", textTransform: "uppercase", borderRadius: 2, textDecoration: "none", transition: "background .2s" }}
           onMouseEnter={e => e.currentTarget.style.background = "#e8d5a3"}
           onMouseLeave={e => e.currentTarget.style.background = "#C9A96E"}
         >
-          <MessageCircle size={14} /> Consulta Gratuita
+          <MessageCircle size={14} /> Consulta
         </a>
 
         {/* Burger */}
@@ -85,11 +85,11 @@ export default function SiteHeader() {
               onMouseLeave={e => e.currentTarget.style.color = "rgba(245,240,232,.7)"}
             >{l.label}</button>
           ))}
-          <a href="https://wa.me/5571987806608?text=Ol%C3%A1%2C%20gostaria%20de%20uma%20consulta%20gratuita."
+          <a href="https://wa.me/5571987806608?text=Ol%C3%A1%2C%20gostaria%20de%20uma%20consulta%20."
             target="_blank" rel="noopener noreferrer"
             style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginTop: 20, padding: "13px", background: "#C9A96E", color: "#0a0102", fontWeight: 700, fontSize: 13, letterSpacing: "0.08em", textTransform: "uppercase", borderRadius: 2, textDecoration: "none" }}
           >
-            <MessageCircle size={15} /> Consulta Gratuita
+            <MessageCircle size={15} /> Consulta
           </a>
         </div>
       )}

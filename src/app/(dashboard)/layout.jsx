@@ -4,7 +4,11 @@ import { useState } from "react";
 import { AuthProvider } from "@/context/AuthContext";
 import Sidebar from "@/components/dashboard/Sidebar";
 import { Menu } from "lucide-react";
+import { Toaster } from "sonner";
 import { useAuth } from "@/context/AuthContext";
+import { SWRConfig } from "swr";
+import { motion, AnimatePresence } from "framer-motion";
+import { usePathname } from "next/navigation";
 
 function TopBar({ onMenuOpen }) {
   const { usuario } = useAuth();
@@ -53,6 +57,7 @@ function TopBar({ onMenuOpen }) {
 
 function DashboardInner({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const pathname = usePathname();
 
   return (
     <div style={{ minHeight: "100vh", background: "#0d0307" }}>
@@ -60,17 +65,50 @@ function DashboardInner({ children }) {
       <div className="dashboard-main" style={{ transition: "margin-left .3s" }}>
         <TopBar onMenuOpen={() => setSidebarOpen(true)} />
         <main style={{ padding: 0 }}>
-          {children}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={pathname}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+            >
+              {children}
+            </motion.div>
+          </AnimatePresence>
         </main>
       </div>
     </div>
   );
 }
 
+const swrConfig = {
+  fetcher: (url) => fetch(url).then((res) => res.json()),
+  revalidateOnFocus: false,
+  revalidateIfStale: true,
+  dedupingInterval: 5000,
+};
+
 export default function DashboardLayout({ children }) {
   return (
     <AuthProvider>
-      <DashboardInner>{children}</DashboardInner>
+      <SWRConfig value={swrConfig}>
+        <Toaster 
+          theme="dark" 
+          position="top-right"
+          expand={false}
+          richColors 
+          toastOptions={{
+            style: {
+              background: 'rgba(20, 5, 10, 0.8)',
+              backdropFilter: 'blur(16px)',
+              border: '1px solid rgba(201, 169, 110, 0.15)',
+              color: '#f5f0e8',
+            },
+          }}
+        />
+        <DashboardInner>{children}</DashboardInner>
+      </SWRConfig>
     </AuthProvider>
   );
 }

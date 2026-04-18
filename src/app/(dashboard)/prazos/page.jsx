@@ -15,10 +15,25 @@ import {
 } from "lucide-react";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
+import { toast } from "sonner";
+import useSWR from "swr";
+import Skeleton from "@/components/ui/Skeleton";
+import { motion, AnimatePresence } from "framer-motion";
+
+const container = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.05 }
+  }
+};
+
+const item = {
+  hidden: { opacity: 0, x: -10 },
+  show: { opacity: 1, x: 0 }
+};
 
 export default function PrazosPage() {
-  const [prazos, setPrazos]   = useState([]);
-  const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState("calendar"); // calendar | list
   
   // Estado do Calendário
@@ -28,24 +43,26 @@ export default function PrazosPage() {
   const currentYear = currentDate.getFullYear();
   const currentMonth = currentDate.getMonth();
 
-  const carregar = useCallback(async () => {
-    setLoading(true);
-    // Buscamos um range maior para o calendário (90 dias ou conforme o mês)
-    const res = await fetch(`/api/prazos?limit=500`);
-    const data = await res.json();
-    setPrazos(data);
-    setLoading(false);
-  }, []);
-
-  useEffect(() => { carregar(); }, [carregar]);
+  // SWR para cache e background update
+  const { data: resData, error, isLoading, mutate } = useSWR(`/api/prazos?limit=500`);
+  const prazos = resData || [];
 
   async function toggle(id, concluido) {
-    await fetch(`/api/prazos/${id}`, {
-      method:  "PUT",
-      headers: { "Content-Type": "application/json" },
-      body:    JSON.stringify({ concluido: !concluido }),
-    });
-    carregar();
+    try {
+      const res = await fetch(`/api/prazos/${id}`, {
+        method:  "PUT",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({ concluido: !concluido }),
+      });
+      
+      if (!res.ok) throw new Error("Não foi possível atualizar o prazo.");
+      
+      
+      toast.success(concluido ? "Prazo reaberto" : "Prazo concluído com sucesso");
+      mutate();
+    } catch (err) {
+      toast.error(err.message);
+    }
   }
 
   // Navegação do Calendário
@@ -74,16 +91,24 @@ export default function PrazosPage() {
   // Prazos do dia selecionado
   const prazosDoDia = prazosPorData[selectedDayISO] || [];
 
-  // Renderização do Modo Lista (Original refatorado)
   const renderLista = () => (
-    <div className="glass-card rounded-2xl overflow-hidden divide-y divide-white/[0.03] animate-in fade-in slide-in-from-bottom-2">
+    <motion.div 
+      variants={container}
+      initial="hidden"
+      animate="show"
+      className="glass-card rounded-2xl overflow-hidden divide-y divide-white/[0.03]"
+    >
       {prazos.length === 0 ? (
         <p className="p-12 text-center text-sm text-ink-500">Nenhum prazo encontrado.</p>
       ) : (
         prazos.map(p => {
           const dias = diasRestantes(p.data_prazo);
           return (
-            <div key={p.id} className={cn("flex items-center gap-4 px-5 py-4 table-row-hover", p.concluido && "opacity-40")}>
+            <motion.div 
+              key={p.id} 
+              variants={item}
+              className={cn("flex items-center gap-4 px-5 py-4 table-row-hover", p.concluido && "opacity-40")}
+            >
               <button
                 onClick={() => toggle(p.id, p.concluido)}
                 className={cn("w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all",
@@ -112,11 +137,11 @@ export default function PrazosPage() {
                 </p>
                 {!p.concluido && <p className={cn("text-[11px]", corPrazo(dias))}>{dias === 0 ? "Hoje" : dias < 0 ? `${Math.abs(dias)}d atrás` : `${dias}d`}</p>}
               </div>
-            </div>
+            </motion.div>
           );
         })
       )}
-    </div>
+    </motion.div>
   );
 
   return (
@@ -149,9 +174,11 @@ export default function PrazosPage() {
         </div>
       </div>
 
-      {loading ? (
-        <div className="flex items-center justify-center py-40">
-          <div className="w-10 h-10 border-2 border-gold-500 border-t-transparent rounded-full animate-spin" />
+      {isLoading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+           <Skeleton className="h-40 w-full rounded-2xl" />
+           <Skeleton className="h-40 w-full rounded-2xl" />
+           <Skeleton className="h-40 w-full rounded-2xl" />
         </div>
       ) : viewMode === "list" ? renderLista() : (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-in fade-in slide-in-from-bottom-4">

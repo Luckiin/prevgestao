@@ -22,8 +22,8 @@ const SLIDES = [
 ];
 
 export default function Hero() {
-  const [current,  setCurrent]  = useState(0);
-  const [visible,  setVisible]  = useState(true);
+  const [current, setCurrent] = useState(0);
+  const [visible, setVisible] = useState(true);
 
   const goTo = useCallback((idx) => {
     setVisible(false);
@@ -77,13 +77,13 @@ export default function Hero() {
 
         {/* CTAs */}
         <div style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap" }}>
-          <a href="https://wa.me/5571987806608?text=Ol%C3%A1%2C%20gostaria%20de%20uma%20consulta%20gratuita."
+          <a href="https://wa.me/5571987806608?text=Ol%C3%A1%2C%20gostaria%20de%20uma%20consulta%20."
             target="_blank" rel="noopener noreferrer"
             style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "16px 40px", background: "#C9A96E", color: "#0a0102", fontWeight: 700, fontSize: 13, letterSpacing: "0.1em", textTransform: "uppercase", textDecoration: "none", borderRadius: 2, transition: "background .2s" }}
             onMouseEnter={e => e.currentTarget.style.background = "#e8d5a3"}
             onMouseLeave={e => e.currentTarget.style.background = "#C9A96E"}
           >
-            <MessageCircle size={15} /> Consulta Gratuita
+            <MessageCircle size={15} /> Consulta
           </a>
           <button
             onClick={() => document.querySelector("#areas")?.scrollIntoView({ behavior: "smooth" })}

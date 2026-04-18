@@ -8,21 +8,21 @@ const COLS = [
   {
     title: "Navegação",
     links: [
-      { label: "Início",           href: "#inicio"      },
-      { label: "Quem Somos",       href: "#quem-somos"  },
-      { label: "Áreas de Atuação", href: "#areas"       },
-      { label: "Depoimentos",      href: "#depoimentos" },
-      { label: "Contato",          href: "#contato"     },
+      { label: "Início", href: "#inicio" },
+      { label: "Quem Somos", href: "#quem-somos" },
+      { label: "Áreas de Atuação", href: "#areas" },
+      { label: "Depoimentos", href: "#depoimentos" },
+      { label: "Contato", href: "#contato" },
     ],
   },
   {
     title: "Áreas de Atuação",
     links: [
-      { label: "Aposentadoria por Idade",     href: "#areas" },
+      { label: "Aposentadoria por Idade", href: "#areas" },
       { label: "Aposentadoria por Invalidez", href: "#areas" },
-      { label: "Auxílio-Doença",              href: "#areas" },
-      { label: "BPC / LOAS",                 href: "#areas" },
-      { label: "Revisão de Benefício",        href: "#areas" },
+      { label: "Auxílio-Doença", href: "#areas" },
+      { label: "BPC / LOAS", href: "#areas" },
+      { label: "Revisão de Benefício", href: "#areas" },
     ],
   },
 ];
@@ -46,9 +46,6 @@ export default function SiteFooter() {
             </div>
             <p style={{ fontSize: 13, lineHeight: 1.8, color: "rgba(245,240,232,.3)", maxWidth: 320 }}>
               Especialistas em Direito Previdenciário. Mais de uma década defendendo os direitos de quem trabalhou a vida toda.
-            </p>
-            <p style={{ fontSize: 12, color: "rgba(201,169,110,.4)", marginTop: 20, letterSpacing: "0.05em" }}>
-              OAB/SP nº 000.000
             </p>
           </div>
 
@@ -79,7 +76,7 @@ export default function SiteFooter() {
           <p style={{ fontSize: 12, color: "rgba(245,240,232,.2)" }}>
             © {ANO} Deise Lisboa Advocacia. Todos os direitos reservados.
           </p>
-          <a href="https://wa.me/5571987806608?text=Olá%2C%20gostaria%20de%20uma%20consulta%20gratuita." target="_blank" rel="noopener noreferrer"
+          <a href="https://wa.me/5571987806608?text=Olá%2C%20gostaria%20de%20uma%20consulta%20." target="_blank" rel="noopener noreferrer"
             style={{ fontSize: 12, color: "rgba(201,169,110,.4)", textDecoration: "none", letterSpacing: "0.05em", transition: "color .2s" }}
             onMouseEnter={e => e.currentTarget.style.color = "#C9A96E"}
             onMouseLeave={e => e.currentTarget.style.color = "rgba(201,169,110,.4)"}

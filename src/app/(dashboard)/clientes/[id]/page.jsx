@@ -8,14 +8,65 @@ import Modal from "@/components/ui/Modal";
 import ClienteForm from "@/components/clientes/ClienteForm";
 import Input, { Select } from "@/components/ui/Input";
 import {
-  formatCPF, formatData, formatDataHora, formatMoeda, diasRestantes, corPrazo,
+  formatCPF, formatData, formatDataHora, formatMoeda, diasRestantes, corPrazo, cn,
 } from "@/lib/utils";
 import {
   User, Shield, FileText, CalendarClock, FolderOpen, Clock,
   Plus, Trash2, CheckCircle, Upload, History, ArrowLeft, Eye, EyeOff, Download,
 } from "lucide-react";
+import { toast } from "sonner";
 
 const statusVariant = { "Ativo": "ativo", "Inativo": "inativo", "Concluído": "concluido" };
+const FIELD_LABELS = {
+  nome: "Nome",
+  cpf: "CPF",
+  data_nascimento: "Data Nasc.",
+  tipo_processo: "Tipo",
+  subdivisao_id: "ID Subdivisão",
+  subdivisao_nome: "Subdivisão",
+  status: "Status",
+  situacao: "Situação",
+  numero_processo: "Nº Processo",
+  valor_beneficio: "Valor",
+  observacoes: "Obs.",
+  ano_referencia: "Ano",
+};
+
+function AuditDiff({ anterior, novo }) {
+  if (!anterior || !novo) return null;
+  const changes = [];
+  
+  Object.keys(novo).forEach(key => {
+    let oldVal = anterior[key];
+    let newVal = novo[key];
+    
+    // Pequenos tratamentos para evitar falso positivo (null vs undefined vs "")
+    if ((oldVal || "") === (newVal || "")) return;
+    if (key === "subdivisao_id") return; // Pulamos o ID técnico agora que temos o nome
+    
+    changes.push({
+      key,
+      label: FIELD_LABELS[key] || key,
+      old: oldVal,
+      new: newVal,
+    });
+  });
+
+  if (changes.length === 0) return null;
+
+  return (
+    <div className="mt-2.5 space-y-1.5 border-l-2 border-white/[0.05] pl-3 py-1">
+      {changes.map(c => (
+        <div key={c.key} className="flex items-baseline gap-2 text-[11px]">
+          <span className="text-ink-500 font-medium min-w-[50px]">{c.label}:</span>
+          <span className="text-ink-600 line-through truncate max-w-[100px]">{c.old || "—"}</span>
+          <span className="text-ink-500">→</span>
+          <span className="text-gold-500 font-semibold">{c.new || "—"}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 function TabBtn({ active, onClick, children }) {
   return (
@@ -78,8 +129,12 @@ export default function ClienteDetalhePage() {
       headers: { "Content-Type": "application/json" },
       body:    JSON.stringify(payload),
     });
-    if (res.ok) { setEditModal(false); carregar(); }
-    else alert("Erro ao salvar");
+    if (res.ok) { 
+      toast.success("Dados do cliente atualizados");
+      setEditModal(false); 
+      carregar(); 
+    }
+    else toast.error("Erro ao salvar as alterações");
     setSaving(false);
   }
 
@@ -92,7 +147,13 @@ export default function ClienteDetalhePage() {
       headers: { "Content-Type": "application/json" },
       body:    JSON.stringify({ ...novoPrazo, cliente_id: id }),
     });
-    if (res.ok) { setNovoPrazo({ descricao: "", data_prazo: "" }); carregar(); }
+    if (res.ok) { 
+      toast.success("Prazo adicionado com sucesso");
+      setNovoPrazo({ descricao: "", data_prazo: "" }); 
+      carregar(); 
+    } else {
+      toast.error("Erro ao adicionar prazo");
+    }
     setAddingPrazo(false);
   }
 
@@ -107,9 +168,16 @@ export default function ClienteDetalhePage() {
 
   async function handleExcluirPrazo() {
     if (!prazoExcluindo) return;
-    await fetch(`/api/prazos/${prazoExcluindo.id}`, { method: "DELETE" });
-    setPrazoExcluindo(null);
-    carregar();
+    try {
+      const res = await fetch(`/api/prazos/${prazoExcluindo.id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Não foi possível excluir o prazo.");
+      
+      toast.success("Prazo removido");
+      setPrazoExcluindo(null);
+      carregar();
+    } catch (err) {
+      toast.error(err.message);
+    }
   }
 
   async function handleUpload(e) {
@@ -150,9 +218,10 @@ export default function ClienteDetalhePage() {
       });
       if (!resReg.ok) throw new Error("Erro ao registrar metadados do arquivo");
 
+      toast.success("Documento enviado com sucesso");
       carregar();
     } catch (err) {
-      alert("Erro no upload: " + err.message);
+      toast.error("Erro no upload: " + err.message);
     } finally {
       setUploading(false);
       e.target.value = ""; // limpa input
@@ -160,23 +229,27 @@ export default function ClienteDetalhePage() {
   }
 
   async function downloadDocumento(docId, force = false) {
-    const url = `/api/documentos/${docId}${force ? "?download=1" : ""}`;
-    const res = await fetch(url);
-    const json = await res.json();
-    if (json.url) {
-      if (force) {
-        // Cria link invisível para forçar download
-        const a = document.createElement("a");
-        a.href = json.url;
-        a.download = ""; // O browser tentará baixar
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-      } else {
-        window.open(json.url, "_blank");
+    try {
+      const url = `/api/documentos/${docId}${force ? "?download=1" : ""}`;
+      const res = await fetch(url);
+      const json = await res.json();
+      
+      if (!res.ok) throw new Error(json.erro || "Falha ao recuperar link.");
+
+      if (json.url) {
+        if (force) {
+          const a = document.createElement("a");
+          a.href = json.url;
+          a.download = "";
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+        } else {
+          window.open(json.url, "_blank");
+        }
       }
-    } else {
-      alert("Erro ao buscar link");
+    } catch (err) {
+      toast.error("Erro ao gerar link de acesso");
     }
   }
 
@@ -184,10 +257,11 @@ export default function ClienteDetalhePage() {
     if (!docExcluindo) return;
     const res = await fetch(`/api/documentos/${docExcluindo.id}`, { method: "DELETE" });
     if (res.ok) {
+      toast.success("Documento excluído");
       setDocExcluindo(null);
       carregar();
     } else {
-      alert("Erro ao excluir documento");
+      toast.error("Erro ao excluir arquivo");
     }
   }
 
@@ -496,6 +570,11 @@ export default function ClienteDetalhePage() {
                       <p className="text-sm font-medium text-ink-100 italic">
                         {acaoMsg} <span className="text-ink-300 not-italic font-normal">{desc && `· ${desc}`}</span>
                       </p>
+                      
+                      {a.acao === "UPDATE" && a.tabela === "clientes" && (
+                        <AuditDiff anterior={a.dados_anteriores} novo={a.dados_novos} />
+                      )}
+
                       <div className="flex items-center gap-2 mt-1">
                         <span className="text-[11px] text-ink-500 font-medium">{a.usuario_nome || a.usuario_email || "Sistema"}</span>
                         <span className="text-[11px] text-ink-600">·</span>

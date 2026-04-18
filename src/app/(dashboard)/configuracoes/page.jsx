@@ -7,6 +7,7 @@ import Input, { Select } from "@/components/ui/Input";
 import Badge from "@/components/ui/Badge";
 import { Settings, Plus, Pencil, Power, Shield } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { toast } from "sonner";
 
 export default function ConfiguracoesPage() {
   const { usuario } = useAuth();
@@ -34,23 +35,40 @@ export default function ConfiguracoesPage() {
     setSaving(true);
     const url = editando ? `/api/subdivisoes/${editando.id}` : "/api/subdivisoes";
     const method = editando ? "PUT" : "POST";
-    const res = await fetch(url, {
-      method,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
-    if (res.ok) { setModal(false); setEditando(null); setForm({ nome: "", tipo: "administrativo" }); carregar(); }
-    else alert("Erro ao salvar");
-    setSaving(false);
+    try {
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      if (!res.ok) throw new Error("Erro ao salvar subdivisão");
+      
+      toast.success(editando ? "Subdivisão atualizada" : "Subdivisão criada com sucesso");
+      setModal(false); 
+      setEditando(null); 
+      setForm({ nome: "", tipo: "administrativo" }); 
+      carregar();
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setSaving(false);
+    }
   }
 
   async function toggleAtivo(s) {
-    await fetch(`/api/subdivisoes/${s.id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ativo: !s.ativo }),
-    });
-    carregar();
+    try {
+      const res = await fetch(`/api/subdivisoes/${s.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ativo: !s.ativo }),
+      });
+      if (!res.ok) throw new Error("Falha ao atualizar status.");
+      
+      toast.success(`Subdivisão ${!s.ativo ? "ativada" : "desativada"}`);
+      carregar();
+    } catch (err) {
+      toast.error(err.message);
+    }
   }
 
   function abrirEditar(s) {
