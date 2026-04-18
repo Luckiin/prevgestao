@@ -44,7 +44,7 @@ export function AuthProvider({ children }) {
   async function logout() {
     await fetch("/api/auth/logout", { method: "POST" });
     setUsuario(null);
-    window.location.href = "/auth/entrar";
+    window.location.href = "/login";
   }
 
   return (

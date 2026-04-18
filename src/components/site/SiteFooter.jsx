@@ -79,7 +79,7 @@ export default function SiteFooter() {
           <p style={{ fontSize: 12, color: "rgba(245,240,232,.2)" }}>
             © {ANO} Deise Lisboa Advocacia. Todos os direitos reservados.
           </p>
-          <a href="https://wa.me/5500000000000" target="_blank" rel="noopener noreferrer"
+          <a href="https://wa.me/5571987806608?text=Olá%2C%20gostaria%20de%20uma%20consulta%20gratuita." target="_blank" rel="noopener noreferrer"
             style={{ fontSize: 12, color: "rgba(201,169,110,.4)", textDecoration: "none", letterSpacing: "0.05em", transition: "color .2s" }}
             onMouseEnter={e => e.currentTarget.style.color = "#C9A96E"}
             onMouseLeave={e => e.currentTarget.style.color = "rgba(201,169,110,.4)"}

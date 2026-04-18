@@ -13,6 +13,7 @@ export async function GET(request) {
     const data = await buscarAuditoria({
       tabela:        searchParams.get("tabela")        || undefined,
       registro_id:   searchParams.get("registro_id")   || undefined,
+      entidade_id:   searchParams.get("entidade_id")   || undefined,
       usuario_email: searchParams.get("usuario_email") || undefined,
       limit:         Number(searchParams.get("limit")) || 100,
       offset:        Number(searchParams.get("offset")) || 0,

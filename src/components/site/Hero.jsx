@@ -7,7 +7,7 @@ const SLIDES = [
   {
     label: "direito previdenciário",
     headline: ["Seu benefício foi negado?", "Nós revertemos."],
-    sub: "Somos especialistas em reverter indeferimentos do INSS. Análise gratuita e sem compromisso. Você só paga se ganhar.",
+    sub: "Especialistas em reverter indeferimentos do INSS em Salvador e todo o Brasil. Análise gratuita e sem compromisso.",
   },
   {
     label: "direito previdenciário",
@@ -77,7 +77,7 @@ export default function Hero() {
 
         {/* CTAs */}
         <div style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap" }}>
-          <a href="https://wa.me/5500000000000?text=Olá,%20gostaria%20de%20uma%20consulta%20gratuita."
+          <a href="https://wa.me/5571987806608?text=Ol%C3%A1%2C%20gostaria%20de%20uma%20consulta%20gratuita."
             target="_blank" rel="noopener noreferrer"
             style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "16px 40px", background: "#C9A96E", color: "#0a0102", fontWeight: 700, fontSize: 13, letterSpacing: "0.1em", textTransform: "uppercase", textDecoration: "none", borderRadius: 2, transition: "background .2s" }}
             onMouseEnter={e => e.currentTarget.style.background = "#e8d5a3"}

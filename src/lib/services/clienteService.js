@@ -97,6 +97,7 @@ export async function criarCliente(supabase, payload, usuarioEmail, usuarioNome)
   await registrarAuditoria({
     tabela:        "clientes",
     registro_id:   data.id,
+    entidade_id:   data.id,
     acao:          "INSERT",
     dados_novos:   { nome: data.nome, cpf: data.cpf, tipo_processo: data.tipo_processo },
     usuario_email: usuarioEmail,
@@ -139,6 +140,7 @@ export async function atualizarCliente(supabase, id, payload, usuarioEmail, usua
   await registrarAuditoria({
     tabela:           "clientes",
     registro_id:      id,
+    entidade_id:      id,
     acao:             "UPDATE",
     dados_anteriores: anterior,
     dados_novos:      { nome: data.nome, status: data.status, situacao: data.situacao, ano_referencia: data.ano_referencia },
@@ -166,6 +168,7 @@ export async function excluirCliente(supabase, id, usuarioEmail, usuarioNome) {
   await registrarAuditoria({
     tabela:           "clientes",
     registro_id:      id,
+    entidade_id:      id,
     acao:             "DELETE",
     dados_anteriores: anterior,
     usuario_email:    usuarioEmail,

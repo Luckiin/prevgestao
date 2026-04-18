@@ -58,7 +58,7 @@ export default function SiteHeader() {
         </nav>
 
         {/* CTA */}
-        <a href="https://wa.me/5500000000000?text=Olá,%20gostaria%20de%20uma%20consulta%20gratuita."
+        <a href="https://wa.me/5571987806608?text=Ol%C3%A1%2C%20gostaria%20de%20uma%20consulta%20gratuita."
           target="_blank" rel="noopener noreferrer"
           className="hidden-mobile"
           style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 22px", background: "#C9A96E", color: "#0a0102", fontWeight: 700, fontSize: 12, letterSpacing: "0.08em", textTransform: "uppercase", borderRadius: 2, textDecoration: "none", transition: "background .2s" }}
@@ -85,7 +85,7 @@ export default function SiteHeader() {
               onMouseLeave={e => e.currentTarget.style.color = "rgba(245,240,232,.7)"}
             >{l.label}</button>
           ))}
-          <a href="https://wa.me/5500000000000?text=Olá,%20gostaria%20de%20uma%20consulta%20gratuita."
+          <a href="https://wa.me/5571987806608?text=Ol%C3%A1%2C%20gostaria%20de%20uma%20consulta%20gratuita."
             target="_blank" rel="noopener noreferrer"
             style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginTop: 20, padding: "13px", background: "#C9A96E", color: "#0a0102", fontWeight: 700, fontSize: 13, letterSpacing: "0.08em", textTransform: "uppercase", borderRadius: 2, textDecoration: "none" }}
           >

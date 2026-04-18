@@ -49,6 +49,7 @@ export async function criarPrazo(supabase, payload, usuarioEmail, usuarioNome) {
   await registrarAuditoria({
     tabela:        "prazos",
     registro_id:   data.id,
+    entidade_id:   data.cliente_id,
     acao:          "INSERT",
     dados_novos:   { descricao: data.descricao, data_prazo: data.data_prazo, cliente_id: data.cliente_id },
     usuario_email: usuarioEmail,
@@ -62,7 +63,7 @@ export async function criarPrazo(supabase, payload, usuarioEmail, usuarioNome) {
 export async function atualizarPrazo(supabase, id, payload, usuarioEmail, usuarioNome) {
   const { data: anterior } = await supabase
     .from("prazos")
-    .select("descricao, concluido, data_prazo")
+    .select("descricao, concluido, data_prazo, cliente_id")
     .eq("id", id)
     .single();
 
@@ -78,6 +79,7 @@ export async function atualizarPrazo(supabase, id, payload, usuarioEmail, usuari
   await registrarAuditoria({
     tabela:           "prazos",
     registro_id:      id,
+    entidade_id:      anterior.cliente_id,
     acao:             "UPDATE",
     dados_anteriores: anterior,
     dados_novos:      payload,
@@ -102,6 +104,7 @@ export async function excluirPrazo(supabase, id, usuarioEmail, usuarioNome) {
   await registrarAuditoria({
     tabela:           "prazos",
     registro_id:      id,
+    entidade_id:      anterior.cliente_id,
     acao:             "DELETE",
     dados_anteriores: anterior,
     usuario_email:    usuarioEmail,

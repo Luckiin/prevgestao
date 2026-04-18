@@ -62,6 +62,7 @@ export async function registrarDocumento(supabase, {
   await registrarAuditoria({
     tabela:        "documentos",
     registro_id:   data.id,
+    entidade_id:   cliente_id,
     acao:          "INSERT",
     dados_novos:   { nome, pasta, cliente_id, tamanho },
     usuario_email: usuarioEmail,
@@ -103,6 +104,7 @@ export async function excluirDocumento(supabase, id, usuarioEmail, usuarioNome) 
   await registrarAuditoria({
     tabela:           "documentos",
     registro_id:      id,
+    entidade_id:      doc.cliente_id,
     acao:             "DELETE",
     dados_anteriores: doc,
     usuario_email:    usuarioEmail,

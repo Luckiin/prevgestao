@@ -158,6 +158,7 @@ create table public.auditoria (
   id               uuid        primary key default gen_random_uuid(),
   tabela           text        not null,
   registro_id      uuid,
+  entidade_id      uuid,       -- ID da entidade pai (ex: cliente_id) para agrupamento
   acao             text        not null,
   dados_anteriores jsonb,
   dados_novos      jsonb,
@@ -169,6 +170,7 @@ create table public.auditoria (
 
 create index idx_auditoria_tabela    on public.auditoria (tabela);
 create index idx_auditoria_registro  on public.auditoria (registro_id);
+create index idx_auditoria_entidade  on public.auditoria (entidade_id);
 create index idx_auditoria_usuario   on public.auditoria (usuario_email);
 create index idx_auditoria_criado_em on public.auditoria (criado_em desc);
 

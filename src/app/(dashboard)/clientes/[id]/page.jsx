@@ -59,7 +59,7 @@ export default function ClienteDetalhePage() {
     const [c, h, a] = await Promise.all([
       fetch(`/api/clientes/${id}`).then(r => r.json()),
       fetch(`/api/clientes/${id}?historico=1`).then(r => r.json()),
-      fetch(`/api/auditoria?registro_id=${id}`).then(r => r.json()),
+      fetch(`/api/auditoria?entidade_id=${id}`).then(r => r.json()),
     ]);
     setCliente(c);
     setPrazos(c.prazos || []);
@@ -467,20 +467,48 @@ export default function ClienteDetalhePage() {
 
       {/* Tab: Auditoria */}
       {tab === "auditoria" && (
-        <div className="glass-card rounded-2xl overflow-hidden">
+        <div className="glass-card rounded-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-2">
           {auditoria.length === 0 ? (
-            <p className="p-6 text-sm text-ink-500 text-center">Nenhum registro de auditoria.</p>
+            <p className="p-12 text-center text-sm text-ink-500">Nenhum registro de auditoria disponível para este cliente.</p>
           ) : (
             <div className="divide-y divide-white/[0.03]">
-              {auditoria.map(a => (
-                <div key={a.id} className="px-5 py-3 flex items-start gap-3">
-                  <div className="flex-1">
-                    <p className="text-xs font-medium text-ink-200">{a.acao}</p>
-                    <p className="text-[11px] text-ink-500 mt-0.5">{a.usuario_email || "sistema"}</p>
+              {auditoria.map(a => {
+                const isDoc = a.tabela === "documentos";
+                const isPrazo = a.tabela === "prazos";
+                const isCliente = a.tabela === "clientes";
+                
+                let acaoMsg = a.acao;
+                if (a.acao === "INSERT") acaoMsg = isDoc ? "Anexou documento" : isPrazo ? "Adicionou prazo" : "Cadastrou cliente";
+                if (a.acao === "UPDATE") acaoMsg = isPrazo ? "Atualizou prazo" : "Editou dados";
+                if (a.acao === "DELETE") acaoMsg = isDoc ? "Excluiu documento" : isPrazo ? "Removeu prazo" : "Excluiu cliente";
+
+                const desc = a.dados_novos?.nome || a.dados_novos?.descricao || a.dados_anteriores?.nome || a.dados_anteriores?.descricao || "";
+
+                return (
+                  <div key={a.id} className="px-5 py-4 flex items-start gap-4 hover:bg-white/[0.01] transition-all">
+                    <div className={cn(
+                      "w-8 h-8 rounded-lg flex items-center justify-center shrink-0",
+                      isDoc ? "bg-brand-500/10 text-brand-400" : isPrazo ? "bg-warn-500/10 text-warn-500" : "bg-gold-500/10 text-gold-500"
+                    )}>
+                      {isDoc ? <FileText size={14} /> : isPrazo ? <CalendarClock size={14} /> : <User size={14} />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-ink-100 italic">
+                        {acaoMsg} <span className="text-ink-300 not-italic font-normal">{desc && `· ${desc}`}</span>
+                      </p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-[11px] text-ink-500 font-medium">{a.usuario_nome || a.usuario_email || "Sistema"}</span>
+                        <span className="text-[11px] text-ink-600">·</span>
+                        <span className="text-[11px] text-ink-600 font-mono lowercase">{a.tabela}</span>
+                      </div>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p className="text-[11px] text-ink-500 font-medium">{formatDataHora(a.criado_em).split(' às ')[0]}</p>
+                      <p className="text-[10px] text-ink-600">{formatDataHora(a.criado_em).split(' às ')[1]}</p>
+                    </div>
                   </div>
-                  <p className="text-[11px] text-ink-600 whitespace-nowrap">{formatDataHora(a.criado_em)}</p>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>

@@ -43,13 +43,13 @@ export async function middleware(request) {
   const rotaProtegida = ROTAS_PROTEGIDAS.some((r) => pathname.startsWith(r));
 
   // Usuário autenticado tentando acessar login → redireciona para home
-  if (user && pathname.startsWith("/auth/entrar")) {
+  if (user && pathname.startsWith("/login")) {
     return NextResponse.redirect(new URL("/home", request.url));
   }
 
   // Rota protegida sem usuário → redireciona para login
   if (rotaProtegida && !user) {
-    const url = new URL("/auth/entrar", request.url);
+    const url = new URL("/login", request.url);
     url.searchParams.set("next", pathname);
     return NextResponse.redirect(url);
   }

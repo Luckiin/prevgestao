@@ -72,21 +72,21 @@ module.exports = {
         },
         // Fundo escuro — ambiente profissional (tons vinho-escuro)
         dark: {
-          50:  "#1e0d12",   // superfície mais clara (cards, inputs)
-          100: "#160a0e",
-          200: "#100608",
-          300: "#0d0307",   // fundo principal do dashboard
-          400: "#080102",   // fundo mais escuro
+          50:  "#2a151b",   // superfície mais clara (cards, inputs)
+          100: "#1e0d12",
+          200: "#160a0e",
+          300: "#12060b",   // fundo principal do dashboard
+          400: "#0d0307",   // fundo mais escuro
         },
         // Texto — tons quentes neutros (contrastes legíveis no fundo #0d0307)
         ink: {
           100: "#ffffff",
-          200: "#f5f0e8",   // branco quente — texto principal
-          300: "#d4c2c8",   // texto secundário claro
-          400: "#b09aa2",   // texto de suporte — legível no escuro
-          500: "#8a7280",   // labels, cabeçalhos de tabela — contraste OK
-          600: "#5c4a52",   // texto muito sutil (divisores, placeholders)
-          700: "#3d2e34",   // quase invisível — só bordas/fundos
+          200: "#fdfaf5",   // branco quente — texto principal
+          300: "#e5dadd",   // texto secundário claro
+          400: "#c8b7bd",   // texto de suporte — legível no escuro
+          500: "#a9939e",   // labels, cabeçalhos de tabela — contraste OK
+          600: "#8a7a81",   // texto muito sutil (divisores, placeholders)
+          700: "#5c4f54",   // quase invisível — só bordas/fundos
         },
       },
       fontFamily: {

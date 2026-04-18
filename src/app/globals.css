@@ -4,8 +4,8 @@
 
 /* ── Base ─────────────────────────────────────────────────── */
 :root {
-  --scrollbar-bg:    #080102;
-  --scrollbar-thumb: #2a0d14;
+  --scrollbar-bg:    #0d0307;
+  --scrollbar-thumb: #3d0a1a;
 }
 
 * {
@@ -17,7 +17,7 @@ html {
 }
 
 body {
-  background-color: #0d0307;
+  background-color: #12060b;
   color: #f5f0e8;
   font-family: 'Inter', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -66,9 +66,9 @@ input:-webkit-autofill:focus {
 
 /* ── Card de glass ────────────────────────────────────────── */
 .glass-card {
-  background: rgba(20, 5, 10, 0.7);
+  background: rgba(42, 21, 27, 0.6);
   backdrop-filter: blur(16px);
-  border: 1px solid rgba(201, 169, 110, 0.08);
+  border: 1px solid rgba(201, 169, 110, 0.15);
 }
 
 /* Tooltips nativas usam cursor padrão ou pointer no dash */
