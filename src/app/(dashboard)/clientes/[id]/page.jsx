@@ -15,6 +15,7 @@ import {
   Plus, Trash2, CheckCircle, Upload, History, ArrowLeft, Eye, EyeOff, Download,
 } from "lucide-react";
 import { toast } from "sonner";
+import DropZone from "@/components/ui/DropZone";
 
 const statusVariant = { "Ativo": "ativo", "Inativo": "inativo", "Concluído": "concluido" };
 const FIELD_LABELS = {
@@ -180,11 +181,7 @@ export default function ClienteDetalhePage() {
     }
   }
 
-  async function handleUpload(e) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setUploading(true);
+  async function processarArquivo(file) {
     try {
       // 1. Pede URL assinada para o Supabase
       const resUrl = await fetch("/api/documentos/upload-url", {
@@ -201,7 +198,7 @@ export default function ClienteDetalhePage() {
         body: file,
         headers: { "Content-Type": file.type },
       });
-      if (!resUpload.ok) throw new Error("Falha no upload para o storage");
+      if (!resUpload.ok) throw new Error(`Falha no upload de ${file.name}`);
 
       // 3. Registra no banco de dados local
       const resReg = await fetch("/api/documentos", {
@@ -216,16 +213,27 @@ export default function ClienteDetalhePage() {
           pasta: "Geral",
         }),
       });
-      if (!resReg.ok) throw new Error("Erro ao registrar metadados do arquivo");
-
-      toast.success("Documento enviado com sucesso");
-      carregar();
+      if (!resReg.ok) throw new Error(`Erro ao registrar metadados de ${file.name}`);
+      return true;
     } catch (err) {
-      toast.error("Erro no upload: " + err.message);
-    } finally {
-      setUploading(false);
-      e.target.value = ""; // limpa input
+      toast.error(err.message);
+      return false;
     }
+  }
+
+  async function handleFiles(files) {
+    if (!files || files.length === 0) return;
+    setUploading(true);
+    let sucessos = 0;
+    for (const file of files) {
+      const ok = await processarArquivo(file);
+      if (ok) sucessos++;
+    }
+    if (sucessos > 0) {
+      toast.success(`${sucessos} documento(s) enviado(s) com sucesso`);
+      carregar();
+    }
+    setUploading(false);
   }
 
   async function downloadDocumento(docId, force = false) {
@@ -450,65 +458,68 @@ export default function ClienteDetalhePage() {
       {/* Tab: Documentos */}
       {tab === "documentos" && (
         <div className="space-y-4">
-          <div className="glass-card rounded-2xl p-6 flex items-center justify-between">
-            <div>
-              <h1 className="text-md font-semibold text-ink-100">Documentos do Cliente</h1>
-              <p className="text-xs text-ink-500">Anexe PDFs, imagens ou outros arquivos relevantes.</p>
+          <DropZone onFilesDropped={handleFiles} disabled={uploading}>
+            <div className="glass-card rounded-2xl p-6 flex items-center justify-between">
+              <div>
+                <h1 className="text-md font-semibold text-ink-100">Documentos do Cliente</h1>
+                <p className="text-xs text-ink-500">Anexe PDFs, imagens ou arraste e solte arquivos aqui.</p>
+              </div>
+              <div className="relative">
+                <input
+                  type="file"
+                  id="file-upload"
+                  className="hidden"
+                  multiple
+                  onChange={(e) => handleFiles(Array.from(e.target.files))}
+                  disabled={uploading}
+                />
+                <Button
+                  onClick={() => document.getElementById("file-upload").click()}
+                  loading={uploading}
+                >
+                  <div className="flex items-center gap-2 cursor-pointer">
+                    <Upload size={14} />
+                    {uploading ? "Enviando..." : "Anexar Documento"}
+                  </div>
+                </Button>
+              </div>
             </div>
-            <div className="relative">
-              <input
-                type="file"
-                id="file-upload"
-                className="hidden"
-                onChange={handleUpload}
-                disabled={uploading}
-              />
-              <Button
-                onClick={() => document.getElementById("file-upload").click()}
-                loading={uploading}
-              >
-                <div className="flex items-center gap-2 cursor-pointer">
-                  <Upload size={14} />
-                  {uploading ? "Enviando..." : "Anexar Documento"}
-                </div>
-              </Button>
-            </div>
-          </div>
+          </DropZone>
 
           <div className="glass-card rounded-2xl overflow-hidden divide-y divide-white/[0.03]">
             {documentos.length === 0 ? (
               <p className="p-10 text-center text-sm text-ink-500">Nenhum documento anexado.</p>
             ) : (
-              documentos.map(d => (
-                <div key={d.id} className="flex items-center gap-4 px-5 py-4 group hover:bg-white/[0.01] transition-all">
-                  <div className="w-10 h-10 rounded-xl bg-gold-500/5 flex items-center justify-center text-gold-500">
-                    <FileText size={18} />
+                documentos.map(d => (
+                  <div key={d.id} className="flex items-center gap-4 px-5 py-4 group hover:bg-white/[0.01] transition-all">
+                    <div className="w-10 h-10 rounded-xl bg-gold-500/5 flex items-center justify-center text-gold-500">
+                      <FileText size={18} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-ink-200 truncate">{d.nome}</p>
+                      <p className="text-[11px] text-ink-500 mt-0.5">
+                        {(d.tamanho / 1024).toFixed(1)} KB · {formatDataHora(d.criado_em)}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button variant="ghost" size="sm" onClick={() => downloadDocumento(d.id, false)} title="Visualizar">
+                        <Eye size={13} className="mr-1.5" /> Ver
+                      </Button>
+                      <Button variant="ghost" size="sm" onClick={() => downloadDocumento(d.id, true)} title="Baixar arquivo">
+                        <Download size={13} className="mr-1.5" /> Download
+                      </Button>
+                      <button
+                        onClick={() => setDocExcluindo(d)}
+                        className="w-8 h-8 flex items-center justify-center text-ink-500 hover:text-danger-500 hover:bg-danger-500/10 rounded-lg transition-all"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-ink-200 truncate">{d.nome}</p>
-                    <p className="text-[11px] text-ink-500 mt-0.5">
-                      {(d.tamanho / 1024).toFixed(1)} KB · {formatDataHora(d.criado_em)}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="sm" onClick={() => downloadDocumento(d.id, false)} title="Visualizar">
-                      <Eye size={13} className="mr-1.5" /> Ver
-                    </Button>
-                    <Button variant="ghost" size="sm" onClick={() => downloadDocumento(d.id, true)} title="Baixar arquivo">
-                      <Download size={13} className="mr-1.5" /> Download
-                    </Button>
-                    <button
-                      onClick={() => setDocExcluindo(d)}
-                      className="w-8 h-8 flex items-center justify-center text-ink-500 hover:text-danger-500 hover:bg-danger-500/10 rounded-lg transition-all"
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  </div>
-                </div>
-              ))
-            )}
+                ))
+              )}
+            </div>
           </div>
-        </div>
       )}
 
       {/* Tab: Histórico Anual */}

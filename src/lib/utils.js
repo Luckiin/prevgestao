@@ -46,6 +46,16 @@ export function formatMoeda(value) {
   }).format(value);
 }
 
+/** Máscara de moeda para inputs: 123456 → 1.234,56 */
+export function maskMoeda(value) {
+  if (!value) return "";
+  let v = String(value).replace(/\D/g, "");
+  if (!v) return "";
+  v = (Number(v) / 100).toFixed(2).replace(".", ",");
+  v = v.replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1.");
+  return v;
+}
+
 /** Formata data ISO → dd/MM/yyyy */
 export function formatData(dateStr) {
   if (!dateStr) return "—";

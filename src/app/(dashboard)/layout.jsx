@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { AuthProvider } from "@/context/AuthContext";
 import Sidebar from "@/components/dashboard/Sidebar";
 import { Menu } from "lucide-react";
@@ -9,7 +9,6 @@ import { useAuth } from "@/context/AuthContext";
 import { SWRConfig } from "swr";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePathname, useSearchParams } from "next/navigation";
-import { useEffect } from "react";
 
 function TopBar({ onMenuOpen }) {
   const { usuario } = useAuth();
@@ -121,7 +120,9 @@ function DashboardInner({ children }) {
 
   return (
     <div style={{ minHeight: "100vh", background: "#0d0307" }}>
-      <ProgressBar forceLoading={navigating} />
+      <Suspense fallback={null}>
+        <ProgressBar forceLoading={navigating} />
+      </Suspense>
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <div className="dashboard-main" style={{ transition: "margin-left .3s" }}>
         <TopBar onMenuOpen={() => setSidebarOpen(true)} />

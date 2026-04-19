@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend,
   PieChart, Pie, Cell, Label as RechartsLabel
@@ -8,18 +8,19 @@ import {
 import {
   DollarSign, TrendingDown, TrendingUp, AlertTriangle, RefreshCw,
   Plus, X, CheckCircle, ChevronDown, Repeat, SplitSquareHorizontal, Info,
-  ArrowDownCircle, ArrowUpCircle, List, BarChart2, FileText, Trash2
+  ArrowDownCircle, ArrowUpCircle, List, BarChart2, FileText, Trash2, Pencil
 } from "lucide-react";
 import { toast } from "sonner";
-import { useFinanceiroDashboard, useLancamentos } from "@/hooks/useFinanceiro";
+import { useFinanceiroDashboard, useLancamentos, useCategorias } from "@/hooks/useFinanceiro";
+import AnexoFinanceiro from "@/components/financeiro/AnexoFinanceiro";
+import ModalLancamento from "@/components/financeiro/ModalLancamento";
+import { maskMoeda } from "@/lib/utils";
 
 const MESES      = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
 const MESES_FULL = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
 const fmt        = (v) => new Intl.NumberFormat("pt-BR", { style:"currency", currency:"BRL" }).format(v || 0);
 const fmtShort   = (v) => v >= 1000 ? `R$${(v/1000).toFixed(0)}k` : `R$${(v||0).toFixed(0)}`;
 
-const CATS_DESPESA = ["Alimentação","Educação","Lazer","Moradia","Pagamentos","Roupas","Saúde","Transporte"];
-const CATS_RECEITA = ["Investimento","Prêmios","Outros","Salário","Serviço"];
 const CORES        = ["#C9A96E","#22c55e","#8b5cf6","#f97316","#06b6d4","#ec4899","#84cc16","#f59e0b","#14b8a6","#ef4444"];
 
 function cn(...c) { return c.filter(Boolean).join(" "); }
@@ -50,221 +51,6 @@ function CenterLabel({ viewBox, total, linha1 }) {
   );
 }
 
-// ── Modal de Lançamento ──────────────────────────────────────────────────────
-function ModalLancamento({ tipo, onClose, onSalvo }) {
-  const [tab, setTab]       = useState("lancamento");
-  const [saving, setSaving] = useState(false);
-  const [clientes, setClientes] = useState([]);
-  const [form, setForm] = useState({
-    descricao:"", categoria:"", cliente_id:"", pessoa:"",
-    data_vencimento: new Date().toISOString().slice(0,10),
-    valor:"", recorrente:false, parcelado:false, mais_info:false,
-    quitado:false, data_pagamento: new Date().toISOString().slice(0,10),
-    conta:"", juros_multa:"", desconto:"", valor_pago:"",
-  });
-
-  // Clientes podem ser transformados em hook também, mas mantendo para foco no financeiro
-  useState(() => {
-    if (tipo === "receita") {
-      fetch("/api/clientes?limit=500&status=ativo")
-        .then(r => r.json())
-        .then(j => setClientes(j?.data || j || []))
-        .catch(() => {});
-    }
-  }, [tipo]);
-
-  function set(k, v) { setForm(f => ({ ...f, [k]: v })); }
-
-  const isDespesa   = tipo === "despesa";
-  const accentColor = isDespesa ? "#ef4444" : "#22c55e";
-  const cats        = isDespesa ? CATS_DESPESA : CATS_RECEITA;
-
-  async function salvar() {
-    if (!form.descricao || !form.valor) { toast.error("Preencha descrição e valor."); return; }
-    setSaving(true);
-    try {
-      const payload = {
-        tipo, descricao: form.descricao, categoria: form.categoria,
-        data_vencimento: form.data_vencimento,
-        valor: parseFloat(form.valor.replace(",",".")),
-        status: form.quitado ? "pago" : "pendente",
-        data_pagamento: form.quitado ? form.data_pagamento : null,
-        valor_pago: form.quitado && form.valor_pago ? parseFloat(form.valor_pago.replace(",",".")) : null,
-        observacao: form.mais_info ? `Juros: ${form.juros_multa||0} | Desconto: ${form.desconto||0}` : null,
-      };
-      const res = await fetch("/api/financeiro/lancamentos", {
-        method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(payload),
-      });
-      if (!res.ok) throw new Error();
-      toast.success(`${isDespesa ? "Despesa" : "Receita"} cadastrada!`);
-      onSalvo?.(); onClose();
-    } catch { toast.error("Erro ao salvar."); }
-    finally { setSaving(false); }
-  }
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background:"rgba(0,0,0,.75)", backdropFilter:"blur(4px)" }}>
-      <div className="w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl" style={{ background:"#1e0d12", border:`1px solid ${accentColor}35` }}>
-
-        <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.06]" style={{ background:`${accentColor}12` }}>
-          <div className="flex items-center gap-3">
-            {isDespesa ? <ArrowDownCircle size={20} style={{color:accentColor}} /> : <ArrowUpCircle size={20} style={{color:accentColor}} />}
-            <h2 className="text-base font-bold text-ink-100">Incluindo Nova {isDespesa ? "Despesa" : "Receita"}</h2>
-          </div>
-          <button onClick={onClose} className="p-1.5 rounded-lg text-ink-500 hover:text-ink-100 hover:bg-white/10 transition-all"><X size={16} /></button>
-        </div>
-
-        <div className="flex border-b border-white/[0.06]">
-          {[["lancamento","Lançamento"],["anexo","Anexo de documentos"]].map(([k,label]) => (
-            <button key={k} onClick={() => setTab(k)}
-              className={cn("px-5 py-2.5 text-xs font-semibold transition-all border-b-2",
-                tab===k ? "text-ink-100 border-gold-500" : "text-ink-500 border-transparent hover:text-ink-200")}>
-              {label}
-            </button>
-          ))}
-        </div>
-
-        {tab === "lancamento" ? (
-          <div className="p-6 space-y-4 max-h-[68vh] overflow-y-auto">
-            <div>
-              <label className="block text-[11px] font-semibold text-ink-500 uppercase tracking-wider mb-1.5">Descrição</label>
-              <input type="text" value={form.descricao} onChange={e => set("descricao",e.target.value)}
-                placeholder={isDespesa ? "Ex: Aluguel escritório..." : "Ex: Honorários cliente..."}
-                className="w-full bg-dark-100 border border-white/10 rounded-xl px-3 py-2.5 text-sm text-ink-200 placeholder-ink-600 focus:outline-none focus:border-gold-500/50 transition-all" />
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-[11px] font-semibold text-ink-500 uppercase tracking-wider mb-1.5">Categoria</label>
-                <div className="relative">
-                  <select value={form.categoria} onChange={e => set("categoria",e.target.value)}
-                    className="w-full appearance-none bg-dark-100 border border-white/10 rounded-xl px-3 py-2.5 text-sm text-ink-200 focus:outline-none focus:border-gold-500/50 transition-all">
-                    <option value="">Selecionar...</option>
-                    {cats.map(c => <option key={c} value={c}>{c}</option>)}
-                  </select>
-                  <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-500 pointer-events-none" />
-                </div>
-              </div>
-              <div>
-                <label className="block text-[11px] font-semibold text-ink-500 uppercase tracking-wider mb-1.5">{isDespesa ? "Fornecedor" : "Cliente"}</label>
-                {isDespesa ? (
-                  <input type="text" value={form.pessoa} onChange={e => set("pessoa",e.target.value)}
-                    placeholder="Fornecedor"
-                    className="w-full bg-dark-100 border border-white/10 rounded-xl px-3 py-2.5 text-sm text-ink-200 placeholder-ink-600 focus:outline-none focus:border-gold-500/50 transition-all" />
-                ) : (
-                  <div className="relative">
-                    <select value={form.cliente_id} onChange={e => set("cliente_id",e.target.value)}
-                      className="w-full appearance-none bg-dark-100 border border-white/10 rounded-xl px-3 py-2.5 pr-8 text-sm text-ink-200 focus:outline-none focus:border-gold-500/50 transition-all">
-                      <option value="">Selecione o cliente</option>
-                      {clientes.map(c => <option key={c.id} value={c.id}>{c.nome}</option>)}
-                    </select>
-                    <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-500 pointer-events-none" />
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-[11px] font-semibold text-ink-500 uppercase tracking-wider mb-1.5">Data de Vencimento</label>
-                <input type="date" value={form.data_vencimento} onChange={e => set("data_vencimento",e.target.value)}
-                  className="w-full bg-dark-100 border border-white/10 rounded-xl px-3 py-2.5 text-sm text-ink-200 focus:outline-none focus:border-gold-500/50 transition-all" />
-              </div>
-              <div>
-                <label className="block text-[11px] font-semibold text-ink-500 uppercase tracking-wider mb-1.5">{isDespesa ? "Valor a Pagar" : "Valor a Receber"}</label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-ink-500">R$</span>
-                  <input type="text" value={form.valor} onChange={e => set("valor",e.target.value)} placeholder="0,00"
-                    className="w-full bg-dark-100 border border-white/10 rounded-xl pl-8 pr-3 py-2.5 text-sm text-ink-200 placeholder-ink-600 focus:outline-none focus:border-gold-500/50 transition-all" />
-                </div>
-              </div>
-            </div>
-
-            <div className="flex gap-2 flex-wrap">
-              {[["recorrente","Recorrente",Repeat],["parcelado","Parcelado",SplitSquareHorizontal],["mais_info","Mais informações",Info]].map(([k,label,Icon]) => (
-                <button key={k} type="button" onClick={() => set(k,!form[k])}
-                  className={cn("flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all",
-                    form[k] ? "bg-gold-500/15 border-gold-500/40 text-gold-500" : "bg-dark-100 border-white/10 text-ink-500 hover:text-ink-200")}>
-                  <Icon size={12} />{label}
-                </button>
-              ))}
-            </div>
-
-            {form.mais_info && (
-              <div className="grid grid-cols-2 gap-3 p-4 rounded-xl bg-white/[0.02] border border-white/[0.05]">
-                {[["juros_multa","Juros/Multa"],["desconto","Desconto"]].map(([k,label]) => (
-                  <div key={k}>
-                    <label className="block text-[11px] font-semibold text-ink-500 uppercase tracking-wider mb-1.5">{label}</label>
-                    <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-ink-500">R$</span>
-                      <input type="text" value={form[k]} onChange={e => set(k,e.target.value)} placeholder="0,00"
-                        className="w-full bg-dark-100 border border-white/10 rounded-xl pl-8 pr-3 py-2 text-sm text-ink-200 placeholder-ink-600 focus:outline-none focus:border-gold-500/50 transition-all" />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            <div className="border-t border-white/[0.06]" />
-
-            <label className="flex items-center gap-3 cursor-pointer group">
-              <div onClick={() => set("quitado",!form.quitado)}
-                className={cn("w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all flex-shrink-0",
-                  form.quitado ? "bg-success-500 border-success-500 text-white" : "border-ink-600 group-hover:border-gold-500")}>
-                {form.quitado && <CheckCircle size={12} />}
-              </div>
-              <span className="text-sm font-medium text-ink-200">{isDespesa ? "Pago" : "Recebido"}</span>
-            </label>
-
-            {form.quitado && (
-              <div className="grid grid-cols-2 gap-3 p-4 rounded-xl bg-white/[0.02] border border-white/[0.05]">
-                <div>
-                  <label className="block text-[11px] font-semibold text-ink-500 uppercase tracking-wider mb-1.5">{isDespesa ? "Data do Pagamento" : "Data do Recebimento"}</label>
-                  <input type="date" value={form.data_pagamento} onChange={e => set("data_pagamento",e.target.value)}
-                    className="w-full bg-dark-100 border border-white/10 rounded-xl px-3 py-2 text-sm text-ink-200 focus:outline-none focus:border-gold-500/50 transition-all" />
-                </div>
-                <div>
-                  <label className="block text-[11px] font-semibold text-ink-500 uppercase tracking-wider mb-1.5">Conta</label>
-                  <div className="relative">
-                    <select value={form.conta} onChange={e => set("conta",e.target.value)}
-                      className="w-full appearance-none bg-dark-100 border border-white/10 rounded-xl px-3 py-2 text-sm text-ink-200 focus:outline-none focus:border-gold-500/50 transition-all">
-                      <option value="">Selecionar...</option>
-                      <option>Conta Corrente</option><option>Caixa</option><option>Poupança</option>
-                    </select>
-                    <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-500 pointer-events-none" />
-                  </div>
-                </div>
-                <div className="col-span-2">
-                  <label className="block text-[11px] font-semibold text-ink-500 uppercase tracking-wider mb-1.5">{isDespesa ? "Valor Pago" : "Valor Recebido"}</label>
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-ink-500">R$</span>
-                    <input type="text" value={form.valor_pago} onChange={e => set("valor_pago",e.target.value)} placeholder={form.valor || "0,00"}
-                      className="w-full bg-dark-100 border border-white/10 rounded-xl pl-8 pr-3 py-2 text-sm text-ink-200 placeholder-ink-600 focus:outline-none focus:border-gold-500/50 transition-all" />
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        ) : (
-          <div className="p-6 flex flex-col items-center justify-center h-48 text-ink-600">
-            <Info size={28} className="mb-3 opacity-30" />
-            <p className="text-sm">Anexo de documentos em breve.</p>
-          </div>
-        )}
-
-        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-white/[0.06]">
-          <button onClick={onClose} className="px-4 py-2 text-sm text-ink-500 hover:text-ink-200 transition-colors">Cancelar</button>
-          <button onClick={salvar} disabled={saving}
-            className="flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold text-dark-400 transition-all disabled:opacity-50"
-            style={{ background:"linear-gradient(135deg,#C9A96E,#b08840)" }}>
-            {saving ? <RefreshCw size={14} className="animate-spin" /> : <Plus size={14} />}
-            {saving ? "Salvando..." : "Salvar"}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 // ── Seção Despesas / Receitas do mês ─────────────────────────────────────────
 function SecaoMes({ tipo, lancamentos, loading, onAbrirModal, onRecarregar }) {
@@ -463,10 +249,16 @@ function SecaoMes({ tipo, lancamentos, loading, onAbrirModal, onRecarregar }) {
                           {pago ? "Quitado" : `Vence ${new Date(l.data_vencimento+"T00:00:00").toLocaleDateString("pt-BR",{day:"2-digit",month:"2-digit"})}`}
                         </p>
                       </div>
-                      <button onClick={() => excluir(l.id)}
-                        className="opacity-0 group-hover:opacity-100 p-1 rounded text-ink-600 hover:text-danger-500 transition-all flex-shrink-0">
-                        <Trash2 size={12} />
-                      </button>
+                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all flex-shrink-0">
+                        <button onClick={() => onAbrirModal(l)}
+                          className="p-1.5 rounded text-ink-600 hover:text-gold-500 hover:bg-gold-500/10 transition-all">
+                          <Pencil size={12} />
+                        </button>
+                        <button onClick={() => excluir(l.id)}
+                          className="p-1.5 rounded text-ink-600 hover:text-danger-500 hover:bg-danger-500/10 transition-all">
+                          <Trash2 size={12} />
+                        </button>
+                      </div>
                     </div>
                   );
                 })}
@@ -606,15 +398,20 @@ export default function FinanceiroDashboard() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
             <SecaoMes tipo="despesa" lancamentos={despesas} loading={lancLoading}
-              onAbrirModal={() => setModal("despesa")} onRecarregar={recarregar} />
+              onAbrirModal={(original) => setModal({ tipo: "despesa", original })} onRecarregar={recarregar} />
             <SecaoMes tipo="receita" lancamentos={receitas} loading={lancLoading}
-              onAbrirModal={() => setModal("receita")} onRecarregar={recarregar} />
+              onAbrirModal={(original) => setModal({ tipo: "receita", original })} onRecarregar={recarregar} />
           </div>
         </>
       )}
 
       {modal && (
-        <ModalLancamento tipo={modal} onClose={() => setModal(null)} onSalvo={recarregar} />
+        <ModalLancamento 
+          tipo={modal.tipo} 
+          original={modal.original} 
+          onClose={() => setModal(null)} 
+          onSalvo={recarregar} 
+        />
       )}
     </div>
   );

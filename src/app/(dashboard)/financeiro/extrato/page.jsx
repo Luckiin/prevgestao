@@ -15,18 +15,15 @@ export default function Extrato() {
 
   const [inicio,  setInicio]  = useState(inicioDefault);
   const [fim,     setFim]     = useState(fimDefault);
-  const [contaId, setContaId] = useState("");
 
   const { movimentacoes: movs, isLoading: loadingMovs, mutate } = useMovimentacoes({
     data_inicio: inicio,
     data_fim: fim,
-    conta_id: contaId,
     limit: 500
   });
 
-  const { contas, isLoading: loadingContas } = useContas();
 
-  const loading = loadingMovs || loadingContas;
+  const loading = loadingMovs;
 
   async function conciliar(id, val) {
     try {
@@ -70,13 +67,6 @@ export default function Extrato() {
           <label style={{ display: "block", fontSize: 11, color: "rgba(201,169,110,.6)", marginBottom: 6, letterSpacing: "0.1em", textTransform: "uppercase" }}>Data Fim</label>
           <input type="date" style={S} value={fim} onChange={e => setFim(e.target.value)} />
         </div>
-        <div>
-          <label style={{ display: "block", fontSize: 11, color: "rgba(201,169,110,.6)", marginBottom: 6, letterSpacing: "0.1em", textTransform: "uppercase" }}>Conta</label>
-          <select style={S} value={contaId} onChange={e => setContaId(e.target.value)}>
-            <option value="">Todas</option>
-            {contas.map(c => <option key={c.id} value={c.id}>{c.nome}</option>)}
-          </select>
-        </div>
       </div>
 
       {/* Totais */}
@@ -106,7 +96,7 @@ export default function Extrato() {
           <table className="w-full text-sm border-collapse">
             <thead>
               <tr className="border-b border-white/[0.05]">
-                {["Data", "Conta", "Descrição", "Entrada", "Saída", "Conciliado"].map(h => (
+                {["Data", "Descrição", "Entrada", "Saída", "Conciliado"].map(h => (
                   <th key={h} className="text-left px-4 py-3 text-xs font-medium text-ink-500 whitespace-nowrap">{h}</th>
                 ))}
               </tr>
@@ -115,7 +105,6 @@ export default function Extrato() {
               {movs.map(m => (
                 <tr key={m.id} className="table-row-hover transition-colors">
                   <td className="px-4 py-3 text-ink-400 text-xs whitespace-nowrap">{fmtDate(m.data_movimento)}</td>
-                  <td className="px-4 py-3 text-ink-400 text-xs">{m.contas?.nome || "—"}</td>
                   <td className="px-4 py-3 text-ink-200">{m.descricao}</td>
                   <td className="px-4 py-3 font-mono text-sm font-semibold text-success-500">{m.tipo === "entrada" ? fmt(m.valor) : "—"}</td>
                   <td className="px-4 py-3 font-mono text-sm font-semibold text-danger-400">{m.tipo === "saida" ? fmt(m.valor) : "—"}</td>

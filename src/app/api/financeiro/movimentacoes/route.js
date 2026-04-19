@@ -39,3 +39,22 @@ export async function POST(request) {
     return NextResponse.json({ erro: err.message }, { status: 400 });
   }
 }
+
+export async function DELETE(request) {
+  try {
+    const supabase = await createServerClient();
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get("id");
+    const lancamento_id = searchParams.get("lancamento_id");
+
+    let query = supabase.from("movimentacoes").delete();
+    if (id) query = query.eq("id", id);
+    if (lancamento_id) query = query.eq("lancamento_id", lancamento_id);
+
+    const { error } = await query;
+    if (error) throw error;
+    return NextResponse.json({ sucesso: true });
+  } catch (err) {
+    return NextResponse.json({ erro: err.message }, { status: 400 });
+  }
+}

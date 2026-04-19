@@ -1,17 +1,19 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   Plus, Filter, RefreshCw, ChevronLeft, ChevronRight,
   ChevronDown, CheckCircle, Trash2, AlertTriangle, X,
   Receipt, FileText, Download, Repeat, SplitSquareHorizontal, Info,
-  ChevronsLeft, ChevronsRight, ArrowUpDown
+  ChevronsLeft, ChevronsRight, ArrowUpDown, Pencil
 } from "lucide-react";
 import { toast } from "sonner";
-import { useLancamentos } from "@/hooks/useFinanceiro";
+import { useLancamentos, useCategorias } from "@/hooks/useFinanceiro";
+import AnexoFinanceiro from "@/components/financeiro/AnexoFinanceiro";
+import ModalLancamento from "@/components/financeiro/ModalLancamento";
+import { maskMoeda } from "@/lib/utils";
 
 const MESES_ABREV = ["JAN","FEV","MAR","ABR","MAI","JUN","JUL","AGO","SET","OUT","NOV","DEZ"];
-const CATS_DESPESA = ["Alimentação","Educação","Lazer","Moradia","Pagamentos","Roupas","Saúde","Transporte"];
 const PAGE_SIZES = [25, 50, 100];
 
 const fmt = (v) => new Intl.NumberFormat("pt-BR",{style:"currency",currency:"BRL"}).format(v||0);
@@ -45,240 +47,6 @@ function EmptyState({ onNovo }) {
   );
 }
 
-// ── Modal Nova Despesa ────────────────────────────────────────────────────────
-function ModalNovaDespesa({ onClose, onSalvo }) {
-  const [tab, setTab]     = useState("lancamento");
-  const [saving, setSaving] = useState(false);
-  const [form, setForm]   = useState({
-    descricao:"", categoria:"", fornecedor:"",
-    data_vencimento: new Date().toISOString().slice(0,10),
-    valor:"",
-    recorrente:false, parcelado:false, mais_info:false,
-    pago:false,
-    data_pagamento: new Date().toISOString().slice(0,10),
-    conta:"", juros:"", multa:"", desconto:"", valor_pago:"",
-  });
-
-  function set(k,v) { setForm(f => ({ ...f, [k]:v })); }
-
-  async function salvar() {
-    if (!form.descricao) { toast.error("Informe a descrição."); return; }
-    if (!form.valor)     { toast.error("Informe o valor."); return; }
-    setSaving(true);
-    try {
-      const payload = {
-        tipo:"despesa",
-        descricao: form.descricao,
-        categoria: form.categoria,
-        fornecedor: form.fornecedor,
-        data_vencimento: form.data_vencimento,
-        valor: parseFloat(form.valor.replace(",",".")||0),
-        status: form.pago ? "pago" : "pendente",
-        data_pagamento: form.data_pagamento || null,
-        valor_pago: form.valor_pago ? parseFloat(form.valor_pago.replace(",",".")) : null,
-        observacao: [
-          form.juros  ? `Juros: ${form.juros}`   : "",
-          form.multa  ? `Multa: ${form.multa}`   : "",
-          form.desconto ? `Desconto: ${form.desconto}` : "",
-        ].filter(Boolean).join(" | ") || null,
-      };
-      const res = await fetch("/api/financeiro/lancamentos", {
-        method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(payload),
-      });
-      if (!res.ok) throw new Error();
-      toast.success("Despesa cadastrada!");
-      onSalvo(); onClose();
-    } catch { toast.error("Erro ao salvar despesa."); }
-    finally { setSaving(false); }
-  }
-
-  const inputCls = "w-full bg-dark-100/80 border border-white/10 rounded-lg px-3 py-2 text-sm text-ink-200 placeholder-ink-600 focus:outline-none focus:border-gold-500/50 transition-all";
-  const labelCls = "block text-[11px] font-semibold text-ink-500 mb-1.5";
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background:"rgba(0,0,0,.8)", backdropFilter:"blur(4px)" }}>
-      <div className="w-full max-w-xl rounded-xl overflow-hidden shadow-2xl" style={{ background:"#1a0d14", border:"1px solid rgba(239,68,68,.2)" }}>
-
-        {/* Header */}
-        <div className="flex items-center justify-between px-5 py-3.5" style={{ background:"#ef444420" }}>
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-danger-500/20 flex items-center justify-center">
-              <span className="text-danger-500 font-bold text-sm">$</span>
-            </div>
-            <h2 className="text-sm font-bold text-ink-100">Incluindo Nova Despesa</h2>
-          </div>
-          <button onClick={onClose} className="p-1 rounded text-ink-500 hover:text-ink-100 transition-colors"><X size={16}/></button>
-        </div>
-
-        {/* Tabs */}
-        <div className="flex gap-1 px-5 pt-4 border-b border-white/[0.06] pb-0">
-          {[["lancamento","Lançamento"],["anexo","Anexo de documentos"]].map(([k,lbl]) => (
-            <button key={k} onClick={()=>setTab(k)}
-              className={cn("flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-t-lg border-b-2 transition-all",
-                tab===k ? "bg-white/5 text-ink-100 border-gold-500" : "text-ink-500 border-transparent hover:text-ink-300")}>
-              {k==="lancamento" ? <Receipt size={12}/> : <FileText size={12}/>}{lbl}
-            </button>
-          ))}
-        </div>
-
-        {tab==="lancamento" ? (
-          <div className="p-5 space-y-4 max-h-[72vh] overflow-y-auto">
-
-            {/* Descrição + Categoria */}
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className={labelCls}>Descrição</label>
-                <input type="text" value={form.descricao} onChange={e=>set("descricao",e.target.value)}
-                  placeholder="Informe a descrição da despesa" className={inputCls} />
-              </div>
-              <div>
-                <label className={labelCls}>Categoria</label>
-                <div className="flex gap-1.5">
-                  <div className="relative flex-1">
-                    <select value={form.categoria} onChange={e=>set("categoria",e.target.value)}
-                      className={cn(inputCls,"appearance-none pr-7")}>
-                      <option value="">Selecione a categoria de despesa</option>
-                      {CATS_DESPESA.map(c=><option key={c} value={c}>{c}</option>)}
-                    </select>
-                    <ChevronDown size={13} className="absolute right-2 top-1/2 -translate-y-1/2 text-ink-500 pointer-events-none"/>
-                  </div>
-                  <button className="w-8 h-8 flex-shrink-0 flex items-center justify-center rounded-lg bg-success-500/20 text-success-500 hover:bg-success-500/30 transition-all">
-                    <Plus size={14}/>
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Fornecedor + Data + Valor */}
-            <div className="grid grid-cols-5 gap-3">
-              <div className="col-span-2">
-                <label className={labelCls}>Fornecedor</label>
-                <div className="flex gap-1.5">
-                  <div className="relative flex-1">
-                    <select value={form.fornecedor} onChange={e=>set("fornecedor",e.target.value)}
-                      className={cn(inputCls,"appearance-none pr-7")}>
-                      <option value="">Selecione o fornecedor</option>
-                    </select>
-                    <ChevronDown size={13} className="absolute right-2 top-1/2 -translate-y-1/2 text-ink-500 pointer-events-none"/>
-                  </div>
-                  <button className="w-8 h-8 flex-shrink-0 flex items-center justify-center rounded-lg bg-success-500/20 text-success-500 hover:bg-success-500/30 transition-all">
-                    <Plus size={14}/>
-                  </button>
-                </div>
-              </div>
-              <div className="col-span-2">
-                <label className={labelCls}>Data vencimento</label>
-                <input type="date" value={form.data_vencimento} onChange={e=>set("data_vencimento",e.target.value)} className={inputCls} />
-              </div>
-              <div>
-                <label className={labelCls}>Valor a Pagar</label>
-                <input type="text" value={form.valor} onChange={e=>set("valor",e.target.value)}
-                  placeholder="0,00" className={inputCls} />
-              </div>
-            </div>
-
-            {/* Separador */}
-            <div className="border-t border-white/[0.06]"/>
-
-            {/* Toggles */}
-            <div className="flex gap-2">
-              {[["recorrente","Recorrente",Repeat],["parcelado","Parcelado",SplitSquareHorizontal],["mais_info","Mais informações",Info]].map(([k,lbl,Icon])=>(
-                <button key={k} type="button" onClick={()=>set(k,!form[k])}
-                  className={cn("flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold border transition-all",
-                    form[k] ? "bg-gold-500/15 border-gold-500/40 text-gold-400" : "bg-dark-100/50 border-white/10 text-ink-500 hover:text-ink-200")}>
-                  <Icon size={12}/>{lbl}
-                </button>
-              ))}
-            </div>
-
-            {/* Separador */}
-            <div className="border-t border-white/[0.06]"/>
-
-            {/* Checkbox Pago */}
-            <label className="flex items-center gap-2.5 cursor-pointer group w-fit">
-              <div onClick={()=>set("pago",!form.pago)}
-                className={cn("w-4 h-4 rounded border-2 flex items-center justify-center transition-all flex-shrink-0",
-                  form.pago ? "bg-success-500 border-success-500 text-white" : "border-ink-500 group-hover:border-gold-500")}>
-                {form.pago && <CheckCircle size={10}/>}
-              </div>
-              <span className="text-sm font-medium text-ink-300">Pago</span>
-            </label>
-
-            {/* Seção de pagamento — sempre visível */}
-            <div className="grid grid-cols-5 gap-3">
-              <div className="col-span-1">
-                <label className={labelCls}>Data pagamento</label>
-                <input type="date" value={form.data_pagamento} onChange={e=>set("data_pagamento",e.target.value)}
-                  disabled={!form.pago}
-                  className={cn(inputCls, !form.pago && "opacity-40 cursor-not-allowed")} />
-              </div>
-              <div className="col-span-2">
-                <label className={labelCls}>Conta</label>
-                <div className="flex gap-1.5">
-                  <div className="relative flex-1">
-                    <select value={form.conta} onChange={e=>set("conta",e.target.value)}
-                      disabled={!form.pago}
-                      className={cn(inputCls,"appearance-none pr-7", !form.pago && "opacity-40 cursor-not-allowed")}>
-                      <option value=""/>
-                      <option>Conta Corrente</option>
-                      <option>Caixa</option>
-                      <option>Poupança</option>
-                    </select>
-                    <ChevronDown size={13} className="absolute right-2 top-1/2 -translate-y-1/2 text-ink-500 pointer-events-none"/>
-                  </div>
-                  <button disabled={!form.pago}
-                    className={cn("w-8 h-8 flex-shrink-0 flex items-center justify-center rounded-lg bg-success-500/20 text-success-500 hover:bg-success-500/30 transition-all", !form.pago && "opacity-40 cursor-not-allowed")}>
-                    <Plus size={14}/>
-                  </button>
-                </div>
-              </div>
-              <div>
-                <label className={labelCls}>Juros/Multa</label>
-                <input type="text" value={form.juros} onChange={e=>set("juros",e.target.value)}
-                  disabled={!form.pago} placeholder="0,00"
-                  className={cn(inputCls, !form.pago && "opacity-40 cursor-not-allowed")} />
-              </div>
-              <div>
-                <label className={labelCls}>Desconto</label>
-                <input type="text" value={form.desconto} onChange={e=>set("desconto",e.target.value)}
-                  disabled={!form.pago} placeholder="0,00"
-                  className={cn(inputCls, !form.pago && "opacity-40 cursor-not-allowed")} />
-              </div>
-            </div>
-            <div className="grid grid-cols-5 gap-3">
-              <div className="col-span-1 col-start-5">
-                <label className={labelCls}>Valor Pago</label>
-                <input type="text" value={form.valor_pago} onChange={e=>set("valor_pago",e.target.value)}
-                  disabled={!form.pago} placeholder="0,00"
-                  className={cn(inputCls, !form.pago && "opacity-40 cursor-not-allowed")} />
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="p-8 flex flex-col items-center justify-center h-48 text-ink-600">
-            <FileText size={28} className="mb-3 opacity-25"/>
-            <p className="text-sm">Anexo de documentos em breve.</p>
-          </div>
-        )}
-
-        {/* Footer */}
-        <div className="flex items-center justify-end gap-3 px-5 py-3.5 border-t border-white/[0.06]">
-          <button onClick={onClose}
-            className="px-5 py-2 rounded-lg text-sm font-semibold text-white transition-all"
-            style={{ background:"#f59e0b" }}>
-            Cancelar
-          </button>
-          <button onClick={salvar} disabled={saving}
-            className="flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-semibold text-white transition-all disabled:opacity-50"
-            style={{ background:"#16a34a" }}>
-            {saving ? <RefreshCw size={14} className="animate-spin"/> : <CheckCircle size={14}/>}
-            {saving ? "Salvando..." : "Salvar"}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 // ── Página Contas a Pagar ─────────────────────────────────────────────────────
 export default function ContasPagar() {
@@ -497,6 +265,10 @@ export default function ContasPagar() {
                     <td className="px-3 py-2.5 text-xs text-ink-400">{l.categoria || l.categorias_financeiras?.nome || "—"}</td>
                     <td className="px-3 py-2.5">
                       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button onClick={()=>setModal(l)}
+                          className="w-6 h-6 flex items-center justify-center rounded text-ink-600 hover:text-gold-500 hover:bg-gold-500/10 transition-all">
+                          <Pencil size={12}/>
+                        </button>
                         <button onClick={()=>excluir(l.id)}
                           className="w-6 h-6 flex items-center justify-center rounded text-ink-600 hover:text-danger-400 hover:bg-danger-500/10 transition-all">
                           <Trash2 size={12}/>
@@ -560,7 +332,7 @@ export default function ContasPagar() {
         <span className="text-[11px] text-ink-600">Desconto <span className="text-ink-400 font-semibold">R$ 0,00</span></span>
       </div>
 
-      {modal && <ModalNovaDespesa onClose={()=>setModal(false)} onSalvo={mutate}/>}
+      {modal && <ModalLancamento tipo="despesa" original={typeof modal === 'object' ? modal : null} onClose={()=>setModal(false)} onSalvo={mutate}/>}
     </div>
   );
 }
