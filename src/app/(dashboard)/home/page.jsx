@@ -198,22 +198,6 @@ export default function HomePage() {
         </motion.div>
       </div>
 
-      {/* Link módulo anual */}
-      <motion.div variants={item}>
-        <Link
-          href={`/por-ano?ano=${ANO_ATUAL}`}
-          className="glass-card rounded-2xl p-5 flex items-center gap-4 hover:border-gold-500/30 transition-all group border border-white/[0.05]"
-        >
-          <div className="w-10 h-10 rounded-xl bg-gold-500/10 flex items-center justify-center text-gold-500">
-            <CalendarDays size={18} />
-          </div>
-          <div className="flex-1">
-            <p className="text-sm font-semibold text-ink-200 group-hover:text-ink-100 transition-colors">Clientes do Ano {ANO_ATUAL}</p>
-            <p className="text-xs text-ink-500 mt-0.5">{stats?.total_ano_atual ?? 0} cliente(s) com atividade em {ANO_ATUAL}</p>
-          </div>
-          <ArrowRight size={16} className="text-ink-500 group-hover:text-gold-500 transition-colors" />
-        </Link>
-      </motion.div>
     </motion.div>
   );
 }

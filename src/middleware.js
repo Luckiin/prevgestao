@@ -4,12 +4,11 @@ import { NextResponse } from "next/server";
 const ROTAS_PROTEGIDAS = [
   "/home",
   "/clientes",
-  "/por-ano",
   "/prazos",
-  "/documentos",
   "/relatorios",
   "/auditoria",
   "/configuracoes",
+  "/financeiro",
 ];
 
 export async function middleware(request) {
