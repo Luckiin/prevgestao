@@ -14,6 +14,12 @@ const ROTAS_PROTEGIDAS = [
 export async function middleware(request) {
   const { pathname } = request.nextUrl;
 
+  // RSC Bypass: Torna as navegações internas (cliques no dashboard) instantâneas.
+  // A segurança continuará ativa para acessos diretos via URL e carregamento de dados.
+  if (request.headers.get("RSC") || request.headers.get("Next-Router-State-Tree") || request.headers.get("Next-Router-Prefetch")) {
+    return NextResponse.next();
+  }
+
   let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(
@@ -36,8 +42,10 @@ export async function middleware(request) {
   );
 
   const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  const user = session?.user;
 
   const rotaProtegida = ROTAS_PROTEGIDAS.some((r) => pathname.startsWith(r));
 

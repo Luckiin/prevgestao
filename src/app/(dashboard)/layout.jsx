@@ -7,8 +7,9 @@ import { Menu } from "lucide-react";
 import { Toaster } from "sonner";
 import { useAuth } from "@/context/AuthContext";
 import { SWRConfig } from "swr";
-import { motion } from "framer-motion";
-import { usePathname } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
+import { usePathname, useSearchParams } from "next/navigation";
+import { useEffect } from "react";
 
 function TopBar({ onMenuOpen }) {
   const { usuario } = useAuth();
@@ -55,25 +56,86 @@ function TopBar({ onMenuOpen }) {
   );
 }
 
+
+function ProgressBar({ forceLoading }) {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const [loading, setLoading] = useState(false);
+
+  // Trigger loading on route change (traditional)
+  useEffect(() => {
+    setLoading(true);
+    const timer = setTimeout(() => setLoading(false), 800);
+    return () => clearTimeout(timer);
+  }, [pathname, searchParams]);
+
+  const active = loading || forceLoading;
+
+  return (
+    <AnimatePresence>
+      {active && (
+        <motion.div
+          initial={{ width: 0, opacity: 1 }}
+          animate={{ width: "100%", opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 2, ease: "easeOut" }} // Slow reveal to simulate progress
+          style={{
+            position: "fixed", top: 0, left: 0, height: 3,
+            background: "linear-gradient(90deg, #C9A96E, #E5C78F)",
+            zIndex: 9999, pointerEvents: "none",
+            boxShadow: "0 0 10px rgba(201, 169, 110, 0.5)",
+          }}
+        />
+      )}
+    </AnimatePresence>
+  );
+}
+
 function DashboardInner({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [navigating, setNavigating] = useState(false);
   const pathname = usePathname();
+
+  // Reset navigating state when route actually changes
+  useEffect(() => {
+    setNavigating(false);
+  }, [pathname]);
+
+  // Global click interceptor for truly instant feedback
+  useEffect(() => {
+    const handleGlobalClick = (e) => {
+      const anchor = e.target.closest("a");
+      if (anchor && anchor.href && anchor.href.startsWith(window.location.origin)) {
+        const isExternal = anchor.target === "_blank";
+        const isSamePath = anchor.pathname === window.location.pathname;
+        
+        if (!isExternal && !isSamePath && !e.ctrlKey && !e.metaKey) {
+          setNavigating(true);
+        }
+      }
+    };
+
+    document.addEventListener("mousedown", handleGlobalClick);
+    return () => document.removeEventListener("mousedown", handleGlobalClick);
+  }, []);
 
   return (
     <div style={{ minHeight: "100vh", background: "#0d0307" }}>
+      <ProgressBar forceLoading={navigating} />
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <div className="dashboard-main" style={{ transition: "margin-left .3s" }}>
         <TopBar onMenuOpen={() => setSidebarOpen(true)} />
-        <main style={{ padding: 0 }}>
-          <motion.div
-            key={pathname}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.15, ease: "easeOut" }}
-          >
-            {children}
-          </motion.div>
-        </main>
+          <AnimatePresence mode="popLayout">
+            <motion.div
+              key={pathname}
+              initial={{ opacity: 0, y: 5 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -5 }}
+              transition={{ duration: 0.15, ease: "easeOut" }}
+            >
+              {children}
+            </motion.div>
+          </AnimatePresence>
       </div>
     </div>
   );

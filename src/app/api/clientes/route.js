@@ -12,6 +12,7 @@ export async function GET(request) {
       tipo_processo:  searchParams.get("tipo_processo")  || undefined,
       situacao:       searchParams.get("situacao")       || undefined,
       subdivisao_id:  searchParams.get("subdivisao_id")  || undefined,
+      subdivisao_nome: searchParams.get("subdivisao_nome") || undefined,
       ano_referencia: searchParams.get("ano_referencia") || undefined,
       busca:          searchParams.get("busca")          || undefined,
       limit:          Number(searchParams.get("limit"))  || 50,

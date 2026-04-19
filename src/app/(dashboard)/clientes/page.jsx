@@ -26,7 +26,9 @@ export default function ClientesPage() {
   const [filtroStatus, setFiltroStatus] = useState("");
   const [filtroTipo, setFiltroTipo]     = useState("");
   const [filtroSituacao, setFiltroSituacao] = useState("");
+  const [filtroSubdivisao, setFiltroSubdivisao] = useState("");
   const [filtroAno, setFiltroAno]       = useState(String(ANO_ATUAL));
+  const [subdivisoes, setSubdivisoes]   = useState([]);
   const [carregandoDetalhe, setCarregandoDetalhe] = useState(false);
 
   const carregar = useCallback(async () => {
@@ -36,6 +38,7 @@ export default function ClientesPage() {
     if (filtroStatus) params.set("status", filtroStatus);
     if (filtroTipo)   params.set("tipo_processo", filtroTipo);
     if (filtroSituacao) params.set("situacao", filtroSituacao);
+    if (filtroSubdivisao) params.set("subdivisao_nome", filtroSubdivisao);
     if (filtroAno && filtroAno !== "todos") params.set("ano_referencia", filtroAno);
 
     const res = await fetch(`/api/clientes?${params}`);
@@ -43,7 +46,19 @@ export default function ClientesPage() {
     setClientes(json.data || []);
     setTotal(json.total || 0);
     setLoading(false);
-  }, [busca, filtroStatus, filtroTipo, filtroSituacao, filtroAno]);
+  }, [busca, filtroStatus, filtroTipo, filtroSituacao, filtroSubdivisao, filtroAno]);
+
+  useEffect(() => {
+    async function carregarSubdivisoes() {
+      try {
+        const res = await fetch("/api/subdivisoes");
+        if (res.ok) setSubdivisoes(await res.json());
+      } catch (err) {
+        console.error("Erro ao carregar subdivisões:", err);
+      }
+    }
+    carregarSubdivisoes();
+  }, []);
 
   useEffect(() => { carregar(); }, [carregar]);
 
@@ -152,6 +167,17 @@ export default function ClientesPage() {
         </select>
 
         <select
+          value={filtroSubdivisao}
+          onChange={e => setFiltroSubdivisao(e.target.value)}
+          className="bg-dark-300 border border-dark-50 rounded px-3 py-2 text-sm text-ink-300 focus:outline-none focus:border-gold-500 max-w-[180px]"
+        >
+          <option value="">Subdivisão (Todas)</option>
+          {Array.from(new Set(subdivisoes.map(s => s.nome))).sort().map(nome => (
+            <option key={nome} value={nome}>{nome}</option>
+          ))}
+        </select>
+
+        <select
           value={filtroAno}
           onChange={e => setFiltroAno(e.target.value)}
           className="bg-dark-300 border border-dark-50 rounded px-3 py-2 text-sm text-ink-300 focus:outline-none focus:border-gold-500"
@@ -162,9 +188,16 @@ export default function ClientesPage() {
           ))}
         </select>
 
-        {(busca || filtroStatus || filtroTipo || filtroSituacao || filtroAno !== String(ANO_ATUAL)) && (
+        {(busca || filtroStatus || filtroTipo || filtroSituacao || filtroSubdivisao || filtroAno !== String(ANO_ATUAL)) && (
           <button
-            onClick={() => { setBusca(""); setFiltroStatus(""); setFiltroTipo(""); setFiltroSituacao(""); setFiltroAno(String(ANO_ATUAL)); }}
+            onClick={() => { 
+              setBusca(""); 
+              setFiltroStatus(""); 
+              setFiltroTipo(""); 
+              setFiltroSituacao(""); 
+              setFiltroSubdivisao("");
+              setFiltroAno(String(ANO_ATUAL)); 
+            }}
             className="flex items-center gap-1 text-xs text-ink-500 hover:text-ink-200 transition-colors px-2"
           >
             <X size={13} /> Limpar

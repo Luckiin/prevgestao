@@ -12,7 +12,7 @@ export async function GET(request) {
 
     let query = supabase
       .from("movimentacoes")
-      .select("*, contas(id,nome)", { count: "exact" })
+      .select("*, contas(id,nome)")
       .order("data_movimento", { ascending: false })
       .limit(limit);
 

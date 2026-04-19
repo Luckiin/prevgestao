@@ -30,6 +30,7 @@ export async function listarClientes(supabase, {
   tipo_processo,
   situacao,
   subdivisao_id,
+  subdivisao_nome,
   ano_referencia,
   busca,
   limit  = 50,
@@ -44,7 +45,8 @@ export async function listarClientes(supabase, {
   if (status)         query = query.eq("status", status);
   if (tipo_processo)  query = query.eq("tipo_processo", tipo_processo);
   if (situacao)       query = query.eq("situacao", situacao);
-  if (subdivisao_id)  query = query.eq("subdivisao_id", subdivisao_id);
+  if (subdivisao_id)   query = query.eq("subdivisao_id", subdivisao_id);
+  if (subdivisao_nome) query = query.eq("subdivisoes.nome", subdivisao_nome);
   if (ano_referencia) query = query.eq("ano_referencia", Number(ano_referencia));
   if (busca) {
     query = query.or(
