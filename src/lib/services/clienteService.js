@@ -7,6 +7,7 @@ import { registrarAuditoria } from "./auditService";
 
 const SELECT_COMPLETO = `
   id, nome, cpf, data_nascimento,
+  rg, nacionalidade, estado_civil, endereco, cep, profissao, telefone,
   login_inss, senha_inss,
   tipo_processo, subdivisao_id, status, situacao, ano_referencia,
   numero_processo, valor_beneficio, observacoes,

@@ -9,14 +9,15 @@ import {
   LayoutDashboard, Users, CalendarClock,
   BarChart3, ScrollText, Settings, LogOut, X,
   DollarSign, ChevronDown, ArrowDownCircle, ArrowUpCircle,
-  CalendarRange, FileText, TrendingUp,
+  CalendarRange, FileText, TrendingUp, FileSignature,
 } from "lucide-react";
 
 const NAV_PRINCIPAL = [
   { href: "/home",       icon: LayoutDashboard, label: "Dashboard"             },
   { href: "/clientes",   icon: Users,           label: "Clientes / Processos"  },
-  { href: "/prazos",     icon: CalendarClock,   label: "Prazos & Agenda"       },
-  { href: "/relatorios", icon: BarChart3,       label: "Relatórios"            },
+  { href: "/prazos",     icon: CalendarClock,    label: "Prazos & Agenda"       },
+  { href: "/contratos",  icon: FileSignature,   label: "Contratos"             },
+  { href: "/relatorios", icon: BarChart3,        label: "Relatórios"            },
   { href: "/auditoria",  icon: ScrollText,      label: "Histórico / Auditoria" },
 ];
 

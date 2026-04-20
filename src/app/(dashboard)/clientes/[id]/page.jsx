@@ -333,6 +333,19 @@ export default function ClienteDetalhePage() {
         <div className="glass-card rounded-2xl p-6 grid grid-cols-1 sm:grid-cols-2 gap-5">
           <Campo label="Data de nascimento" value={formatData(cliente.data_nascimento)} />
           <Campo label="Idade" value={cliente.idade ? `${cliente.idade} anos` : "—"} />
+          <Campo label="RG" value={cliente.rg || "—"} />
+          <Campo label="Nacionalidade" value={cliente.nacionalidade || "—"} />
+          <Campo label="Estado civil" value={cliente.estado_civil || "—"} />
+          <Campo label="Profissão" value={cliente.profissao || "—"} />
+          <Campo label="Telefone" value={cliente.telefone || "—"} />
+          <Campo label="CEP" value={cliente.cep || "—"} />
+          {cliente.endereco && (
+            <div className="sm:col-span-2">
+              <p className="text-xs text-ink-500 mb-1">Endereço</p>
+              <p className="text-sm text-ink-200">{cliente.endereco}</p>
+            </div>
+          )}
+          <div className="sm:col-span-2 pt-2 border-t border-white/[0.05]" />
           <Campo label="Tipo de processo" value={cliente.tipo_processo?.charAt(0).toUpperCase() + cliente.tipo_processo?.slice(1)} />
           <Campo label="Subdivisão" value={cliente.subdivisoes?.nome} />
           <Campo label="Número do processo" value={cliente.numero_processo || "—"} />

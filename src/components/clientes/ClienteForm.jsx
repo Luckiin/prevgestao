@@ -15,6 +15,13 @@ export default function ClienteForm({ inicial, onSubmit, loading }) {
     nome:            inicial?.nome || "",
     cpf:             inicial?.cpf || "",
     data_nascimento: inicial?.data_nascimento || "",
+    rg:              inicial?.rg || "",
+    nacionalidade:   inicial?.nacionalidade || "Brasileira",
+    estado_civil:    inicial?.estado_civil || "",
+    endereco:        inicial?.endereco || "",
+    cep:             inicial?.cep || "",
+    profissao:       inicial?.profissao || "",
+    telefone:        inicial?.telefone || "",
     login_inss:      inicial?.login_inss || "",
     senha_inss:      inicial?.senha_inss || "",
     tipo_processo:   inicial?.tipo_processo || "administrativo",
@@ -96,6 +103,67 @@ export default function ClienteForm({ inicial, onSubmit, loading }) {
           onChange={e => set("data_nascimento", e.target.value)}
           error={erros.data_nascimento}
           required
+        />
+      </div>
+
+      {/* Dados pessoais complementares */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <Input
+          label="RG"
+          value={form.rg || ""}
+          onChange={e => set("rg", e.target.value)}
+          placeholder="00.000.000-0"
+        />
+
+        <Input
+          label="Profissão"
+          value={form.profissao || ""}
+          onChange={e => set("profissao", e.target.value)}
+          placeholder="Ex: Agricultor, Pedreiro..."
+        />
+
+        <Input
+          label="Nacionalidade"
+          value={form.nacionalidade || ""}
+          onChange={e => set("nacionalidade", e.target.value)}
+          placeholder="Brasileira"
+        />
+
+        <Select
+          label="Estado Civil"
+          value={form.estado_civil || ""}
+          onChange={e => set("estado_civil", e.target.value)}
+        >
+          <option value="">Selecione...</option>
+          <option value="Solteiro(a)">Solteiro(a)</option>
+          <option value="Casado(a)">Casado(a)</option>
+          <option value="Divorciado(a)">Divorciado(a)</option>
+          <option value="Viúvo(a)">Viúvo(a)</option>
+          <option value="União Estável">União Estável</option>
+        </Select>
+
+        <Input
+          label="Telefone"
+          value={form.telefone || ""}
+          onChange={e => set("telefone", e.target.value)}
+          placeholder="(00) 00000-0000"
+        />
+
+        <Input
+          label="CEP"
+          value={form.cep || ""}
+          onChange={e => set("cep", e.target.value)}
+          placeholder="00000-000"
+          maxLength={9}
+        />
+
+        <Input
+          label="Endereço"
+          value={form.endereco || ""}
+          onChange={e => set("endereco", e.target.value)}
+          placeholder="Rua, nº, Bairro, Cidade/UF"
+          className="sm:col-span-2"
+          containerClassName="sm:col-span-2"
         />
       </div>
 
