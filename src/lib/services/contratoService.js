@@ -180,6 +180,7 @@ export async function gerarDocx(supabase, clienteId, tipoAcao, tipoDoc) {
     // Contrato
     TIPO_ACAO:         tipoAcaoLabel,
     DATA_HOJE:         hoje.toLocaleDateString("pt-BR"),
+    DATA:              hoje.toLocaleDateString("pt-BR", { day: "numeric", month: "long", year: "numeric" }),
   };
 
   // 5. Preenche o template com docxtemplater

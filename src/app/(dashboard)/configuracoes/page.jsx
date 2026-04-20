@@ -347,8 +347,9 @@ export default function ConfiguracoesPage() {
               {
                 grupo: "Contrato",
                 itens: [
-                  ["{TIPO_ACAO}",  "Tipo de ação selecionado ao gerar", "Aposentadoria por Idade"],
-                  ["{DATA_HOJE}",  "Data de geração do documento",       "20/04/2026"],
+                  ["{TIPO_ACAO}",  "Tipo de ação selecionado ao gerar",    "Aposentadoria por Idade"],
+                  ["{DATA_HOJE}",  "Data de geração (formato curto)",     "20/04/2026"],
+                  ["{DATA}",       "Data de geração (formato completo)",  "20 de abril de 2026"],
                 ],
               },
             ].map(({ grupo, itens }) => (
