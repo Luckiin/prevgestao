@@ -9,7 +9,7 @@ import {
   LayoutDashboard, Users, CalendarClock,
   BarChart3, ScrollText, Settings, LogOut, X,
   DollarSign, ChevronDown, ArrowDownCircle, ArrowUpCircle,
-  CalendarRange, FileText, TrendingUp, FileSignature,
+  CalendarRange, FileText, TrendingUp, FileSignature, Scale,
 } from "lucide-react";
 
 const NAV_PRINCIPAL = [
@@ -17,6 +17,7 @@ const NAV_PRINCIPAL = [
   { href: "/clientes",   icon: Users,           label: "Clientes / Processos"  },
   { href: "/prazos",     icon: CalendarClock,    label: "Prazos & Agenda"       },
   { href: "/contratos",  icon: FileSignature,   label: "Contratos"             },
+  { href: "/peticoes",   icon: Scale,           label: "Petições"              },
   { href: "/relatorios", icon: BarChart3,        label: "Relatórios"            },
   { href: "/auditoria",  icon: ScrollText,      label: "Histórico / Auditoria" },
 ];
