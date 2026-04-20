@@ -297,136 +297,428 @@ export default function ConfiguracoesPage() {
   const adm = subdivisoes.filter(s => s.tipo === "administrativo");
   const jud = subdivisoes.filter(s => s.tipo === "judicial");
 
-  return (
-    <div className="p-6 max-w-4xl mx-auto space-y-6">
-      <div>
-        <h1 className="text-xl font-bold text-ink-100 flex items-center gap-2">
-          <Settings size={20} className="text-ink-400" />
-          Configurações
-        </h1>
-        <p className="text-sm text-ink-500 mt-0.5">Gerenciar subdivisões, usuários e sistema</p>
-      </div>
+  // Renderiza o módulo ativo
+  const renderConteudo = () => {
+    switch (moduloAtivo) {
+      case "subdivisoes":
+        return (
+          <div className="glass-card rounded-2xl overflow-hidden">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.05]">
+              <div>
+                <h2 className="text-sm font-semibold text-ink-200">Subdivisões Previdenciárias</h2>
+                <p className="text-xs text-ink-500 mt-0.5">Lista dinâmica e ilimitada</p>
+              </div>
+              <Button size="sm" onClick={() => { setEditando(null); setForm({ nome: "", tipo: "administrativo" }); setModal(true); }}>
+                <Plus size={13} /> Nova
+              </Button>
+            </div>
 
-      {/* Subdivisões */}
-      <div className="glass-card rounded-2xl overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.05]">
-          <div>
-            <h2 className="text-sm font-semibold text-ink-200">Subdivisões Previdenciárias</h2>
-            <p className="text-xs text-ink-500 mt-0.5">Lista dinâmica e ilimitada</p>
-          </div>
-          <Button size="sm" onClick={() => { setEditando(null); setForm({ nome: "", tipo: "administrativo" }); setModal(true); }}>
-            <Plus size={13} /> Nova
-          </Button>
-        </div>
-
-        {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <div className="w-6 h-6 border-2 border-gold-500 border-t-transparent rounded-full animate-spin" />
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-white/[0.05]">
-            {[{ label: "Administrativo", items: adm }, { label: "Judicial", items: jud }].map(col => (
-              <div key={col.label}>
-                <p className="px-5 py-3 text-xs font-medium text-ink-500 border-b border-white/[0.05]">
-                  {col.label} ({col.items.length})
-                </p>
-                <div className="divide-y divide-white/[0.03]">
-                  {col.items.map(s => (
-                    <div key={s.id} className="flex items-center gap-3 px-5 py-3 table-row-hover">
-                      <div className="flex-1">
-                        <p className={`text-sm ${s.ativo ? "text-ink-200" : "text-ink-600 line-through"}`}>
-                          {s.nome}
-                        </p>
-                      </div>
-                      <Badge variant={s.ativo ? "ativo" : "inativo"}>{s.ativo ? "Ativo" : "Inativo"}</Badge>
-                      <button onClick={() => abrirEditar(s)} className="text-ink-600 hover:text-gold-500 transition-colors">
-                        <Pencil size={13} />
-                      </button>
-                      <button onClick={() => toggleAtivo(s)} className="text-ink-600 hover:text-warn-500 transition-colors">
-                        <Power size={13} />
-                      </button>
+            {loading ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="w-6 h-6 border-2 border-gold-500 border-t-transparent rounded-full animate-spin" />
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-white/[0.05]">
+                {[{ label: "Administrativo", items: adm }, { label: "Judicial", items: jud }].map(col => (
+                  <div key={col.label}>
+                    <p className="px-5 py-3 text-xs font-medium text-ink-500 border-b border-white/[0.05]">
+                      {col.label} ({col.items.length})
+                    </p>
+                    <div className="divide-y divide-white/[0.03]">
+                      {col.items.map(s => (
+                        <div key={s.id} className="flex items-center gap-3 px-5 py-3 table-row-hover">
+                          <div className="flex-1">
+                            <p className={`text-sm ${s.ativo ? "text-ink-200" : "text-ink-600 line-through"}`}>
+                              {s.nome}
+                            </p>
+                          </div>
+                          <Badge variant={s.ativo ? "ativo" : "inativo"}>{s.ativo ? "Ativo" : "Inativo"}</Badge>
+                          <button onClick={() => abrirEditar(s)} className="text-ink-600 hover:text-gold-500 transition-colors">
+                            <Pencil size={13} />
+                          </button>
+                          <button onClick={() => toggleAtivo(s)} className="text-ink-600 hover:text-warn-500 transition-colors">
+                            <Power size={13} />
+                          </button>
+                        </div>
+                      ))}
+                      {col.items.length === 0 && (
+                        <p className="px-5 py-4 text-xs text-ink-600">Nenhuma subdivisão cadastrada.</p>
+                      )}
                     </div>
-                  ))}
-                  {col.items.length === 0 && (
-                    <p className="px-5 py-4 text-xs text-ink-600">Nenhuma subdivisão cadastrada.</p>
-                  )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+
+      case "tipos":
+        return (
+          <div className="glass-card rounded-2xl overflow-hidden">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.05]">
+              <div>
+                <h2 className="text-sm font-semibold text-ink-200">Tipos de Ação</h2>
+                <p className="text-xs text-ink-500 mt-0.5">Categorias de contrato disponíveis</p>
+              </div>
+              <Button size="sm" onClick={() => { setEditandoTipo(null); setFormTipo({ nome: "" }); setModalTipo(true); }}>
+                <Plus size={13} /> Novo
+              </Button>
+            </div>
+
+            <div className="divide-y divide-white/[0.03]">
+              {tiposAcao.length === 0 ? (
+                <p className="px-5 py-4 text-xs text-ink-600">Nenhum tipo cadastrado.</p>
+              ) : tiposAcao.map(t => (
+                <div key={t.id} className="flex items-center gap-3 px-5 py-3 table-row-hover">
+                  <div className="flex-1 min-w-0">
+                    <p className={`text-sm truncate ${t.ativo ? "text-ink-200" : "text-ink-600 line-through"}`}>
+                      {t.nome}
+                    </p>
+                    <p className="text-[10px] font-mono text-ink-600 mt-0.5">{t.slug}</p>
+                  </div>
+                  <Badge variant={t.ativo ? "ativo" : "inativo"}>{t.ativo ? "Ativo" : "Inativo"}</Badge>
+                  <button onClick={() => abrirEditarTipo(t)} className="text-ink-600 hover:text-gold-500 transition-colors">
+                    <Pencil size={13} />
+                  </button>
+                  <button onClick={() => handleToggleAtivoTipo(t)} className="text-ink-600 hover:text-warn-500 transition-colors" title={t.ativo ? "Desativar" : "Ativar"}>
+                    <Power size={13} />
+                  </button>
+                  <button
+                    onClick={() => handleExcluirTipo(t.id)}
+                    disabled={excluindoTipoId === t.id}
+                    className="text-ink-600 hover:text-red-400 transition-colors disabled:opacity-50"
+                    title="Excluir"
+                  >
+                    {excluindoTipoId === t.id
+                      ? <div className="w-3 h-3 border border-red-400 border-t-transparent rounded-full animate-spin" />
+                      : <Trash2 size={13} />
+                    }
+                  </button>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        )}
-      </div>
+        );
 
-      {/* Tipos de Ação */}
-      <div className="glass-card rounded-2xl overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.05]">
-          <div>
-            <h2 className="text-sm font-semibold text-ink-200">Tipos de Ação</h2>
-            <p className="text-xs text-ink-500 mt-0.5">Categorias de contrato disponíveis</p>
-          </div>
-          <Button size="sm" onClick={() => { setEditandoTipo(null); setFormTipo({ nome: "" }); setModalTipo(true); }}>
-            <Plus size={13} /> Novo
-          </Button>
-        </div>
-
-        <div className="divide-y divide-white/[0.03]">
-          {tiposAcao.length === 0 ? (
-            <p className="px-5 py-4 text-xs text-ink-600">Nenhum tipo cadastrado.</p>
-          ) : tiposAcao.map(t => (
-            <div key={t.id} className="flex items-center gap-3 px-5 py-3 table-row-hover">
-              <div className="flex-1 min-w-0">
-                <p className={`text-sm truncate ${t.ativo ? "text-ink-200" : "text-ink-600 line-through"}`}>
-                  {t.nome}
-                </p>
-                <p className="text-[10px] font-mono text-ink-600 mt-0.5">{t.slug}</p>
+      case "modelos":
+        return (
+          <div className="glass-card rounded-2xl overflow-hidden">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.05]">
+              <div>
+                <h2 className="text-sm font-semibold text-ink-200">Modelos de Contrato</h2>
+                <p className="text-xs text-ink-500 mt-0.5">Um modelo .docx por tipo de ação e documento</p>
               </div>
-              <Badge variant={t.ativo ? "ativo" : "inativo"}>{t.ativo ? "Ativo" : "Inativo"}</Badge>
-              <button onClick={() => abrirEditarTipo(t)} className="text-ink-600 hover:text-gold-500 transition-colors">
-                <Pencil size={13} />
-              </button>
-              <button onClick={() => handleToggleAtivoTipo(t)} className="text-ink-600 hover:text-warn-500 transition-colors" title={t.ativo ? "Desativar" : "Ativar"}>
-                <Power size={13} />
-              </button>
               <button
-                onClick={() => handleExcluirTipo(t.id)}
-                disabled={excluindoTipoId === t.id}
-                className="text-ink-600 hover:text-red-400 transition-colors disabled:opacity-50"
-                title="Excluir"
+                onClick={() => setInfoAberto(v => !v)}
+                className="text-ink-600 hover:text-gold-500 transition-colors"
+                title="Ver variáveis disponíveis"
               >
-                {excluindoTipoId === t.id
-                  ? <div className="w-3 h-3 border border-red-400 border-t-transparent rounded-full animate-spin" />
-                  : <Trash2 size={13} />
-                }
+                <Info size={15} />
               </button>
             </div>
-          ))}
-        </div>
-      </div>
 
-      {/* Modal de tipo de ação */}
-      <Modal
-        open={modalTipo}
-        onClose={() => { setModalTipo(false); setEditandoTipo(null); }}
-        title={editandoTipo ? "Editar tipo de ação" : "Novo tipo de ação"}
-        size="sm"
-      >
-        <form onSubmit={handleSalvarTipo} className="space-y-4">
-          <Input
-            label="Nome"
-            value={formTipo.nome}
-            onChange={e => setFormTipo(f => ({ ...f, nome: e.target.value }))}
-            required
-            placeholder="Ex: Aposentadoria por Idade"
-            autoFocus
-          />
-          <div className="flex justify-end gap-3 pt-1">
-            <Button variant="secondary" type="button" onClick={() => setModalTipo(false)}>Cancelar</Button>
-            <Button type="submit" loading={savingTipo}>Salvar</Button>
+            {/* Painel de variáveis */}
+            {infoAberto && (
+              <div className="border-b border-white/[0.05] text-xs">
+                <div className="px-5 py-3 bg-dark-300/70">
+                  <p className="text-ink-300 font-semibold mb-0.5">Como usar</p>
+                  <p className="text-ink-500">
+                    No seu arquivo Word, escreva a variável entre chaves simples onde quiser o dado.
+                    Ex: <span className="font-mono text-gold-400 bg-gold-500/10 px-1 rounded">{"{NOME}"}</span> será substituído pelo nome completo do cliente ao gerar.
+                  </p>
+                </div>
+
+                {[
+                  {
+                    grupo: "Dados Pessoais",
+                    itens: [
+                      ["{NOME}",           "Nome completo",               "João da Silva"],
+                      ["{CPF}",            "CPF formatado",               "000.000.000-00"],
+                      ["{RG}",             "RG",                          "00.000.000-0"],
+                      ["{DATA_NASCIMENTO}","Data de nascimento",           "01/01/1970"],
+                      ["{IDADE}",          "Idade calculada",             "54 anos"],
+                      ["{NACIONALIDADE}",  "Nacionalidade",               "Brasileira"],
+                      ["{ESTADO_CIVIL}",   "Estado civil",                "Casado(a)"],
+                      ["{PROFISSAO}",      "Profissão",                   "Agricultor"],
+                      ["{ENDERECO}",       "Endereço completo",           "Rua X, nº 10, Bairro, Cidade/UF"],
+                      ["{CEP}",            "CEP",                         "00000-000"],
+                      ["{TELEFONE}",       "Telefone",                    "(71) 99999-9999"],
+                    ],
+                  },
+                  {
+                    grupo: "Credenciais INSS",
+                    itens: [
+                      ["{LOGIN_INSS}",  "Login do Meu INSS",  "000.000.000-00"],
+                      ["{SENHA_INSS}",  "Senha do Meu INSS",  "••••••••"],
+                    ],
+                  },
+                  {
+                    grupo: "Processo",
+                    itens: [
+                      ["{TIPO_PROCESSO}",  "Tipo (Administrativo / Judicial)", "Administrativo"],
+                      ["{SUBDIVISAO}",     "Subdivisão previdenciária",         "Aposentadoria por Idade"],
+                      ["{NUMERO_PROCESSO}","Número do processo",                "1234567-89.2024.0.00.0000"],
+                      ["{STATUS}",         "Status do processo",               "Ativo"],
+                      ["{SITUACAO}",       "Situação",                         "Pendente"],
+                      ["{VALOR_BENEFICIO}","Valor estimado do benefício",       "R$ 1.412,00"],
+                      ["{DESCRICAO}",      "Observações / descrição",           "Texto livre..."],
+                    ],
+                  },
+                  {
+                    grupo: "Contrato",
+                    itens: [
+                      ["{TIPO_ACAO}",  "Tipo de ação selecionado ao gerar",    "Aposentadoria por Idade"],
+                      ["{DATA_HOJE}",  "Data de geração (formato curto)",     "20/04/2026"],
+                      ["{DATA}",       "Data de geração (formato completo)",  "20 de abril de 2026"],
+                    ],
+                  },
+                ].map(({ grupo, itens }) => (
+                  <div key={grupo} className="border-t border-white/[0.04]">
+                    <p className="px-5 py-2 text-[10px] font-semibold uppercase tracking-widest text-ink-600 bg-dark-300/40">
+                      {grupo}
+                    </p>
+                    <div className="divide-y divide-white/[0.03]">
+                      {itens.map(([variavel, descricao, exemplo]) => (
+                        <div key={variavel} className="flex items-center gap-3 px-5 py-2 hover:bg-white/[0.02] transition-colors">
+                          <code className="shrink-0 text-gold-400 bg-gold-500/10 px-2 py-0.5 rounded text-[11px] font-mono">
+                            {variavel}
+                          </code>
+                          <span className="flex-1 text-ink-400">{descricao}</span>
+                          <span className="text-ink-600 hidden sm:block font-mono">{exemplo}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Tabs de tipo de ação (dinâmico) */}
+            <div className="flex overflow-x-auto border-b border-white/[0.05] px-5 gap-1 pt-3">
+              {tiposAcao.filter(t => t.ativo).length === 0 ? (
+                <p className="text-xs text-ink-600 pb-3">Nenhum tipo de ação ativo. Cadastre em "Tipos de Ação".</p>
+              ) : tiposAcao.filter(t => t.ativo).map(ta => (
+                <button
+                  key={ta.slug}
+                  onClick={() => setTipoAcaoAtivo(ta.slug)}
+                  className={`shrink-0 px-3 py-2 text-xs font-medium rounded-t-lg transition-colors ${
+                    tipoAcaoAtivo === ta.slug
+                      ? "text-gold-400 border-b-2 border-gold-500 bg-gold-500/5"
+                      : "text-ink-600 hover:text-ink-300"
+                  }`}
+                >
+                  {ta.nome}
+                </button>
+              ))}
+            </div>
+
+            {/* Grid de documentos para o tipo selecionado */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-5">
+              {TIPOS_DOC.map(td => {
+                const modelo      = modelos.find(m => m.tipo_acao === tipoAcaoAtivo && m.tipo_doc === td.value);
+                const uploading   = uploadingSlot === td.value;
+                const excluindo   = excluindoId === modelo?.id;
+                const baixando    = acessandoId === `${modelo?.id}-download`;
+                const visualizando= acessandoId === `${modelo?.id}-preview`;
+                const isDragOver  = dragOver === td.value;
+
+                return (
+                  <div
+                    key={td.value}
+                    onDragOver={e => handleDragOver(e, td.value)}
+                    onDragLeave={handleDragLeave}
+                    onDrop={e => handleDrop(e, td.value)}
+                    className={`relative rounded-xl border p-4 transition-all ${
+                      uploading
+                        ? "border-gold-500/40 bg-gold-500/5"
+                        : isDragOver
+                        ? "border-gold-500/60 bg-gold-500/10 scale-[1.01]"
+                        : modelo
+                        ? "border-gold-500/20 bg-gold-500/5"
+                        : "border-dark-50 bg-dark-300/50"
+                    }`}
+                  >
+                    {/* Overlay de drag */}
+                    {isDragOver && (
+                      <div className="absolute inset-0 rounded-xl flex items-center justify-center pointer-events-none">
+                        <div className="flex flex-col items-center gap-1">
+                          <Upload size={18} className="text-gold-400" />
+                          <p className="text-xs font-medium text-gold-400">Solte para enviar</p>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className={`flex items-start gap-3 transition-opacity ${isDragOver ? "opacity-30" : ""}`}>
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
+                        modelo ? "bg-gold-500/15" : "bg-dark-200"
+                      }`}>
+                        {uploading
+                          ? <div className="w-4 h-4 border border-gold-500 border-t-transparent rounded-full animate-spin" />
+                          : modelo
+                          ? <CheckCircle2 size={15} className="text-gold-500" />
+                          : <FileText size={15} className="text-ink-600" />
+                        }
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-ink-200">{td.label}</p>
+                        {uploading ? (
+                          <p className="text-xs text-gold-500 mt-0.5">Enviando...</p>
+                        ) : modelo ? (
+                          <p className="text-xs text-ink-500 mt-0.5 truncate" title={modelo.nome}>{modelo.nome}</p>
+                        ) : (
+                          <p className="text-xs text-ink-600 mt-0.5">Arraste ou clique para enviar</p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className={`flex flex-col gap-2 mt-3 transition-opacity ${isDragOver ? "opacity-30" : ""}`}>
+                      {/* Linha 1: upload + excluir */}
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => iniciarUpload(td.value)}
+                          disabled={uploading}
+                          className="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg
+                                     border border-dark-50 hover:border-gold-500/30 text-xs text-ink-500 hover:text-ink-200
+                                     transition-all disabled:opacity-50"
+                        >
+                          <Upload size={11} /> {modelo ? "Substituir" : "Enviar modelo"}
+                        </button>
+
+                        {modelo && (
+                          <button
+                            onClick={() => handleExcluirModelo(modelo.id)}
+                            disabled={excluindo}
+                            className="flex items-center gap-1.5 py-1.5 px-2 rounded-lg border border-dark-50
+                                       hover:border-red-500/30 hover:text-red-400 text-xs text-ink-600
+                                       transition-all disabled:opacity-50"
+                            title="Excluir modelo"
+                          >
+                            {excluindo
+                              ? <div className="w-3 h-3 border border-red-400 border-t-transparent rounded-full animate-spin" />
+                              : <Trash2 size={11} />
+                            }
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Linha 2: visualizar + baixar (só se tiver modelo) */}
+                      {modelo && (
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleAcessarModelo(modelo.id, "preview")}
+                            disabled={!!acessandoId}
+                            className="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg
+                                       border border-dark-50 hover:border-gold-500/30 text-xs text-ink-500 hover:text-ink-200
+                                       transition-all disabled:opacity-50"
+                            title="Visualizar no navegador"
+                          >
+                            {visualizando
+                              ? <div className="w-3 h-3 border border-gold-500 border-t-transparent rounded-full animate-spin" />
+                              : <Eye size={11} />
+                            }
+                            Visualizar
+                          </button>
+
+                          <button
+                            onClick={() => handleAcessarModelo(modelo.id, "download")}
+                            disabled={!!acessandoId}
+                            className="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg
+                                       border border-dark-50 hover:border-gold-500/30 text-xs text-ink-500 hover:text-ink-200
+                                       transition-all disabled:opacity-50"
+                            title="Baixar arquivo"
+                          >
+                            {baixando
+                              ? <div className="w-3 h-3 border border-gold-500 border-t-transparent rounded-full animate-spin" />
+                              : <Download size={11} />
+                            }
+                            Baixar
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        </form>
-      </Modal>
+        );
 
-      {/* Input oculto para upload de modelos */}
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="flex flex-col lg:flex-row gap-6 p-6 min-h-screen">
+      {/* Sidebar */}
+      <aside className="w-full lg:w-[220px] flex-shrink-0">
+        <nav className="glass-card rounded-2xl overflow-hidden sticky top-6 lg:top-24">
+          {/* PROCESSOS */}
+          <div>
+            <p className="px-4 py-2.5 text-[10px] font-semibold uppercase tracking-widest text-ink-600 border-b border-white/[0.05]">
+              Processos
+            </p>
+            <div className="divide-y divide-white/[0.03]">
+              <button
+                onClick={() => setModuloAtivo("subdivisoes")}
+                className={`w-full text-left px-4 py-3 text-sm transition-all ${
+                  moduloAtivo === "subdivisoes"
+                    ? "text-gold-400 bg-gold-500/10 border-l-2 border-gold-500 font-medium"
+                    : "text-ink-300 hover:text-ink-100 hover:bg-white/[0.02]"
+                }`}
+              >
+                Subdivisões
+              </button>
+            </div>
+          </div>
+
+          {/* CONTRATOS */}
+          <div className="border-t border-white/[0.05]">
+            <p className="px-4 py-2.5 text-[10px] font-semibold uppercase tracking-widest text-ink-600 border-b border-white/[0.05]">
+              Contratos
+            </p>
+            <div className="divide-y divide-white/[0.03]">
+              <button
+                onClick={() => setModuloAtivo("tipos")}
+                className={`w-full text-left px-4 py-3 text-sm transition-all ${
+                  moduloAtivo === "tipos"
+                    ? "text-gold-400 bg-gold-500/10 border-l-2 border-gold-500 font-medium"
+                    : "text-ink-300 hover:text-ink-100 hover:bg-white/[0.02]"
+                }`}
+              >
+                Tipos de Ação
+              </button>
+              <button
+                onClick={() => setModuloAtivo("modelos")}
+                className={`w-full text-left px-4 py-3 text-sm transition-all ${
+                  moduloAtivo === "modelos"
+                    ? "text-gold-400 bg-gold-500/10 border-l-2 border-gold-500 font-medium"
+                    : "text-ink-300 hover:text-ink-100 hover:bg-white/[0.02]"
+                }`}
+              >
+                Modelos
+              </button>
+            </div>
+          </div>
+        </nav>
+      </aside>
+
+      {/* Main content */}
+      <main className="flex-1 min-w-0">
+        {/* Page header */}
+        <div className="mb-6">
+          <h1 className="text-xl font-bold text-ink-100 flex items-center gap-2">
+            <Settings size={20} className="text-ink-400" />
+            Configurações
+          </h1>
+          <p className="text-sm text-ink-500 mt-0.5">Gerenciar subdivisões, usuários e sistema</p>
+        </div>
+
+        {/* Content area */}
+        {renderConteudo()}
+      </main>
+
+      {/* Hidden file input for model uploads */}
       <input
         ref={fileInputRef}
         type="file"
@@ -434,247 +726,6 @@ export default function ConfiguracoesPage() {
         className="hidden"
         onChange={handleFileChange}
       />
-
-      {/* Modelos de Contrato */}
-      <div className="glass-card rounded-2xl overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.05]">
-          <div>
-            <h2 className="text-sm font-semibold text-ink-200">Modelos de Contrato</h2>
-            <p className="text-xs text-ink-500 mt-0.5">Um modelo .docx por tipo de ação e documento</p>
-          </div>
-          <button
-            onClick={() => setInfoAberto(v => !v)}
-            className="text-ink-600 hover:text-gold-500 transition-colors"
-            title="Ver variáveis disponíveis"
-          >
-            <Info size={15} />
-          </button>
-        </div>
-
-        {/* Painel de variáveis */}
-        {infoAberto && (
-          <div className="border-b border-white/[0.05] text-xs">
-            <div className="px-5 py-3 bg-dark-300/70">
-              <p className="text-ink-300 font-semibold mb-0.5">Como usar</p>
-              <p className="text-ink-500">
-                No seu arquivo Word, escreva a variável entre chaves simples onde quiser o dado.
-                Ex: <span className="font-mono text-gold-400 bg-gold-500/10 px-1 rounded">{"{NOME}"}</span> será substituído pelo nome completo do cliente ao gerar.
-              </p>
-            </div>
-
-            {[
-              {
-                grupo: "Dados Pessoais",
-                itens: [
-                  ["{NOME}",           "Nome completo",               "João da Silva"],
-                  ["{CPF}",            "CPF formatado",               "000.000.000-00"],
-                  ["{RG}",             "RG",                          "00.000.000-0"],
-                  ["{DATA_NASCIMENTO}","Data de nascimento",           "01/01/1970"],
-                  ["{IDADE}",          "Idade calculada",             "54 anos"],
-                  ["{NACIONALIDADE}",  "Nacionalidade",               "Brasileira"],
-                  ["{ESTADO_CIVIL}",   "Estado civil",                "Casado(a)"],
-                  ["{PROFISSAO}",      "Profissão",                   "Agricultor"],
-                  ["{ENDERECO}",       "Endereço completo",           "Rua X, nº 10, Bairro, Cidade/UF"],
-                  ["{CEP}",            "CEP",                         "00000-000"],
-                  ["{TELEFONE}",       "Telefone",                    "(71) 99999-9999"],
-                ],
-              },
-              {
-                grupo: "Credenciais INSS",
-                itens: [
-                  ["{LOGIN_INSS}",  "Login do Meu INSS",  "000.000.000-00"],
-                  ["{SENHA_INSS}",  "Senha do Meu INSS",  "••••••••"],
-                ],
-              },
-              {
-                grupo: "Processo",
-                itens: [
-                  ["{TIPO_PROCESSO}",  "Tipo (Administrativo / Judicial)", "Administrativo"],
-                  ["{SUBDIVISAO}",     "Subdivisão previdenciária",         "Aposentadoria por Idade"],
-                  ["{NUMERO_PROCESSO}","Número do processo",                "1234567-89.2024.0.00.0000"],
-                  ["{STATUS}",         "Status do processo",               "Ativo"],
-                  ["{SITUACAO}",       "Situação",                         "Pendente"],
-                  ["{VALOR_BENEFICIO}","Valor estimado do benefício",       "R$ 1.412,00"],
-                  ["{DESCRICAO}",      "Observações / descrição",           "Texto livre..."],
-                ],
-              },
-              {
-                grupo: "Contrato",
-                itens: [
-                  ["{TIPO_ACAO}",  "Tipo de ação selecionado ao gerar",    "Aposentadoria por Idade"],
-                  ["{DATA_HOJE}",  "Data de geração (formato curto)",     "20/04/2026"],
-                  ["{DATA}",       "Data de geração (formato completo)",  "20 de abril de 2026"],
-                ],
-              },
-            ].map(({ grupo, itens }) => (
-              <div key={grupo} className="border-t border-white/[0.04]">
-                <p className="px-5 py-2 text-[10px] font-semibold uppercase tracking-widest text-ink-600 bg-dark-300/40">
-                  {grupo}
-                </p>
-                <div className="divide-y divide-white/[0.03]">
-                  {itens.map(([variavel, descricao, exemplo]) => (
-                    <div key={variavel} className="flex items-center gap-3 px-5 py-2 hover:bg-white/[0.02] transition-colors">
-                      <code className="shrink-0 text-gold-400 bg-gold-500/10 px-2 py-0.5 rounded text-[11px] font-mono">
-                        {variavel}
-                      </code>
-                      <span className="flex-1 text-ink-400">{descricao}</span>
-                      <span className="text-ink-600 hidden sm:block font-mono">{exemplo}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Tabs de tipo de ação (dinâmico) */}
-        <div className="flex overflow-x-auto border-b border-white/[0.05] px-5 gap-1 pt-3">
-          {tiposAcao.filter(t => t.ativo).length === 0 ? (
-            <p className="text-xs text-ink-600 pb-3">Nenhum tipo de ação ativo. Cadastre em "Tipos de Ação" acima.</p>
-          ) : tiposAcao.filter(t => t.ativo).map(ta => (
-            <button
-              key={ta.slug}
-              onClick={() => setTipoAcaoAtivo(ta.slug)}
-              className={`shrink-0 px-3 py-2 text-xs font-medium rounded-t-lg transition-colors ${
-                tipoAcaoAtivo === ta.slug
-                  ? "text-gold-400 border-b-2 border-gold-500 bg-gold-500/5"
-                  : "text-ink-600 hover:text-ink-300"
-              }`}
-            >
-              {ta.nome}
-            </button>
-          ))}
-        </div>
-
-        {/* Grid de documentos para o tipo selecionado */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-5">
-          {TIPOS_DOC.map(td => {
-            const modelo      = modelos.find(m => m.tipo_acao === tipoAcaoAtivo && m.tipo_doc === td.value);
-            const uploading   = uploadingSlot === td.value;
-            const excluindo   = excluindoId === modelo?.id;
-            const baixando    = acessandoId === `${modelo?.id}-download`;
-            const visualizando= acessandoId === `${modelo?.id}-preview`;
-            const isDragOver  = dragOver === td.value;
-
-            return (
-              <div
-                key={td.value}
-                onDragOver={e => handleDragOver(e, td.value)}
-                onDragLeave={handleDragLeave}
-                onDrop={e => handleDrop(e, td.value)}
-                className={`relative rounded-xl border p-4 transition-all ${
-                  uploading
-                    ? "border-gold-500/40 bg-gold-500/5"
-                    : isDragOver
-                    ? "border-gold-500/60 bg-gold-500/10 scale-[1.01]"
-                    : modelo
-                    ? "border-gold-500/20 bg-gold-500/5"
-                    : "border-dark-50 bg-dark-300/50"
-                }`}
-              >
-                {/* Overlay de drag */}
-                {isDragOver && (
-                  <div className="absolute inset-0 rounded-xl flex items-center justify-center pointer-events-none">
-                    <div className="flex flex-col items-center gap-1">
-                      <Upload size={18} className="text-gold-400" />
-                      <p className="text-xs font-medium text-gold-400">Solte para enviar</p>
-                    </div>
-                  </div>
-                )}
-
-                <div className={`flex items-start gap-3 transition-opacity ${isDragOver ? "opacity-30" : ""}`}>
-                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
-                    modelo ? "bg-gold-500/15" : "bg-dark-200"
-                  }`}>
-                    {uploading
-                      ? <div className="w-4 h-4 border border-gold-500 border-t-transparent rounded-full animate-spin" />
-                      : modelo
-                      ? <CheckCircle2 size={15} className="text-gold-500" />
-                      : <FileText size={15} className="text-ink-600" />
-                    }
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-ink-200">{td.label}</p>
-                    {uploading ? (
-                      <p className="text-xs text-gold-500 mt-0.5">Enviando...</p>
-                    ) : modelo ? (
-                      <p className="text-xs text-ink-500 mt-0.5 truncate" title={modelo.nome}>{modelo.nome}</p>
-                    ) : (
-                      <p className="text-xs text-ink-600 mt-0.5">Arraste ou clique para enviar</p>
-                    )}
-                  </div>
-                </div>
-
-                <div className={`flex flex-col gap-2 mt-3 transition-opacity ${isDragOver ? "opacity-30" : ""}`}>
-                  {/* Linha 1: upload + excluir */}
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => iniciarUpload(td.value)}
-                      disabled={uploading}
-                      className="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg
-                                 border border-dark-50 hover:border-gold-500/30 text-xs text-ink-500 hover:text-ink-200
-                                 transition-all disabled:opacity-50"
-                    >
-                      <Upload size={11} /> {modelo ? "Substituir" : "Enviar modelo"}
-                    </button>
-
-                    {modelo && (
-                      <button
-                        onClick={() => handleExcluirModelo(modelo.id)}
-                        disabled={excluindo}
-                        className="flex items-center gap-1.5 py-1.5 px-2 rounded-lg border border-dark-50
-                                   hover:border-red-500/30 hover:text-red-400 text-xs text-ink-600
-                                   transition-all disabled:opacity-50"
-                        title="Excluir modelo"
-                      >
-                        {excluindo
-                          ? <div className="w-3 h-3 border border-red-400 border-t-transparent rounded-full animate-spin" />
-                          : <Trash2 size={11} />
-                        }
-                      </button>
-                    )}
-                  </div>
-
-                  {/* Linha 2: visualizar + baixar (só se tiver modelo) */}
-                  {modelo && (
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => handleAcessarModelo(modelo.id, "preview")}
-                        disabled={!!acessandoId}
-                        className="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg
-                                   border border-dark-50 hover:border-gold-500/30 text-xs text-ink-500 hover:text-ink-200
-                                   transition-all disabled:opacity-50"
-                        title="Visualizar no navegador"
-                      >
-                        {visualizando
-                          ? <div className="w-3 h-3 border border-gold-500 border-t-transparent rounded-full animate-spin" />
-                          : <Eye size={11} />
-                        }
-                        Visualizar
-                      </button>
-
-                      <button
-                        onClick={() => handleAcessarModelo(modelo.id, "download")}
-                        disabled={!!acessandoId}
-                        className="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg
-                                   border border-dark-50 hover:border-gold-500/30 text-xs text-ink-500 hover:text-ink-200
-                                   transition-all disabled:opacity-50"
-                        title="Baixar arquivo"
-                      >
-                        {baixando
-                          ? <div className="w-3 h-3 border border-gold-500 border-t-transparent rounded-full animate-spin" />
-                          : <Download size={11} />
-                        }
-                        Baixar
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
 
       {/* Modal de subdivisão */}
       <Modal
@@ -702,6 +753,29 @@ export default function ConfiguracoesPage() {
           <div className="flex justify-end gap-3 pt-1">
             <Button variant="secondary" type="button" onClick={() => setModal(false)}>Cancelar</Button>
             <Button type="submit" loading={saving}>Salvar</Button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Modal de tipo de ação */}
+      <Modal
+        open={modalTipo}
+        onClose={() => { setModalTipo(false); setEditandoTipo(null); }}
+        title={editandoTipo ? "Editar tipo de ação" : "Novo tipo de ação"}
+        size="sm"
+      >
+        <form onSubmit={handleSalvarTipo} className="space-y-4">
+          <Input
+            label="Nome"
+            value={formTipo.nome}
+            onChange={e => setFormTipo(f => ({ ...f, nome: e.target.value }))}
+            required
+            placeholder="Ex: Aposentadoria por Idade"
+            autoFocus
+          />
+          <div className="flex justify-end gap-3 pt-1">
+            <Button variant="secondary" type="button" onClick={() => setModalTipo(false)}>Cancelar</Button>
+            <Button type="submit" loading={savingTipo}>Salvar</Button>
           </div>
         </form>
       </Modal>

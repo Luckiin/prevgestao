@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Badge from "@/components/ui/Badge";
 import { formatCPF, formatData, formatMoeda, corStatus } from "@/lib/utils";
-import { Eye, Pencil, Trash2, CalendarClock } from "lucide-react";
+import { Eye, Pencil, Trash2, CalendarClock, ChevronUp, ChevronDown, ChevronsUpDown } from "lucide-react";
 
 import { motion } from "framer-motion";
 
@@ -28,7 +28,25 @@ const statusVariant = {
   "Concluído": "concluido",
 };
 
-export default function ClienteTable({ clientes, onEdit, onDelete, loading }) {
+function SortIcon({ col, sortCol, sortDir }) {
+  if (sortCol !== col) return <ChevronsUpDown size={11} className="opacity-30 ml-1 inline-block" />;
+  return sortDir === "asc"
+    ? <ChevronUp size={11} className="text-gold-500 ml-1 inline-block" />
+    : <ChevronDown size={11} className="text-gold-500 ml-1 inline-block" />;
+}
+
+const COLUNAS = [
+  { key: "nome",        label: "Cliente",          sortable: true  },
+  { key: "cpf",         label: "CPF",              sortable: true  },
+  { key: "tipo",        label: "Tipo / Subdivisão", sortable: false },
+  { key: "status",      label: "Status",           sortable: true  },
+  { key: "situacao",    label: "Situação",         sortable: true  },
+  { key: "ano",         label: "Ano",              sortable: true  },
+  { key: "prazo",       label: "Próx. Prazo",      sortable: false },
+  { key: "_acoes",      label: "",                 sortable: false },
+];
+
+export default function ClienteTable({ clientes, onEdit, onDelete, loading, sortCol, sortDir, onSort }) {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -51,9 +69,20 @@ export default function ClienteTable({ clientes, onEdit, onDelete, loading }) {
       <table className="w-full text-sm border-collapse">
         <thead>
           <tr className="border-b border-white/[0.05]">
-            {["Cliente", "CPF", "Tipo / Subdivisão", "Status", "Situação", "Ano", "Próx. Prazo", ""].map((h) => (
-              <th key={h} className="text-left px-4 py-3 text-xs font-medium text-ink-500 whitespace-nowrap">
-                {h}
+            {COLUNAS.map((col) => (
+              <th
+                key={col.key}
+                onClick={col.sortable && onSort ? () => onSort(col.key) : undefined}
+                className={[
+                  "text-left px-4 py-3 text-xs font-medium whitespace-nowrap select-none",
+                  col.sortable && onSort
+                    ? "cursor-pointer text-ink-400 hover:text-ink-200 transition-colors"
+                    : "text-ink-500",
+                  sortCol === col.key ? "text-ink-200" : "",
+                ].join(" ")}
+              >
+                {col.label}
+                {col.sortable && <SortIcon col={col.key} sortCol={sortCol} sortDir={sortDir} />}
               </th>
             ))}
           </tr>

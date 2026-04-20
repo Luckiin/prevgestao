@@ -21,6 +21,19 @@ export default function ClientesPage() {
   const [editando, setEditando] = useState(null);
   const [excluindo, setExcluindo] = useState(null);
 
+  // Ordenação
+  const [sortCol, setSortCol] = useState("nome");
+  const [sortDir, setSortDir] = useState("asc");
+
+  function handleSort(col) {
+    if (sortCol === col) {
+      setSortDir(d => d === "asc" ? "desc" : "asc");
+    } else {
+      setSortCol(col);
+      setSortDir("asc");
+    }
+  }
+
   // Filtros
   const [busca, setBusca]               = useState("");
   const [filtroStatus, setFiltroStatus] = useState("");
@@ -108,6 +121,22 @@ export default function ClientesPage() {
       setCarregandoDetalhe(false);
     }
   }
+
+  // Ordenação client-side
+  const clientesOrdenados = [...clientes].sort((a, b) => {
+    let va, vb;
+    switch (sortCol) {
+      case "nome":     va = a.nome?.toLowerCase() || ""; vb = b.nome?.toLowerCase() || ""; break;
+      case "cpf":      va = a.cpf || ""; vb = b.cpf || ""; break;
+      case "status":   va = a.status || ""; vb = b.status || ""; break;
+      case "situacao": va = a.situacao || ""; vb = b.situacao || ""; break;
+      case "ano":      va = a.ano_referencia || 0; vb = b.ano_referencia || 0; break;
+      default:         va = ""; vb = "";
+    }
+    if (va < vb) return sortDir === "asc" ? -1 : 1;
+    if (va > vb) return sortDir === "asc" ? 1 : -1;
+    return 0;
+  });
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-5">
@@ -208,10 +237,13 @@ export default function ClientesPage() {
       {/* Tabela */}
       <div className="glass-card rounded overflow-hidden">
         <ClienteTable
-          clientes={clientes}
+          clientes={clientesOrdenados}
           loading={loading || carregandoDetalhe}
           onEdit={abrirEditar}
           onDelete={setExcluindo}
+          sortCol={sortCol}
+          sortDir={sortDir}
+          onSort={handleSort}
         />
       </div>
 
