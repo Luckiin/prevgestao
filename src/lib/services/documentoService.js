@@ -72,17 +72,30 @@ export async function registrarDocumento(supabase, {
   return data;
 }
 
+/** Sanitiza nome de arquivo removendo acentos, espaços e caracteres especiais */
+function sanitizarNome(nomeArquivo) {
+  const ext = nomeArquivo.split(".").pop();
+  const base = nomeArquivo
+    .substring(0, nomeArquivo.length - ext.length - 1)
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")   // remove acentos
+    .replace(/[^a-zA-Z0-9_-]/g, "_")   // substitui espaços e especiais por _
+    .replace(/_+/g, "_")               // colapsa múltiplos _
+    .replace(/^_|_$/g, "");            // remove _ do início/fim
+  return `${base}.${ext}`;
+}
+
 /** Gera URL para upload direto pelo browser */
 export async function gerarUrlUpload(supabase, clienteId, nomeArquivo) {
-  const ext  = nomeArquivo.split(".").pop();
-  const path = `${clienteId}/${Date.now()}_${nomeArquivo}`;
+  const nomeSeguro = sanitizarNome(nomeArquivo);
+  const path = `${clienteId}/${Date.now()}_${nomeSeguro}`;
 
   const { data, error } = await supabase.storage
     .from(BUCKET)
     .createSignedUploadUrl(path);
 
   if (error) throw error;
-  return { signedUrl: data.signedUrl, path };
+  return { signedUrl: data.signedUrl, path, nomeOriginal: nomeArquivo };
 }
 
 /** Exclui documento do Storage e do banco */

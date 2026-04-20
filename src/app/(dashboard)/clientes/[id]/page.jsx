@@ -196,7 +196,7 @@ export default function ClienteDetalhePage() {
       const resUpload = await fetch(dataUrl.signedUrl, {
         method: "PUT",
         body: file,
-        headers: { "Content-Type": file.type },
+        headers: { "Content-Type": file.type || "application/octet-stream" },
       });
       if (!resUpload.ok) throw new Error(`Falha no upload de ${file.name}`);
 
