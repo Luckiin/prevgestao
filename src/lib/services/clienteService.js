@@ -2,7 +2,6 @@
  * clienteService.js
  * CRUD de clientes + regra de ano de referência
  */
-import { encryptCredenciais, decryptCredenciais } from "@/lib/cryptoUtils";
 import { calcIdade } from "@/lib/utils";
 import { registrarAuditoria } from "./auditService";
 
@@ -57,7 +56,6 @@ export async function listarClientes(supabase, {
   const { data, error, count } = await query;
   if (error) throw error;
 
-  // Sem decrypt na listagem — credenciais só são carregadas no detalhe do cliente
   return {
     data: data.map((c) => ({ ...c, idade: calcIdade(c.data_nascimento) })),
     total: count,
@@ -74,7 +72,7 @@ export async function buscarCliente(supabase, id) {
 
   if (error) throw error;
   return {
-    ...decryptCredenciais(data),
+    ...data,
     idade: calcIdade(data.data_nascimento),
   };
 }
@@ -85,13 +83,12 @@ export async function criarCliente(supabase, payload, usuarioEmail, usuarioNome)
     login_inss, senha_inss, documentos, prazos, subdivisoes, idade, 
     id, criado_em, atualizado_em, data_entrada, ...resto 
   } = payload;
-  const credencias = encryptCredenciais({ login_inss, senha_inss });
-
   const { data, error } = await supabase
     .from("clientes")
     .insert({
       ...resto,
-      ...credencias,
+      login_inss,
+      senha_inss,
       cpf: payload.cpf.replace(/\D/g, ""),
     })
     .select(SELECT_COMPLETO)
@@ -110,7 +107,7 @@ export async function criarCliente(supabase, payload, usuarioEmail, usuarioNome)
   });
 
   return {
-    ...decryptCredenciais(data),
+    ...data,
     idade: calcIdade(data.data_nascimento),
   };
 }
@@ -134,9 +131,9 @@ export async function atualizarCliente(supabase, id, payload, usuarioEmail, usua
   } = payload;
   const updates = { ...resto };
 
-  // Só recriptografa se os campos foram enviados
-  if (login_inss !== undefined) updates.login_inss = login_inss ? encryptCredenciais({ login_inss, senha_inss: "" }).login_inss : null;
-  if (senha_inss !== undefined) updates.senha_inss = senha_inss ? encryptCredenciais({ login_inss: "", senha_inss }).senha_inss : null;
+  // Atualiza credenciais se enviadas
+  if (login_inss !== undefined) updates.login_inss = login_inss || null;
+  if (senha_inss !== undefined) updates.senha_inss = senha_inss || null;
 
   if (updates.cpf) updates.cpf = updates.cpf.replace(/\D/g, "");
 
@@ -171,7 +168,7 @@ export async function atualizarCliente(supabase, id, payload, usuarioEmail, usua
   });
 
   return {
-    ...decryptCredenciais(data),
+    ...data,
     idade: calcIdade(data.data_nascimento),
   };
 }
