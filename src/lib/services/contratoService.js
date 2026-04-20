@@ -3,10 +3,75 @@
  * Gestão de modelos de contrato e geração de DOCX via docxtemplater
  */
 
-import { TIPOS_ACAO, TIPOS_DOC } from "@/lib/contratos/tipos";
-export { TIPOS_ACAO, TIPOS_DOC };
+import { TIPOS_DOC } from "@/lib/contratos/tipos";
+export { TIPOS_DOC };
 
 const BUCKET = "modelos-contrato";
+
+// ── Tipos de ação (dinâmicos) ────────────────────────────────────────────────
+
+function gerarSlug(nome) {
+  return nome
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .trim()
+    .replace(/\s+/g, "-");
+}
+
+export async function listarTiposAcao(supabase) {
+  const { data, error } = await supabase
+    .from("tipos_acao_contrato")
+    .select("*")
+    .order("nome");
+  if (error) throw error;
+  return data;
+}
+
+export async function criarTipoAcao(supabase, { nome }) {
+  const slug = gerarSlug(nome);
+  const { data, error } = await supabase
+    .from("tipos_acao_contrato")
+    .insert({ nome, slug })
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function atualizarTipoAcao(supabase, id, campos) {
+  const updates = { ...campos };
+  if (campos.nome) updates.slug = gerarSlug(campos.nome);
+  const { data, error } = await supabase
+    .from("tipos_acao_contrato")
+    .update(updates)
+    .eq("id", id)
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function excluirTipoAcao(supabase, id) {
+  // Verifica se há modelos vinculados ao slug deste tipo
+  const { data: tipo } = await supabase
+    .from("tipos_acao_contrato")
+    .select("slug")
+    .eq("id", id)
+    .single();
+
+  if (tipo) {
+    const { count } = await supabase
+      .from("modelos_contrato")
+      .select("id", { count: "exact", head: true })
+      .eq("tipo_acao", tipo.slug);
+    if (count > 0) throw new Error("Não é possível excluir: há modelos vinculados a este tipo.");
+  }
+
+  const { error } = await supabase.from("tipos_acao_contrato").delete().eq("id", id);
+  if (error) throw error;
+}
 
 /** Lista todos os modelos cadastrados */
 export async function listarModelos(supabase) {

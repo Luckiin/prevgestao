@@ -8,7 +8,7 @@ import Badge from "@/components/ui/Badge";
 import { Settings, Plus, Pencil, Power, Upload, Trash2, FileText, CheckCircle2, Info, Download, Eye } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
-import { TIPOS_ACAO, TIPOS_DOC } from "@/lib/contratos/tipos";
+import { TIPOS_DOC } from "@/lib/contratos/tipos";
 
 export default function ConfiguracoesPage() {
   const { usuario } = useAuth();
@@ -19,16 +19,27 @@ export default function ConfiguracoesPage() {
   const [saving, setSaving]           = useState(false);
   const [form, setForm]               = useState({ nome: "", tipo: "administrativo" });
 
+  // Tipos de ação (dinâmicos)
+  const [tiposAcao, setTiposAcao]           = useState([]);
+  const [modalTipo, setModalTipo]           = useState(false);
+  const [editandoTipo, setEditandoTipo]     = useState(null);
+  const [savingTipo, setSavingTipo]         = useState(false);
+  const [formTipo, setFormTipo]             = useState({ nome: "" });
+  const [excluindoTipoId, setExcluindoTipoId] = useState(null);
+
   // Modelos de contrato
-  const [modelos, setModelos]         = useState([]);
-  const [tipoAcaoAtivo, setTipoAcaoAtivo] = useState(TIPOS_ACAO[0].value);
-  const [uploadingSlot, setUploadingSlot] = useState(null); // "tipo_doc"
+  const [modelos, setModelos]               = useState([]);
+  const [tipoAcaoAtivo, setTipoAcaoAtivo]   = useState(null);
+  const [uploadingSlot, setUploadingSlot]   = useState(null);
   const [excluindoId, setExcluindoId]     = useState(null);
   const [acessandoId, setAcessandoId]     = useState(null); // id do modelo sendo baixado/visualizado
   const [infoAberto, setInfoAberto]       = useState(false);
   const [dragOver, setDragOver]           = useState(null); // tipo_doc sendo hovered
   const fileInputRef = useRef(null);
   const uploadSlotRef = useRef(null);
+
+  // Módulo ativo (sidebar navigation)
+  const [moduloAtivo, setModuloAtivo] = useState("subdivisoes");
 
   async function carregar() {
     setLoading(true);
@@ -47,7 +58,81 @@ export default function ConfiguracoesPage() {
     } catch {}
   }
 
-  useEffect(() => { carregar(); carregarModelos(); }, []);
+  async function carregarTipos() {
+    try {
+      const res = await fetch("/api/contratos/tipos");
+      const data = await res.json();
+      const lista = Array.isArray(data) ? data : [];
+      setTiposAcao(lista);
+      if (lista.length > 0 && !tipoAcaoAtivo) setTipoAcaoAtivo(lista[0].slug);
+    } catch {}
+  }
+
+  useEffect(() => { carregar(); carregarModelos(); carregarTipos(); }, []);
+
+  // ── CRUD de tipos de ação ──────────────────────────────────────────────────
+  async function handleSalvarTipo(e) {
+    e.preventDefault();
+    if (!formTipo.nome.trim()) return;
+    setSavingTipo(true);
+    try {
+      const url    = editandoTipo ? `/api/contratos/tipos/${editandoTipo.id}` : "/api/contratos/tipos";
+      const method = editandoTipo ? "PUT" : "POST";
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nome: formTipo.nome.trim() }),
+      });
+      if (!res.ok) { const j = await res.json(); throw new Error(j.erro); }
+      toast.success(editandoTipo ? "Tipo atualizado" : "Tipo criado com sucesso");
+      setModalTipo(false);
+      setEditandoTipo(null);
+      setFormTipo({ nome: "" });
+      carregarTipos();
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setSavingTipo(false);
+    }
+  }
+
+  async function handleToggleAtivoTipo(t) {
+    try {
+      const res = await fetch(`/api/contratos/tipos/${t.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ativo: !t.ativo }),
+      });
+      if (!res.ok) throw new Error("Falha ao atualizar");
+      toast.success(`Tipo ${!t.ativo ? "ativado" : "desativado"}`);
+      carregarTipos();
+    } catch (err) {
+      toast.error(err.message);
+    }
+  }
+
+  async function handleExcluirTipo(id) {
+    setExcluindoTipoId(id);
+    try {
+      const res = await fetch(`/api/contratos/tipos/${id}`, { method: "DELETE" });
+      if (!res.ok) { const j = await res.json(); throw new Error(j.erro); }
+      toast.success("Tipo removido");
+      if (tipoAcaoAtivo && tiposAcao.find(t => t.id === id)?.slug === tipoAcaoAtivo) {
+        setTipoAcaoAtivo(tiposAcao.filter(t => t.id !== id)[0]?.slug || null);
+      }
+      carregarTipos();
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setExcluindoTipoId(null);
+    }
+  }
+
+  function abrirEditarTipo(t) {
+    setEditandoTipo(t);
+    setFormTipo({ nome: t.nome });
+    setModalTipo(true);
+  }
 
   // ── Modelos: upload ────────────────────────────────────────────────────────
   function iniciarUpload(tipoDoc) {
@@ -272,6 +357,75 @@ export default function ConfiguracoesPage() {
         )}
       </div>
 
+      {/* Tipos de Ação */}
+      <div className="glass-card rounded-2xl overflow-hidden">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.05]">
+          <div>
+            <h2 className="text-sm font-semibold text-ink-200">Tipos de Ação</h2>
+            <p className="text-xs text-ink-500 mt-0.5">Categorias de contrato disponíveis</p>
+          </div>
+          <Button size="sm" onClick={() => { setEditandoTipo(null); setFormTipo({ nome: "" }); setModalTipo(true); }}>
+            <Plus size={13} /> Novo
+          </Button>
+        </div>
+
+        <div className="divide-y divide-white/[0.03]">
+          {tiposAcao.length === 0 ? (
+            <p className="px-5 py-4 text-xs text-ink-600">Nenhum tipo cadastrado.</p>
+          ) : tiposAcao.map(t => (
+            <div key={t.id} className="flex items-center gap-3 px-5 py-3 table-row-hover">
+              <div className="flex-1 min-w-0">
+                <p className={`text-sm truncate ${t.ativo ? "text-ink-200" : "text-ink-600 line-through"}`}>
+                  {t.nome}
+                </p>
+                <p className="text-[10px] font-mono text-ink-600 mt-0.5">{t.slug}</p>
+              </div>
+              <Badge variant={t.ativo ? "ativo" : "inativo"}>{t.ativo ? "Ativo" : "Inativo"}</Badge>
+              <button onClick={() => abrirEditarTipo(t)} className="text-ink-600 hover:text-gold-500 transition-colors">
+                <Pencil size={13} />
+              </button>
+              <button onClick={() => handleToggleAtivoTipo(t)} className="text-ink-600 hover:text-warn-500 transition-colors" title={t.ativo ? "Desativar" : "Ativar"}>
+                <Power size={13} />
+              </button>
+              <button
+                onClick={() => handleExcluirTipo(t.id)}
+                disabled={excluindoTipoId === t.id}
+                className="text-ink-600 hover:text-red-400 transition-colors disabled:opacity-50"
+                title="Excluir"
+              >
+                {excluindoTipoId === t.id
+                  ? <div className="w-3 h-3 border border-red-400 border-t-transparent rounded-full animate-spin" />
+                  : <Trash2 size={13} />
+                }
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Modal de tipo de ação */}
+      <Modal
+        open={modalTipo}
+        onClose={() => { setModalTipo(false); setEditandoTipo(null); }}
+        title={editandoTipo ? "Editar tipo de ação" : "Novo tipo de ação"}
+        size="sm"
+      >
+        <form onSubmit={handleSalvarTipo} className="space-y-4">
+          <Input
+            label="Nome"
+            value={formTipo.nome}
+            onChange={e => setFormTipo(f => ({ ...f, nome: e.target.value }))}
+            required
+            placeholder="Ex: Aposentadoria por Idade"
+            autoFocus
+          />
+          <div className="flex justify-end gap-3 pt-1">
+            <Button variant="secondary" type="button" onClick={() => setModalTipo(false)}>Cancelar</Button>
+            <Button type="submit" loading={savingTipo}>Salvar</Button>
+          </div>
+        </form>
+      </Modal>
+
       {/* Input oculto para upload de modelos */}
       <input
         ref={fileInputRef}
@@ -373,19 +527,21 @@ export default function ConfiguracoesPage() {
           </div>
         )}
 
-        {/* Tabs de tipo de ação */}
+        {/* Tabs de tipo de ação (dinâmico) */}
         <div className="flex overflow-x-auto border-b border-white/[0.05] px-5 gap-1 pt-3">
-          {TIPOS_ACAO.map(ta => (
+          {tiposAcao.filter(t => t.ativo).length === 0 ? (
+            <p className="text-xs text-ink-600 pb-3">Nenhum tipo de ação ativo. Cadastre em "Tipos de Ação" acima.</p>
+          ) : tiposAcao.filter(t => t.ativo).map(ta => (
             <button
-              key={ta.value}
-              onClick={() => setTipoAcaoAtivo(ta.value)}
+              key={ta.slug}
+              onClick={() => setTipoAcaoAtivo(ta.slug)}
               className={`shrink-0 px-3 py-2 text-xs font-medium rounded-t-lg transition-colors ${
-                tipoAcaoAtivo === ta.value
+                tipoAcaoAtivo === ta.slug
                   ? "text-gold-400 border-b-2 border-gold-500 bg-gold-500/5"
                   : "text-ink-600 hover:text-ink-300"
               }`}
             >
-              {ta.label}
+              {ta.nome}
             </button>
           ))}
         </div>

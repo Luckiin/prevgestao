@@ -331,35 +331,37 @@ export default function ClienteDetalhePage() {
       {/* Tab: Dados */}
       {tab === "dados" && (
         <div className="glass-card rounded-2xl p-6 grid grid-cols-1 sm:grid-cols-2 gap-5">
+          {/* 1. Nome — exibido no cabeçalho da página, mas repetimos aqui para completude */}
+          {/* 2. RG */}
+          <Campo label="RG" value={cliente.rg || "—"} />
+          {/* 3. CPF — exibido no cabeçalho */}
+          {/* 4. Data de nascimento */}
           <Campo label="Data de nascimento" value={formatData(cliente.data_nascimento)} />
           <Campo label="Idade" value={cliente.idade ? `${cliente.idade} anos` : "—"} />
-          <Campo label="RG" value={cliente.rg || "—"} />
-          <Campo label="Nacionalidade" value={cliente.nacionalidade || "—"} />
+          {/* 5. Estado civil */}
           <Campo label="Estado civil" value={cliente.estado_civil || "—"} />
-          <Campo label="Profissão" value={cliente.profissao || "—"} />
-          <Campo label="Telefone" value={cliente.telefone || "—"} />
+          {/* 6. Endereço */}
+          <div className="sm:col-span-2">
+            <p className="text-xs text-ink-500 mb-1">Endereço</p>
+            <p className="text-sm text-ink-200">{cliente.endereco || "—"}</p>
+          </div>
+          {/* 7. CEP */}
           <Campo label="CEP" value={cliente.cep || "—"} />
-          {cliente.endereco && (
-            <div className="sm:col-span-2">
-              <p className="text-xs text-ink-500 mb-1">Endereço</p>
-              <p className="text-sm text-ink-200">{cliente.endereco}</p>
-            </div>
-          )}
-          <div className="sm:col-span-2 pt-2 border-t border-white/[0.05]" />
-          <Campo label="Tipo de processo" value={cliente.tipo_processo?.charAt(0).toUpperCase() + cliente.tipo_processo?.slice(1)} />
-          <Campo label="Subdivisão" value={cliente.subdivisoes?.nome} />
-          <Campo label="Número do processo" value={cliente.numero_processo || "—"} />
-          <Campo label="Valor estimado" value={formatMoeda(cliente.valor_beneficio)} />
-          <Campo label="Data de entrada" value={formatDataHora(cliente.data_entrada)} />
-          <Campo label="Última atualização" value={formatDataHora(cliente.atualizado_em)} />
+          {/* 8. Nacionalidade */}
+          <Campo label="Nacionalidade" value={cliente.nacionalidade || "—"} />
+          {/* 9. Telefone */}
+          <Campo label="Telefone" value={cliente.telefone || "—"} />
+          <Campo label="Profissão" value={cliente.profissao || "—"} />
 
           {/* Credenciais INSS */}
           <div className="sm:col-span-2 pt-2 border-t border-white/[0.05]">
             <p className="text-xs font-medium text-ink-500 mb-3 flex items-center gap-2">
-              <Shield size={12} /> Credenciais INSS (criptografadas)
+              <Shield size={12} /> Credenciais INSS
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* 10. Login INSS */}
               <Campo label="Login INSS" value={cliente.login_inss || "—"} />
+              {/* 11. Senha INSS */}
               <div>
                 <p className="text-xs text-ink-500 mb-1">Senha INSS</p>
                 <div className="flex items-center gap-2">
@@ -379,12 +381,28 @@ export default function ClienteDetalhePage() {
             </div>
           </div>
 
-          {cliente.observacoes && (
-            <div className="sm:col-span-2">
-              <p className="text-xs text-ink-500 mb-1">Observações</p>
-              <p className="text-sm text-ink-200 whitespace-pre-line">{cliente.observacoes}</p>
-            </div>
-          )}
+          {/* Processo */}
+          <div className="sm:col-span-2 pt-2 border-t border-white/[0.05]" />
+          {/* 12. Tipo do processo */}
+          <Campo label="Tipo de processo" value={cliente.tipo_processo?.charAt(0).toUpperCase() + cliente.tipo_processo?.slice(1)} />
+          {/* 13. Subdivisão */}
+          <Campo label="Subdivisão" value={cliente.subdivisoes?.nome} />
+          {/* 14. Status */}
+          <Campo label="Status" value={cliente.status || "—"} />
+          {/* 15. Número do processo */}
+          <Campo label="Número do processo" value={cliente.numero_processo || "—"} />
+          {/* 16. Situação */}
+          <Campo label="Situação" value={cliente.situacao || "—"} />
+          {/* 17. Valor */}
+          <Campo label="Valor estimado" value={formatMoeda(cliente.valor_beneficio)} />
+          <Campo label="Data de entrada" value={formatDataHora(cliente.data_entrada)} />
+          <Campo label="Última atualização" value={formatDataHora(cliente.atualizado_em)} />
+
+          {/* 18. Descrição */}
+          <div className="sm:col-span-2">
+            <p className="text-xs text-ink-500 mb-1">Descrição / Observações</p>
+            <p className="text-sm text-ink-200 whitespace-pre-line">{cliente.observacoes || "—"}</p>
+          </div>
         </div>
       )}
 

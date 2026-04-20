@@ -1,26 +1,32 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { FileSignature, Search, FileText, Download, Loader2, ChevronDown, X } from "lucide-react";
+import { FileSignature, Search, FileText, Download, Loader2, X } from "lucide-react";
 import Button from "@/components/ui/Button";
 import { toast } from "sonner";
-import { TIPOS_ACAO, TIPOS_DOC } from "@/lib/contratos/tipos";
+import { TIPOS_DOC } from "@/lib/contratos/tipos";
 
 export default function ContratosPage() {
-  const [modelos, setModelos]         = useState([]);
-  const [clientes, setClientes]       = useState([]);
-  const [busca, setBusca]             = useState("");
-  const [clienteSel, setClienteSel]   = useState(null);
-  const [tipoAcao, setTipoAcao]       = useState("");
-  const [gerando, setGerando]         = useState({});
+  const [modelos, setModelos]           = useState([]);
+  const [tiposAcao, setTiposAcao]       = useState([]);
+  const [clientes, setClientes]         = useState([]);
+  const [busca, setBusca]               = useState("");
+  const [clienteSel, setClienteSel]     = useState(null);
+  const [tipoAcao, setTipoAcao]         = useState("");
+  const [gerando, setGerando]           = useState({});
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [buscaTimeout, setBuscaTimeout] = useState(null);
 
-  // Carrega modelos cadastrados
+  // Carrega modelos e tipos
   useEffect(() => {
     fetch("/api/contratos/modelos")
       .then(r => r.json())
       .then(d => setModelos(Array.isArray(d) ? d : []))
+      .catch(() => {});
+
+    fetch("/api/contratos/tipos")
+      .then(r => r.json())
+      .then(d => setTiposAcao(Array.isArray(d) ? d.filter(t => t.ativo) : []))
       .catch(() => {});
   }, []);
 
@@ -59,8 +65,8 @@ export default function ContratosPage() {
     ? TIPOS_DOC.filter(td => modelos.some(m => m.tipo_acao === tipoAcao && m.tipo_doc === td.value))
     : [];
 
-  const tiposAcaoComModelo = TIPOS_ACAO.filter(ta =>
-    modelos.some(m => m.tipo_acao === ta.value)
+  const tiposAcaoComModelo = tiposAcao.filter(ta =>
+    modelos.some(m => m.tipo_acao === ta.slug)
   );
 
   async function gerarDocumento(tipoDoc) {
@@ -101,7 +107,7 @@ export default function ContratosPage() {
     }
   }
 
-  const tipoAcaoLabel = TIPOS_ACAO.find(t => t.value === tipoAcao)?.label;
+  const tipoAcaoLabel = tiposAcao.find(t => t.slug === tipoAcao)?.nome;
 
   return (
     <div className="p-6 max-w-3xl mx-auto space-y-6">
@@ -187,7 +193,7 @@ export default function ContratosPage() {
           >
             <option value="">Selecione o tipo de ação...</option>
             {tiposAcaoComModelo.map(t => (
-              <option key={t.value} value={t.value}>{t.label}</option>
+              <option key={t.slug} value={t.slug}>{t.nome}</option>
             ))}
           </select>
           {tiposAcaoComModelo.length === 0 && (
