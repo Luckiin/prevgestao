@@ -11,20 +11,20 @@ export default function LoadingClientes() {
         <Sk w={130} h={38} rounded={8} />
       </div>
 
-      {/* Filtros */}
+
       <div style={{ display:"flex", gap:8, marginBottom:20 }}>
         {[80,100,90,110,80].map((w,i) => <Sk key={i} w={w} h={32} rounded={20} />)}
       </div>
 
-      {/* Tabela */}
+
       <SkCard style={{ padding:0, overflow:"hidden" }}>
-        {/* Header */}
+
         <div style={{ display:"grid", gridTemplateColumns:"2fr 1fr 1fr 1fr 1fr 80px", gap:16, padding:"12px 16px", borderBottom:"1px solid rgba(255,255,255,.04)" }}>
           {["Cliente","CPF","Tipo","Status","Situação",""].map((_, i) => (
             <Sk key={i} w="80%" h={12} rounded={3} />
           ))}
         </div>
-        {/* Rows */}
+
         {[1,2,3,4,5,6,7,8].map(i => (
           <div key={i} style={{ display:"grid", gridTemplateColumns:"2fr 1fr 1fr 1fr 1fr 80px", gap:16, padding:"14px 16px", borderBottom:"1px solid rgba(255,255,255,.03)", alignItems:"center" }}>
             <div>

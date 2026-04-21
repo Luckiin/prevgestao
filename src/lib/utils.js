@@ -2,24 +2,24 @@ import { clsx } from "clsx";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
-/** Combina classes Tailwind condicionalmente */
+
 export function cn(...inputs) {
   return clsx(inputs);
 }
 
-/** Formata CPF: 00000000000 → 000.000.000-00 */
+
 export function formatCPF(cpf) {
   if (!cpf) return "";
   const digits = cpf.replace(/\D/g, "");
   return digits.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
 }
 
-/** Remove máscara do CPF */
+
 export function cleanCPF(cpf) {
   return (cpf || "").replace(/\D/g, "");
 }
 
-/** Valida CPF */
+
 export function validarCPF(cpf) {
   const nums = cleanCPF(cpf);
   if (nums.length !== 11 || /^(\d)\1+$/.test(nums)) return false;
@@ -37,7 +37,7 @@ export function validarCPF(cpf) {
   return r === parseInt(nums[10]);
 }
 
-/** Formata moeda: 1234.56 → R$ 1.234,56 */
+
 export function formatMoeda(value) {
   if (value == null) return "—";
   return new Intl.NumberFormat("pt-BR", {
@@ -46,7 +46,7 @@ export function formatMoeda(value) {
   }).format(value);
 }
 
-/** Máscara de moeda para inputs: 123456 → 1.234,56 */
+
 export function maskMoeda(value) {
   if (!value) return "";
   let v = String(value).replace(/\D/g, "");
@@ -56,7 +56,7 @@ export function maskMoeda(value) {
   return v;
 }
 
-/** Formata data ISO → dd/MM/yyyy */
+
 export function formatData(dateStr) {
   if (!dateStr) return "—";
   try {
@@ -67,7 +67,7 @@ export function formatData(dateStr) {
   }
 }
 
-/** Formata data e hora ISO → dd/MM/yyyy HH:mm */
+
 export function formatDataHora(dateStr) {
   if (!dateStr) return "—";
   try {
@@ -78,7 +78,7 @@ export function formatDataHora(dateStr) {
   }
 }
 
-/** Calcula anos desde a data */
+
 export function calcIdade(dataNasc) {
   if (!dataNasc) return null;
   const nasc = typeof dataNasc === "string" ? parseISO(dataNasc) : dataNasc;
@@ -89,7 +89,7 @@ export function calcIdade(dataNasc) {
   return idade;
 }
 
-/** Retorna cor do status */
+
 export function corStatus(status) {
   switch (status) {
     case "Ativo":     return "text-success-500 bg-success-500/10 border-success-500/20";
@@ -99,7 +99,7 @@ export function corStatus(status) {
   }
 }
 
-/** Retorna dias restantes até um prazo (negativo = atrasado) */
+
 export function diasRestantes(dataPrazo) {
   if (!dataPrazo) return null;
   const prazo = typeof dataPrazo === "string" ? parseISO(dataPrazo) : dataPrazo;
@@ -109,7 +109,7 @@ export function diasRestantes(dataPrazo) {
   return Math.ceil(diff / (1000 * 60 * 60 * 24));
 }
 
-/** Cor do prazo por urgência */
+
 export function corPrazo(dias) {
   if (dias < 0)  return "text-danger-500";
   if (dias <= 3) return "text-danger-400";

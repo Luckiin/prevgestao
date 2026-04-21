@@ -12,12 +12,12 @@ export async function POST(request) {
 
     const response = NextResponse.json({ ok: true });
 
-    // Limpa cookies de sessão
+
     cookies.forEach(({ name }) =>
       response.cookies.set(name, "", { maxAge: 0, path: "/" })
     );
 
-    // Garante limpeza dos cookies do Supabase
+
     request.cookies.getAll().forEach(({ name }) => {
       if (name.startsWith("sb-")) {
         response.cookies.set(name, "", { maxAge: 0, path: "/" });

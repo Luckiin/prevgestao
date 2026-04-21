@@ -1,11 +1,5 @@
-/**
- * cryptoUtils.js
- * Utilitários de criptografia AES-256-GCM para credenciais INSS
- * Formato armazenado: "iv:tag:ciphertext" (tudo em hex)
- */
-
 const ALGORITHM = "aes-256-gcm";
-const IV_LENGTH = 12; // bytes (96 bits – ideal para GCM)
+const IV_LENGTH = 12;
 
 function getKey() {
   const hexKey = process.env.ENCRYPTION_KEY;
@@ -15,9 +9,7 @@ function getKey() {
   return Buffer.from(hexKey, "hex");
 }
 
-/**
- * Criptografa texto plano → string "iv:tag:ciphertext" (hex)
- */
+
 export function encrypt(plaintext) {
   if (!plaintext) return null;
 
@@ -39,9 +31,7 @@ export function encrypt(plaintext) {
   ].join(":");
 }
 
-/**
- * Descriptografa string "iv:tag:ciphertext" → texto plano
- */
+
 export function decrypt(encryptedStr) {
   if (!encryptedStr) return null;
 
@@ -67,10 +57,7 @@ export function decrypt(encryptedStr) {
   return decrypted.toString("utf8");
 }
 
-/**
- * Criptografa objeto { login_inss, senha_inss } se fornecido
- * Retorna { login_inss_enc, senha_inss_enc }
- */
+
 export function encryptCredenciais({ login_inss, senha_inss }) {
   return {
     login_inss: login_inss ? encrypt(login_inss) : null,
@@ -78,9 +65,7 @@ export function encryptCredenciais({ login_inss, senha_inss }) {
   };
 }
 
-/**
- * Descriptografa campos de credenciais retornados do banco
- */
+
 export function decryptCredenciais(row) {
   if (!row) return row;
   return {

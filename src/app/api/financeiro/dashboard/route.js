@@ -8,7 +8,7 @@ export async function GET() {
     if (!user) return NextResponse.json({ erro: "Não autorizado" }, { status: 401 });
 
     const hoje = new Date().toISOString().split("T")[0];
-    const mesAtual = hoje.slice(0, 7); // YYYY-MM
+    const mesAtual = hoje.slice(0, 7);
     const inicioMes = `${mesAtual}-01`;
     const fimMes = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0)
       .toISOString().split("T")[0];
@@ -56,7 +56,7 @@ export async function GET() {
     const soma = (arr) => (arr || []).reduce((s, r) => s + (r.valor || 0), 0);
     const saldoTotal = (saldoContas || []).reduce((s, c) => s + (c.saldo_atual || 0), 0);
 
-    // Agrupa por mês para o gráfico anual
+
     const porMes = (arr, campo = "data_vencimento") => {
       const meses = Array(12).fill(0);
       (arr || []).forEach(r => {

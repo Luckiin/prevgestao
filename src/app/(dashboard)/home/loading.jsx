@@ -3,13 +3,13 @@ import { Sk, SkCard } from "@/components/ui/Skeleton";
 export default function LoadingHome() {
   return (
     <div style={{ padding: 24, maxWidth: 1280, margin: "0 auto" }}>
-      {/* Header */}
+
       <div style={{ marginBottom: 24 }}>
         <Sk w={200} h={28} rounded={6} />
         <div style={{ marginTop: 8 }}><Sk w={320} h={14} rounded={4} /></div>
       </div>
 
-      {/* KPI Cards */}
+
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px,1fr))", gap: 16, marginBottom: 24 }}>
         {[1,2,3,4].map(i => (
           <SkCard key={i}>
@@ -24,7 +24,7 @@ export default function LoadingHome() {
         ))}
       </div>
 
-      {/* Gráfico + tabela */}
+
       <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:16 }}>
         <SkCard style={{ height:320 }}>
           <Sk w={180} h={16} rounded={4} />

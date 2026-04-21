@@ -52,17 +52,17 @@ export default function Extrato() {
   const totalSaida = movs.filter(m => m.tipo === "saida").reduce((s, m) => s + m.valor, 0);
   const saldoPeriodo = totalEntrada - totalSaida;
 
-  // ── PDF Exportação ────────────────────────────────────────────────────────
+
   function exportarPDF() {
     const movsOrdenados = [...movs].sort((a, b) => a.data_movimento > b.data_movimento ? 1 : -1);
     let saldoAcumulado = 0;
 
-    // Cores do sistema
-    const VINHO = "#6B1530";  // brand-600
-    const VINHO_DARK = "#3d0a1a";  // dark background
-    const GOLD = "#C9A96E";  // gold-500
-    const GOLD_LIGHT = "#e8d5a3";  // gold-300
-    const VINHO_BG = "#fdf2f5";  // brand-50 — linha par
+
+    const VINHO = "#6B1530";
+    const VINHO_DARK = "#3d0a1a";
+    const GOLD = "#C9A96E";
+    const GOLD_LIGHT = "#e8d5a3";
+    const VINHO_BG = "#fdf2f5";
 
     const linhas = movsOrdenados.map((m, i) => {
       const entrada = m.tipo === "entrada" ? m.valor : 0;
@@ -225,7 +225,7 @@ export default function Extrato() {
         </div>
       </div>
 
-      {/* Filtros */}
+
       <div className="glass-card rounded-xl p-4 flex flex-wrap gap-4 items-end">
         <div>
           <label style={{ display: "block", fontSize: 11, color: "rgba(201,169,110,.6)", marginBottom: 6, letterSpacing: "0.1em", textTransform: "uppercase" }}>Data Inicio</label>
@@ -237,7 +237,7 @@ export default function Extrato() {
         </div>
       </div>
 
-      {/* Totais */}
+
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
           { l: "Total de Entrada", v: fmt(totalEntrada), c: "#22c55e" },
@@ -252,7 +252,7 @@ export default function Extrato() {
         ))}
       </div>
 
-      {/* Tabela */}
+
       <div className="glass-card rounded-2xl overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center py-20">

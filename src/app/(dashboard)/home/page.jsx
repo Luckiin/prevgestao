@@ -41,23 +41,23 @@ export default function HomePage() {
   };
 
   return (
-    <motion.div 
+    <motion.div
       variants={container}
       initial="hidden"
       animate="show"
       className="p-6 space-y-6 max-w-7xl mx-auto"
     >
-      {/* Header */}
+
       <motion.div variants={item}>
         <h1 className="text-xl font-bold text-ink-100">Dashboard</h1>
         <p className="text-sm text-ink-500 mt-0.5">Visão geral do escritório — {ANO_ATUAL}</p>
       </motion.div>
 
-      {/* Stats cards */}
+
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         {["Clientes Ativos", `Clientes ${ANO_ATUAL}`, "Prazos Vencidos", "Valor Total Estimado"].map((label, i) => {
           if (isLoading) return <Skeleton key={i} className="h-32 rounded-2xl" />;
-          
+
           const components = [
             <StatCard key={0} icon={Users} label="Clientes Ativos" value={stats?.total_ativos ?? "—"} color="brand" />,
             <StatCard key={1} icon={CalendarDays} label={`Clientes ${ANO_ATUAL}`} value={stats?.total_ano_atual ?? "—"} sub="Ano de referência atual" color="gold" />,
@@ -69,7 +69,7 @@ export default function HomePage() {
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
-        {/* Gráfico anual */}
+
         <motion.div variants={item} className="xl:col-span-3 glass-card rounded-2xl p-5 border border-white/[0.05] relative">
           <div className="flex items-center justify-between mb-5">
             <div>
@@ -83,8 +83,8 @@ export default function HomePage() {
             anual.length > 0 ? (
               <div className="relative">
                 <ResponsiveContainer width="100%" height={200}>
-                  <BarChart 
-                    data={anual} 
+                  <BarChart
+                    data={anual}
                     onMouseMove={(state) => {
                       if (state.activePayload && state.activePayload.length > 0) {
                         setHoveredBar({
@@ -101,18 +101,18 @@ export default function HomePage() {
                     <XAxis dataKey="ano" tick={{ fill: "#6b7fa0", fontSize: 11 }} axisLine={false} tickLine={false} />
                     <YAxis tick={{ fill: "#6b7fa0", fontSize: 11 }} axisLine={false} tickLine={false} width={30} />
                     <Tooltip content={() => null} cursor={{ fill: "rgba(201, 169, 110, 0.05)" }} />
-                    
+
                     <Bar name="Total" dataKey="total_clientes" fill="#6366f1" radius={[4, 4, 0, 0]} opacity={0.6} />
                     <Bar name="Ativos" dataKey="ativos" fill="#10b981" radius={[4, 4, 0, 0]} />
                     <Bar name="Inativos" dataKey="inativos" fill="#f43f5e" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
 
-                {/* Stable Floating Tooltip */}
+
                 {hoveredBar && (
-                  <div 
+                  <div
                     className="absolute z-10 glass-card p-3.5 rounded-xl border border-white/10 shadow-2xl backdrop-blur-xl pointer-events-auto min-w-[170px]"
-                    style={{ 
+                    style={{
                       left: hoveredBar.x,
                       top: 0,
                       transform: "translate(-50%, -100%)",
@@ -152,7 +152,7 @@ export default function HomePage() {
           )}
         </motion.div>
 
-        {/* Prazos próximos */}
+
         <motion.div variants={item} className="xl:col-span-2 glass-card rounded-2xl p-5 border border-white/[0.05]">
           <div className="flex items-center justify-between mb-4">
             <div>

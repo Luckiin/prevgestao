@@ -24,7 +24,7 @@ export default function Modal({ open, onClose, title, children, size = "md" }) {
     <AnimatePresence>
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          {/* Overlay */}
+
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -33,7 +33,7 @@ export default function Modal({ open, onClose, title, children, size = "md" }) {
             onClick={onClose}
           />
 
-          {/* Dialog */}
+
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 12 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -44,7 +44,7 @@ export default function Modal({ open, onClose, title, children, size = "md" }) {
               sizes[size]
             )}
           >
-            {/* Header */}
+
             <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.05]">
               <h2 className="text-base font-semibold text-ink-100">{title}</h2>
               <button
@@ -55,7 +55,7 @@ export default function Modal({ open, onClose, title, children, size = "md" }) {
               </button>
             </div>
 
-            {/* Body */}
+
             <div className="px-6 py-5 overflow-y-auto max-h-[80vh]">{children}</div>
           </motion.div>
         </div>

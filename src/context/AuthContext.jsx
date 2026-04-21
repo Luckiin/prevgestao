@@ -11,7 +11,7 @@ export function AuthProvider({ children }) {
   const supabase                = createClient();
 
   useEffect(() => {
-    // Sessão inicial
+
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (user) {
         setUsuario({
@@ -23,7 +23,7 @@ export function AuthProvider({ children }) {
       setLoading(false);
     });
 
-    // Listener de mudanças de sessão
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, session) => {
         if (session?.user) {

@@ -35,7 +35,7 @@ export async function POST(request) {
     if (!user) return NextResponse.json({ erro: "Não autorizado" }, { status: 401 });
 
     const payload = await request.json();
-    
+
     if (!payload.cliente_id || !payload.nome_arquivo) {
       return NextResponse.json({ erro: "Campos obrigatórios ausentes" }, { status: 400 });
     }

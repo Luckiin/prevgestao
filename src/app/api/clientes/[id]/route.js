@@ -23,7 +23,7 @@ export async function GET(request, { params }) {
 
     const data = await buscarCliente(supabase, id);
     if (!data) return NextResponse.json({ erro: "Cliente não encontrado" }, { status: 404 });
-    
+
     return NextResponse.json(data);
   } catch (err) {
     console.error("[GET /api/clientes/[id]]", err.message);

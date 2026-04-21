@@ -13,7 +13,7 @@ export default function StatCard({ icon: Icon, label, value, sub, color = "brand
   };
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       whileHover={{ y: -4 }}
@@ -27,7 +27,7 @@ export default function StatCard({ icon: Icon, label, value, sub, color = "brand
           </h3>
           {sub && <p className="text-[11px] text-ink-600 mt-1 truncate">{sub}</p>}
         </div>
-        
+
         <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center bg-white/[0.03] border border-white/[0.05] shadow-inner", colors[color])}>
           <Icon size={18} />
         </div>

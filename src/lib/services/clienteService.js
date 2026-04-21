@@ -1,7 +1,3 @@
-/**
- * clienteService.js
- * CRUD de clientes + regra de ano de referência
- */
 import { calcIdade } from "@/lib/utils";
 import { registrarAuditoria } from "./auditService";
 
@@ -15,7 +11,7 @@ const SELECT_COMPLETO = `
   subdivisoes (id, nome, tipo)
 `;
 
-// Para listagens — sem credenciais, mais leve
+
 const SELECT_LISTA = `
   id, nome, cpf, data_nascimento,
   tipo_processo, subdivisao_id, status, situacao, ano_referencia,
@@ -24,7 +20,7 @@ const SELECT_LISTA = `
   subdivisoes (id, nome, tipo)
 `;
 
-/** Lista clientes com filtros opcionais */
+
 export async function listarClientes(supabase, {
   status,
   tipo_processo,
@@ -46,7 +42,7 @@ export async function listarClientes(supabase, {
   if (tipo_processo)  query = query.eq("tipo_processo", tipo_processo);
   if (situacao)       query = query.eq("situacao", situacao);
   if (subdivisao_id)   query = query.eq("subdivisao_id", subdivisao_id);
-  
+
   if (subdivisao_nome) {
     const { data: subs } = await supabase.from("subdivisoes").select("id").eq("nome", subdivisao_nome);
     if (subs && subs.length > 0) {
@@ -71,7 +67,7 @@ export async function listarClientes(supabase, {
   };
 }
 
-/** Busca cliente por ID */
+
 export async function buscarCliente(supabase, id) {
   const { data, error } = await supabase
     .from("clientes")
@@ -86,11 +82,11 @@ export async function buscarCliente(supabase, id) {
   };
 }
 
-/** Cria novo cliente */
+
 export async function criarCliente(supabase, payload, usuarioEmail, usuarioNome) {
-  const { 
-    login_inss, senha_inss, documentos, prazos, subdivisoes, idade, 
-    id, criado_em, atualizado_em, data_entrada, ...resto 
+  const {
+    login_inss, senha_inss, documentos, prazos, subdivisoes, idade,
+    id, criado_em, atualizado_em, data_entrada, ...resto
   } = payload;
   const { data, error } = await supabase
     .from("clientes")
@@ -121,26 +117,26 @@ export async function criarCliente(supabase, payload, usuarioEmail, usuarioNome)
   };
 }
 
-/** Atualiza cliente */
+
 export async function atualizarCliente(supabase, id, payload, usuarioEmail, usuarioNome) {
-  // Busca antes para auditoria (quase todos os campos para um diff completo)
+
   const { data: anterior } = await supabase
     .from("clientes")
     .select(`
-      nome, cpf, data_nascimento, tipo_processo, subdivisao_id, status, situacao, 
+      nome, cpf, data_nascimento, tipo_processo, subdivisao_id, status, situacao,
       numero_processo, valor_beneficio, observacoes, ano_referencia,
       subdivisoes (nome)
     `)
     .eq("id", id)
     .single();
 
-  const { 
-    login_inss, senha_inss, documentos, prazos, subdivisoes, idade, 
-    id: _id, criado_em, atualizado_em, data_entrada, ...resto 
+  const {
+    login_inss, senha_inss, documentos, prazos, subdivisoes, idade,
+    id: _id, criado_em, atualizado_em, data_entrada, ...resto
   } = payload;
   const updates = { ...resto };
 
-  // Atualiza credenciais se enviadas
+
   if (login_inss !== undefined) updates.login_inss = login_inss || null;
   if (senha_inss !== undefined) updates.senha_inss = senha_inss || null;
 
@@ -160,11 +156,11 @@ export async function atualizarCliente(supabase, id, payload, usuarioEmail, usua
     registro_id:      id,
     entidade_id:      id,
     acao:             "UPDATE",
-    dados_anteriores: { 
+    dados_anteriores: {
       ...anterior,
-      subdivisao_nome: anterior.subdivisoes?.nome 
+      subdivisao_nome: anterior.subdivisoes?.nome
     },
-    dados_novos:      { 
+    dados_novos:      {
       nome: data.nome, cpf: data.cpf, data_nascimento: data.data_nascimento,
       tipo_processo: data.tipo_processo, subdivisao_id: data.subdivisao_id,
       subdivisao_nome: data.subdivisoes?.nome,
@@ -182,7 +178,7 @@ export async function atualizarCliente(supabase, id, payload, usuarioEmail, usua
   };
 }
 
-/** Exclui cliente */
+
 export async function excluirCliente(supabase, id, usuarioEmail, usuarioNome) {
   const { data: anterior } = await supabase
     .from("clientes")
@@ -204,7 +200,7 @@ export async function excluirCliente(supabase, id, usuarioEmail, usuarioNome) {
   });
 }
 
-/** Busca histórico anual de um cliente */
+
 export async function buscarHistoricoAnual(supabase, clienteId) {
   const { data, error } = await supabase
     .from("historico_anual")

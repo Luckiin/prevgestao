@@ -3,7 +3,7 @@ import { Sk, SkCard } from "@/components/ui/Skeleton";
 export default function LoadingTabela() {
   return (
     <div style={{ display:"flex", flexDirection:"column", height:"100vh" }}>
-      {/* Toolbar */}
+
       <div style={{ display:"flex", alignItems:"center", gap:8, padding:"12px 20px", borderBottom:"1px solid rgba(255,255,255,.05)", background:"rgba(13,3,7,.5)" }}>
         <Sk w={130} h={36} rounded={8} />
         <Sk w={90} h={36} rounded={8} />
@@ -13,19 +13,19 @@ export default function LoadingTabela() {
         <Sk w={32} h={32} rounded={8} />
       </div>
 
-      {/* Meses */}
+
       <div style={{ display:"flex", alignItems:"center", gap:6, padding:"10px 20px", borderBottom:"1px solid rgba(255,255,255,.04)", background:"rgba(13,3,7,.3)" }}>
         <Sk w={90} h={28} rounded={14} />
         {[...Array(12)].map((_,i) => <Sk key={i} w={44} h={28} rounded={14} />)}
       </div>
 
-      {/* Tabela */}
+
       <div style={{ flex:1, overflow:"hidden" }}>
-        {/* Header */}
+
         <div style={{ display:"grid", gridTemplateColumns:"40px 32px 2fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 80px", gap:8, padding:"10px 12px", background:"rgba(13,3,7,.6)", borderBottom:"1px solid rgba(255,255,255,.06)" }}>
           {[...Array(11)].map((_,i) => <Sk key={i} h={12} rounded={3} />)}
         </div>
-        {/* Rows */}
+
         {[...Array(8)].map((_,i) => (
           <div key={i} style={{ display:"grid", gridTemplateColumns:"40px 32px 2fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 80px", gap:8, padding:"14px 12px", borderBottom:"1px solid rgba(255,255,255,.03)", alignItems:"center" }}>
             <Sk h={16} rounded={4} />
@@ -43,12 +43,12 @@ export default function LoadingTabela() {
         ))}
       </div>
 
-      {/* Paginação */}
+
       <div style={{ padding:"10px 20px", borderTop:"1px solid rgba(255,255,255,.05)", background:"rgba(13,3,7,.4)" }}>
         <Sk w={300} h={20} rounded={4} />
       </div>
 
-      {/* Totais */}
+
       <div style={{ display:"flex", gap:24, padding:"10px 20px", borderTop:"1px solid rgba(255,255,255,.06)", background:"rgba(10,2,5,.6)" }}>
         <Sk w={160} h={16} rounded={4} />
         <Sk w={140} h={16} rounded={4} />

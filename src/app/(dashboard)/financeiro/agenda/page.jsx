@@ -10,10 +10,10 @@ const MESES_PT = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho",
 export default function AgendaFinanceiro() {
   const hoje = new Date();
   const [ano,  setAno]  = useState(hoje.getFullYear());
-  const [mes,  setMes]  = useState(hoje.getMonth()); // 0-indexed
+  const [mes,  setMes]  = useState(hoje.getMonth());
   const [lancamentos, setLancamentos] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [view, setView] = useState("mes"); // mes | semana | dia
+  const [view, setView] = useState("mes");
 
   async function carregar() {
     setLoading(true);
@@ -33,14 +33,14 @@ export default function AgendaFinanceiro() {
     setMes(m); setAno(a);
   };
 
-  // Dias do calendário
+
   const primeiroDia = new Date(ano, mes, 1).getDay();
   const diasNoMes   = new Date(ano, mes + 1, 0).getDate();
   const cells = [];
   for (let i = 0; i < primeiroDia; i++) cells.push(null);
   for (let d = 1; d <= diasNoMes; d++) cells.push(d);
 
-  // Lançamentos por dia
+
   const porDia = {};
   lancamentos.forEach(l => {
     const d = new Date(l.data_vencimento + "T12:00:00").getDate();
@@ -57,7 +57,7 @@ export default function AgendaFinanceiro() {
 
   return (
     <div className="p-6 max-w-6xl mx-auto space-y-5">
-      {/* Header */}
+
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-xl font-bold text-ink-100 flex items-center gap-2">
@@ -65,7 +65,7 @@ export default function AgendaFinanceiro() {
           </h1>
         </div>
         <div className="flex items-center gap-3 flex-wrap">
-          {/* Visualizar */}
+
           <div className="flex items-center gap-1 glass-card rounded px-1 py-1">
             {["dia","semana","mes"].map(v => (
               <button key={v} onClick={() => setView(v)}
@@ -77,7 +77,7 @@ export default function AgendaFinanceiro() {
         </div>
       </div>
 
-      {/* Sumário do mês */}
+
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
           { label: "A Pagar",    value: fmt(totalAPagar),   color: "#ef4444", bg: "rgba(239,68,68,.1)"    },
@@ -92,7 +92,7 @@ export default function AgendaFinanceiro() {
         ))}
       </div>
 
-      {/* Nav do mês */}
+
       <div className="glass-card rounded-2xl overflow-hidden">
         <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 20px", borderBottom: "1px solid rgba(201,169,110,.07)" }}>
           <button onClick={() => navMes(-1)} style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(201,169,110,.6)", display: "flex", alignItems: "center", padding: 4, borderRadius: 4 }}><ChevronLeft size={16} /></button>
@@ -104,7 +104,7 @@ export default function AgendaFinanceiro() {
           </button>
         </div>
 
-        {/* Grade */}
+
         <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", borderBottom: "1px solid rgba(201,169,110,.07)" }}>
           {SEMANA.map(s => (
             <div key={s} style={{ padding: "10px 8px", textAlign: "center", fontSize: 11, fontWeight: 600, color: "rgba(201,169,110,.5)", letterSpacing: "0.08em" }}>{s}</div>

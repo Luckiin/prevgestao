@@ -1,7 +1,3 @@
-/**
- * subdivisaoService.js
- * Gerenciamento das subdivisões previdenciárias dinâmicas
- */
 import { registrarAuditoria } from "./auditService";
 
 export async function listarSubdivisoes(supabase, tipo) {
@@ -62,7 +58,7 @@ export async function atualizarSubdivisao(supabase, id, payload, usuarioEmail, u
 }
 
 export async function excluirSubdivisao(supabase, id, usuarioEmail, usuarioNome) {
-  // Desativa em vez de deletar (clientes podem referenciar)
+
   const { data, error } = await supabase
     .from("subdivisoes")
     .update({ ativo: false })

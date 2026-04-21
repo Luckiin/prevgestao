@@ -19,7 +19,7 @@ export default function Areas() {
     <section id="areas" style={{ background: "#0d0307", padding: "120px 0", borderTop: "1px solid rgba(201,169,110,.1)" }}>
       <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 32px" }}>
 
-        {/* Header */}
+
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 64, marginBottom: 80, alignItems: "end" }}>
           <div>
             <div style={{ fontSize: 11, letterSpacing: "0.3em", textTransform: "uppercase", color: "#C9A96E", marginBottom: 24, display: "flex", alignItems: "center", gap: 12 }}>
@@ -45,7 +45,7 @@ export default function Areas() {
           </div>
         </div>
 
-        {/* Grid de áreas */}
+
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 1, background: "rgba(201,169,110,.15)", border: "1px solid rgba(201,169,110,.15)" }}>
           {AREAS.map((a) => (
             <div key={a.num}

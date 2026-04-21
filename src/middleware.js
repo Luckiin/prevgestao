@@ -14,9 +14,7 @@ const ROTAS_PROTEGIDAS = [
 export async function middleware(request) {
   const { pathname } = request.nextUrl;
 
-  // RSC Bypass: Torna as navegações internas instantâneas.
-  // Segurança: Só permitimos o bypass se NÃO for uma rota de API (APIs SEMPRE devem ser validadas internamente)
-  // E apenas se for uma requisição interna do Next.js.
+
   const isApi = pathname.startsWith("/api/");
   const isRSC = request.headers.get("RSC") || request.headers.get("Next-Router-State-Tree") || request.headers.get("Next-Router-Prefetch");
 
@@ -52,12 +50,12 @@ export async function middleware(request) {
   const user = session?.user;
   const rotaProtegida = ROTAS_PROTEGIDAS.some((r) => pathname.startsWith(r));
 
-  // Usuário autenticado tentando acessar login → redireciona para home
+
   if (user && pathname.startsWith("/login")) {
     return NextResponse.redirect(new URL("/home", request.url));
   }
 
-  // Rota protegida sem usuário → redireciona para login
+
   if (rotaProtegida && !user) {
     const url = new URL("/login", request.url);
     url.searchParams.set("next", pathname);

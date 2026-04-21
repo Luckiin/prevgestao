@@ -25,7 +25,7 @@ export async function POST(request) {
     if (!user) return NextResponse.json({ erro: "Não autorizado" }, { status: 401 });
 
     const payload = await request.json();
-    
+
     if (!payload.nome) {
       return NextResponse.json({ erro: "Nome da subdivisão é obrigatório" }, { status: 400 });
     }

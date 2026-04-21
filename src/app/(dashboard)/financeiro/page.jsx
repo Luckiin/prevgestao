@@ -27,7 +27,7 @@ const CORES        = ["#C9A96E","#22c55e","#8b5cf6","#f97316","#06b6d4","#ec4899
 
 function cn(...c) { return c.filter(Boolean).join(" "); }
 
-// ── Tooltip personalizado ────────────────────────────────────────────────────
+
 function CustomTooltip({ active, payload }) {
   if (!active || !payload?.length) return null;
   return (
@@ -38,7 +38,7 @@ function CustomTooltip({ active, payload }) {
   );
 }
 
-// ── Label central do donut ───────────────────────────────────────────────────
+
 function CenterLabel({ viewBox, total, linha1 }) {
   const { cx, cy } = viewBox;
   return (
@@ -54,7 +54,6 @@ function CenterLabel({ viewBox, total, linha1 }) {
 }
 
 
-// ── Seção Despesas / Receitas do mês ─────────────────────────────────────────
 function SecaoMes({ tipo, lancamentos, loading, onAbrirModal, onRecarregar }) {
   const [viewTab, setViewTab] = useState("grafico");
   const [excluindoId, setExcluindoId] = useState(null);
@@ -65,11 +64,11 @@ function SecaoMes({ tipo, lancamentos, loading, onAbrirModal, onRecarregar }) {
   const Icon        = isDespesa ? ArrowDownCircle : ArrowUpCircle;
   const mesNome     = MESES_FULL[new Date().getMonth()];
 
-  // Lançamentos quitados — estes aparecem no gráfico
+
   const quitados = lancamentos.filter(l => l.status === "pago");
   const totalQuitado = quitados.reduce((s, l) => s + (l.valor_pago || l.valor || 0), 0);
 
-  // Dados do donut agrupados por categoria (apenas quitados)
+
   const dadosPie = (() => {
     const mapa = {};
     quitados.forEach(l => {
@@ -79,7 +78,7 @@ function SecaoMes({ tipo, lancamentos, loading, onAbrirModal, onRecarregar }) {
     return Object.entries(mapa).map(([name, value]) => ({ name, value }));
   })();
 
-  // Donut vazio — exibe anel cinza sem valor
+
   const pieData = dadosPie.length > 0 ? dadosPie : [{ name: "_empty", value: 1 }];
   const isEmpty  = dadosPie.length === 0;
 
@@ -115,7 +114,7 @@ function SecaoMes({ tipo, lancamentos, loading, onAbrirModal, onRecarregar }) {
 
   return (
     <div className="glass-card rounded-2xl overflow-hidden flex flex-col min-h-[340px]">
-      {/* Cabeçalho */}
+
       <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/[0.05]">
         <div className="flex items-center gap-2">
           <Icon size={15} style={{ color: accentColor }} />
@@ -124,7 +123,7 @@ function SecaoMes({ tipo, lancamentos, loading, onAbrirModal, onRecarregar }) {
           </h3>
         </div>
         <div className="flex items-center gap-1">
-          {/* Tabs de visualização */}
+
           {[["detalhe","Detalhe",List],["grafico","Gráfico",BarChart2]].map(([k,label,TabIcon]) => (
             <button key={k} onClick={() => setViewTab(k)}
               className={cn("flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all",
@@ -152,7 +151,7 @@ function SecaoMes({ tipo, lancamentos, loading, onAbrirModal, onRecarregar }) {
           <div className="w-5 h-5 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor:"rgba(201,169,110,.3)", borderTopColor:"#C9A96E" }} />
         </div>
       ) : viewTab === "grafico" ? (
-        /* ═══ Visão Gráfico ═══ */
+
         <div className="flex flex-col items-center px-6 pt-2 pb-4">
           <ResponsiveContainer width="100%" height={220}>
             <PieChart>
@@ -185,7 +184,7 @@ function SecaoMes({ tipo, lancamentos, loading, onAbrirModal, onRecarregar }) {
             </PieChart>
           </ResponsiveContainer>
 
-          {/* Legenda de categorias */}
+
           {!isEmpty ? (
             <div className="w-full grid grid-cols-2 gap-x-6 gap-y-2.5 mt-1">
               {dadosPie.map((d, idx) => (
@@ -206,7 +205,7 @@ function SecaoMes({ tipo, lancamentos, loading, onAbrirModal, onRecarregar }) {
             </button>
           )}
 
-          {/* Totalizador pendentes vs quitados */}
+
           {lancamentos.length > 0 && (
             <div className="w-full mt-4 pt-3 border-t border-white/[0.05] grid grid-cols-2 gap-2 text-[11px]">
               <div className="flex justify-between">
@@ -223,7 +222,7 @@ function SecaoMes({ tipo, lancamentos, loading, onAbrirModal, onRecarregar }) {
           )}
         </div>
       ) : (
-        /* ═══ Visão Detalhe ═══ */
+
         <div className="flex flex-col flex-1">
           {lancamentos.length === 0 ? (
             <button onClick={onAbrirModal}
@@ -288,7 +287,7 @@ function SecaoMes({ tipo, lancamentos, loading, onAbrirModal, onRecarregar }) {
         </div>
       )}
 
-      {/* Modal de confirmação de exclusão */}
+
       <Modal open={!!excluindoId} onClose={() => !isDeleting && setExcluindoId(null)} title={`Excluir ${isDespesa ? "despesa" : "receita"}`} size="sm">
         <p className="text-sm text-ink-300 mb-6">
           Tem certeza que deseja excluir este lançamento? Esta ação não pode ser desfeita.
@@ -302,7 +301,7 @@ function SecaoMes({ tipo, lancamentos, loading, onAbrirModal, onRecarregar }) {
   );
 }
 
-// ── Dashboard principal ──────────────────────────────────────────────────────
+
 export default function FinanceiroDashboard() {
   const [modal, setModal]       = useState(null);
   const mesISO = new Date().toISOString().slice(0,7);
@@ -315,10 +314,10 @@ export default function FinanceiroDashboard() {
   const loading = loadDash;
   const lancLoading = loadDesp || loadRec;
 
-  function recarregar() { 
-    mutDash(); 
-    mutDesp(); 
-    mutRec(); 
+  function recarregar() {
+    mutDash();
+    mutDesp();
+    mutRec();
   }
 
   const grafico = MESES.map((mes,i) => ({
@@ -347,7 +346,7 @@ export default function FinanceiroDashboard() {
         </div>
       ) : (
         <>
-          {/* KPI Cards */}
+
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
             {[
               { label:"Saldo Atual", value:fmt(d?.saldo_atual),    icon:DollarSign,    color:"#C9A96E", bg:"rgba(201,169,110,.1)" },
@@ -367,7 +366,7 @@ export default function FinanceiroDashboard() {
             ))}
           </div>
 
-          {/* Gráfico anual */}
+
           <div className="glass-card rounded-2xl p-6">
             <h2 className="text-sm font-semibold text-ink-200 mb-4">Despesas e Receitas de {new Date().getFullYear()}</h2>
             <ResponsiveContainer width="100%" height={220}>
@@ -383,7 +382,7 @@ export default function FinanceiroDashboard() {
             </ResponsiveContainer>
           </div>
 
-          {/* Resumo do mês */}
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {[
               { titulo:"Pagamentos",   sub:mesAtual, itens:[
@@ -428,11 +427,11 @@ export default function FinanceiroDashboard() {
       )}
 
       {modal && (
-        <ModalLancamento 
-          tipo={modal.tipo} 
-          original={modal.original} 
-          onClose={() => setModal(null)} 
-          onSalvo={recarregar} 
+        <ModalLancamento
+          tipo={modal.tipo}
+          original={modal.original}
+          onClose={() => setModal(null)}
+          onSalvo={recarregar}
         />
       )}
     </div>

@@ -1,20 +1,11 @@
-/**
- * calendarUtils.js
- * Utilitários para lógica de calendário mensal
- */
-
-/**
- * Retorna os dias de um mês específico para montar a grade
- */
 export function getDaysInMonth(year, month) {
   const date = new Date(year, month, 1);
   const days = [];
-  
-  // Encontrar o primeiro dia da semana (0 = Domingo)
-  // Se quisermos que Segunda seja o primeiro dia, ajustamos aqui
-  const startDay = date.getDay(); 
-  
-  // Adicionar dias vazios ou do mês anterior para completar a primeira semana
+
+
+  const startDay = date.getDay();
+
+
   const prevMonthLastDay = new Date(year, month, 0).getDate();
   for (let i = startDay - 1; i >= 0; i--) {
     days.push({
@@ -24,8 +15,8 @@ export function getDaysInMonth(year, month) {
       isCurrentMonth: false,
     });
   }
-  
-  // Dias do mês atual
+
+
   const lastDay = new Date(year, month + 1, 0).getDate();
   for (let i = 1; i <= lastDay; i++) {
     days.push({
@@ -35,9 +26,9 @@ export function getDaysInMonth(year, month) {
       isCurrentMonth: true,
     });
   }
-  
-  // Completar a última semana com dias do próximo mês
-  const totalCells = days.length > 35 ? 42 : 35; // 5 ou 6 linhas
+
+
+  const totalCells = days.length > 35 ? 42 : 35;
   const nextDaysNeeded = totalCells - days.length;
   for (let i = 1; i <= nextDaysNeeded; i++) {
     days.push({
@@ -47,13 +38,11 @@ export function getDaysInMonth(year, month) {
       isCurrentMonth: false,
     });
   }
-  
+
   return days;
 }
 
-/**
- * Formata data no estilo ISO (YYYY-MM-DD) preservando fuso local para comparação
- */
+
 export function formatISOLocal(date) {
   const d = new Date(date);
   const year = d.getFullYear();

@@ -11,7 +11,7 @@ export default function LoadingFinanceiro() {
         <Sk w={32} h={32} rounded={8} />
       </div>
 
-      {/* KPI Cards */}
+
       <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:16, marginBottom:20 }}>
         {[1,2,3,4].map(i => (
           <SkCard key={i}>
@@ -26,13 +26,13 @@ export default function LoadingFinanceiro() {
         ))}
       </div>
 
-      {/* Gráfico */}
+
       <SkCard style={{ marginBottom:20 }}>
         <Sk w={220} h={15} rounded={4} />
         <div style={{ marginTop:16 }}><Sk w="100%" h={220} rounded={8} /></div>
       </SkCard>
 
-      {/* 3 cards resumo */}
+
       <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:16, marginBottom:20 }}>
         {[1,2,3].map(i => (
           <SkCard key={i}>
@@ -45,7 +45,7 @@ export default function LoadingFinanceiro() {
         ))}
       </div>
 
-      {/* Donuts */}
+
       <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:20 }}>
         {[1,2].map(i => (
           <SkCard key={i}>

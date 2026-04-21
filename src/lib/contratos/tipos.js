@@ -1,7 +1,3 @@
-/**
- * Constantes de tipos de ação e documento — seguro para uso no cliente e servidor
- */
-
 export const TIPOS_ACAO = [
   { value: "aposentadoria-idade",    label: "Aposentadoria por Idade"                 },
   { value: "aposentadoria-invalidez",label: "Aposentadoria por Invalidez"             },

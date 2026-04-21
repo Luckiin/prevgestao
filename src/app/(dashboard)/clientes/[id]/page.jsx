@@ -36,15 +36,15 @@ const FIELD_LABELS = {
 function AuditDiff({ anterior, novo }) {
   if (!anterior || !novo) return null;
   const changes = [];
-  
+
   Object.keys(novo).forEach(key => {
     let oldVal = anterior[key];
     let newVal = novo[key];
-    
-    // Pequenos tratamentos para evitar falso positivo (null vs undefined vs "")
+
+
     if ((oldVal || "") === (newVal || "")) return;
-    if (key === "subdivisao_id") return; // Pulamos o ID técnico agora que temos o nome
-    
+    if (key === "subdivisao_id") return;
+
     changes.push({
       key,
       label: FIELD_LABELS[key] || key,
@@ -102,7 +102,7 @@ export default function ClienteDetalhePage() {
   const [docExcluindo, setDocExcluindo] = useState(null);
   const [prazoExcluindo, setPrazoExcluindo] = useState(null);
 
-  // Novo prazo
+
   const [novoPrazo, setNovoPrazo] = useState({ descricao: "", data_prazo: "" });
   const [addingPrazo, setAddingPrazo] = useState(false);
 
@@ -130,10 +130,10 @@ export default function ClienteDetalhePage() {
       headers: { "Content-Type": "application/json" },
       body:    JSON.stringify(payload),
     });
-    if (res.ok) { 
+    if (res.ok) {
       toast.success("Dados do cliente atualizados");
-      setEditModal(false); 
-      carregar(); 
+      setEditModal(false);
+      carregar();
     }
     else toast.error("Erro ao salvar as alterações");
     setSaving(false);
@@ -148,10 +148,10 @@ export default function ClienteDetalhePage() {
       headers: { "Content-Type": "application/json" },
       body:    JSON.stringify({ ...novoPrazo, cliente_id: id }),
     });
-    if (res.ok) { 
+    if (res.ok) {
       toast.success("Prazo adicionado com sucesso");
-      setNovoPrazo({ descricao: "", data_prazo: "" }); 
-      carregar(); 
+      setNovoPrazo({ descricao: "", data_prazo: "" });
+      carregar();
     } else {
       toast.error("Erro ao adicionar prazo");
     }
@@ -172,7 +172,7 @@ export default function ClienteDetalhePage() {
     try {
       const res = await fetch(`/api/prazos/${prazoExcluindo.id}`, { method: "DELETE" });
       if (!res.ok) throw new Error("Não foi possível excluir o prazo.");
-      
+
       toast.success("Prazo removido");
       setPrazoExcluindo(null);
       carregar();
@@ -183,7 +183,7 @@ export default function ClienteDetalhePage() {
 
   async function processarArquivo(file) {
     try {
-      // 1. Pede URL assinada para o Supabase
+
       const resUrl = await fetch("/api/documentos/upload-url", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -192,7 +192,7 @@ export default function ClienteDetalhePage() {
       const dataUrl = await resUrl.json();
       if (!resUrl.ok) throw new Error(dataUrl.erro);
 
-      // 2. Upload direto para o Storage
+
       const resUpload = await fetch(dataUrl.signedUrl, {
         method: "PUT",
         body: file,
@@ -200,7 +200,7 @@ export default function ClienteDetalhePage() {
       });
       if (!resUpload.ok) throw new Error(`Falha no upload de ${file.name}`);
 
-      // 3. Registra no banco de dados local
+
       const resReg = await fetch("/api/documentos", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -241,7 +241,7 @@ export default function ClienteDetalhePage() {
       const url = `/api/documentos/${docId}${force ? "?download=1" : ""}`;
       const res = await fetch(url);
       const json = await res.json();
-      
+
       if (!res.ok) throw new Error(json.erro || "Falha ao recuperar link.");
 
       if (json.url) {
@@ -293,7 +293,7 @@ export default function ClienteDetalhePage() {
 
   return (
     <div className="p-6 max-w-5xl mx-auto space-y-5">
-      {/* Header */}
+
       <div className="flex items-start justify-between flex-wrap gap-4">
         <div className="flex items-center gap-3">
           <button onClick={() => router.back()} className="text-ink-500 hover:text-ink-200 transition-colors">
@@ -313,7 +313,7 @@ export default function ClienteDetalhePage() {
         </div>
       </div>
 
-      {/* Tabs */}
+
       <div className="flex flex-wrap gap-2">
         {[
           { id: "dados",      label: "Dados" },
@@ -328,40 +328,40 @@ export default function ClienteDetalhePage() {
         ))}
       </div>
 
-      {/* Tab: Dados */}
+
       {tab === "dados" && (
         <div className="glass-card rounded-2xl p-6 grid grid-cols-1 sm:grid-cols-2 gap-5">
-          {/* 1. Nome — exibido no cabeçalho da página, mas repetimos aqui para completude */}
-          {/* 2. RG */}
+
+
           <Campo label="RG" value={cliente.rg || "—"} />
-          {/* 3. CPF — exibido no cabeçalho */}
-          {/* 4. Data de nascimento */}
+
+
           <Campo label="Data de nascimento" value={formatData(cliente.data_nascimento)} />
           <Campo label="Idade" value={cliente.idade ? `${cliente.idade} anos` : "—"} />
-          {/* 5. Estado civil */}
+
           <Campo label="Estado civil" value={cliente.estado_civil || "—"} />
-          {/* 6. Endereço */}
+
           <div className="sm:col-span-2">
             <p className="text-xs text-ink-500 mb-1">Endereço</p>
             <p className="text-sm text-ink-200">{cliente.endereco || "—"}</p>
           </div>
-          {/* 7. CEP */}
+
           <Campo label="CEP" value={cliente.cep || "—"} />
-          {/* 8. Nacionalidade */}
+
           <Campo label="Nacionalidade" value={cliente.nacionalidade || "—"} />
-          {/* 9. Telefone */}
+
           <Campo label="Telefone" value={cliente.telefone || "—"} />
           <Campo label="Profissão" value={cliente.profissao || "—"} />
 
-          {/* Credenciais INSS */}
+
           <div className="sm:col-span-2 pt-2 border-t border-white/[0.05]">
             <p className="text-xs font-medium text-ink-500 mb-3 flex items-center gap-2">
               <Shield size={12} /> Credenciais INSS
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* 10. Login INSS */}
+
               <Campo label="Login INSS" value={cliente.login_inss || "—"} />
-              {/* 11. Senha INSS */}
+
               <div>
                 <p className="text-xs text-ink-500 mb-1">Senha INSS</p>
                 <div className="flex items-center gap-2">
@@ -381,24 +381,24 @@ export default function ClienteDetalhePage() {
             </div>
           </div>
 
-          {/* Processo */}
+
           <div className="sm:col-span-2 pt-2 border-t border-white/[0.05]" />
-          {/* 12. Tipo do processo */}
+
           <Campo label="Tipo de processo" value={cliente.tipo_processo?.charAt(0).toUpperCase() + cliente.tipo_processo?.slice(1)} />
-          {/* 13. Subdivisão */}
+
           <Campo label="Subdivisão" value={cliente.subdivisoes?.nome} />
-          {/* 14. Status */}
+
           <Campo label="Status" value={cliente.status || "—"} />
-          {/* 15. Número do processo */}
+
           <Campo label="Número do processo" value={cliente.numero_processo || "—"} />
-          {/* 16. Situação */}
+
           <Campo label="Situação" value={cliente.situacao || "—"} />
-          {/* 17. Valor */}
+
           <Campo label="Valor estimado" value={formatMoeda(cliente.valor_beneficio)} />
           <Campo label="Data de entrada" value={formatDataHora(cliente.data_entrada)} />
           <Campo label="Última atualização" value={formatDataHora(cliente.atualizado_em)} />
 
-          {/* 18. Descrição */}
+
           <div className="sm:col-span-2">
             <p className="text-xs text-ink-500 mb-1">Descrição / Observações</p>
             <p className="text-sm text-ink-200 whitespace-pre-line">{cliente.observacoes || "—"}</p>
@@ -406,10 +406,10 @@ export default function ClienteDetalhePage() {
         </div>
       )}
 
-      {/* Tab: Prazos */}
+
       {tab === "prazos" && (
         <div className="space-y-4">
-          {/* Adicionar prazo */}
+
           <div className="glass-card rounded-2xl p-5">
             <h3 className="text-sm font-semibold text-ink-200 mb-4">Adicionar prazo</h3>
             <form onSubmit={handleAddPrazo} className="flex flex-wrap gap-3">
@@ -435,7 +435,7 @@ export default function ClienteDetalhePage() {
             </form>
           </div>
 
-          {/* Lista de prazos */}
+
           <div className="glass-card rounded-2xl overflow-hidden">
             {prazos.length === 0 ? (
               <p className="text-sm text-ink-500 p-6 text-center">Nenhum prazo cadastrado.</p>
@@ -486,7 +486,7 @@ export default function ClienteDetalhePage() {
         </div>
       )}
 
-      {/* Tab: Documentos */}
+
       {tab === "documentos" && (
         <div className="space-y-4">
           <DropZone onFilesDropped={handleFiles} disabled={uploading}>
@@ -553,7 +553,7 @@ export default function ClienteDetalhePage() {
           </div>
       )}
 
-      {/* Tab: Histórico Anual */}
+
       {tab === "historico" && (
         <div className="glass-card rounded-2xl p-5">
           <h3 className="text-sm font-semibold text-ink-200 mb-4 flex items-center gap-2">
@@ -581,7 +581,7 @@ export default function ClienteDetalhePage() {
         </div>
       )}
 
-      {/* Tab: Auditoria */}
+
       {tab === "auditoria" && (
         <div className="glass-card rounded-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-2">
           {auditoria.length === 0 ? (
@@ -592,7 +592,7 @@ export default function ClienteDetalhePage() {
                 const isDoc = a.tabela === "documentos";
                 const isPrazo = a.tabela === "prazos";
                 const isCliente = a.tabela === "clientes";
-                
+
                 let acaoMsg = a.acao;
                 if (a.acao === "INSERT") acaoMsg = isDoc ? "Anexou documento" : isPrazo ? "Adicionou prazo" : "Cadastrou cliente";
                 if (a.acao === "UPDATE") acaoMsg = isPrazo ? "Atualizou prazo" : "Editou dados";
@@ -612,7 +612,7 @@ export default function ClienteDetalhePage() {
                       <p className="text-sm font-medium text-ink-100 italic">
                         {acaoMsg} <span className="text-ink-300 not-italic font-normal">{desc && `· ${desc}`}</span>
                       </p>
-                      
+
                       {a.acao === "UPDATE" && a.tabela === "clientes" && (
                         <AuditDiff anterior={a.dados_anteriores} novo={a.dados_novos} />
                       )}
@@ -635,12 +635,12 @@ export default function ClienteDetalhePage() {
         </div>
       )}
 
-      {/* Modal de edição */}
+
       <Modal open={editModal} onClose={() => setEditModal(false)} title="Editar cliente" size="lg">
         <ClienteForm key={cliente?.id} inicial={cliente} onSubmit={handleSalvar} loading={saving} />
       </Modal>
 
-      {/* Confirmação de exclusão de documento */}
+
       <Modal open={!!docExcluindo} onClose={() => setDocExcluindo(null)} title="Excluir documento" size="sm">
         <p className="text-sm text-ink-300 mb-6">
           Tem certeza que deseja excluir o documento <strong className="text-ink-100">{docExcluindo?.nome}</strong>?
@@ -652,7 +652,7 @@ export default function ClienteDetalhePage() {
         </div>
       </Modal>
 
-      {/* Confirmação de exclusão de prazo */}
+
       <Modal open={!!prazoExcluindo} onClose={() => setPrazoExcluindo(null)} title="Excluir prazo" size="sm">
         <p className="text-sm text-ink-300 mb-6">
           Tem certeza que deseja excluir o prazo <strong className="text-ink-100">{prazoExcluindo?.descricao}</strong>?

@@ -2,14 +2,14 @@
 
 import { useEffect, useState, useCallback, useMemo } from "react";
 import Link from "next/link";
-import { 
-  formatData, formatCPF, diasRestantes, corPrazo, cn 
+import {
+  formatData, formatCPF, diasRestantes, corPrazo, cn
 } from "@/lib/utils";
-import { 
-  getDaysInMonth, formatISOLocal, MONTH_NAMES, DAY_NAMES 
+import {
+  getDaysInMonth, formatISOLocal, MONTH_NAMES, DAY_NAMES
 } from "@/lib/calendarUtils";
-import { 
-  CalendarClock, CheckCircle, AlertTriangle, 
+import {
+  CalendarClock, CheckCircle, AlertTriangle,
   ChevronLeft, ChevronRight, List, Calendar as CalendarIcon,
   Clock, User, ExternalLink
 } from "lucide-react";
@@ -34,16 +34,16 @@ const item = {
 };
 
 export default function PrazosPage() {
-  const [viewMode, setViewMode] = useState("calendar"); // calendar | list
-  
-  // Estado do Calendário
+  const [viewMode, setViewMode] = useState("calendar");
+
+
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDayISO, setSelectedDayISO] = useState(formatISOLocal(new Date()));
 
   const currentYear = currentDate.getFullYear();
   const currentMonth = currentDate.getMonth();
 
-  // SWR para cache e background update
+
   const { data: resData, error, isLoading, mutate } = useSWR(`/api/prazos?limit=500`);
   const prazos = resData || [];
 
@@ -54,10 +54,10 @@ export default function PrazosPage() {
         headers: { "Content-Type": "application/json" },
         body:    JSON.stringify({ concluido: !concluido }),
       });
-      
+
       if (!res.ok) throw new Error("Não foi possível atualizar o prazo.");
-      
-      
+
+
       toast.success(concluido ? "Prazo reaberto" : "Prazo concluído com sucesso");
       mutate();
     } catch (err) {
@@ -65,7 +65,7 @@ export default function PrazosPage() {
     }
   }
 
-  // Navegação do Calendário
+
   const irParaMesAnterior = () => setCurrentDate(new Date(currentYear, currentMonth - 1, 1));
   const irParaMesProximo = () => setCurrentDate(new Date(currentYear, currentMonth + 1, 1));
   const irParaHoje = () => {
@@ -74,10 +74,10 @@ export default function PrazosPage() {
     setSelectedDayISO(formatISOLocal(hoje));
   };
 
-  // Cálculo dos dias do mês
+
   const calendarDays = useMemo(() => getDaysInMonth(currentYear, currentMonth), [currentYear, currentMonth]);
 
-  // Agrupa prazos por data para facilitar exibição no grid
+
   const prazosPorData = useMemo(() => {
     const map = {};
     prazos.forEach(p => {
@@ -88,11 +88,11 @@ export default function PrazosPage() {
     return map;
   }, [prazos]);
 
-  // Prazos do dia selecionado
+
   const prazosDoDia = prazosPorData[selectedDayISO] || [];
 
   const renderLista = () => (
-    <motion.div 
+    <motion.div
       variants={container}
       initial="hidden"
       animate="show"
@@ -104,8 +104,8 @@ export default function PrazosPage() {
         prazos.map(p => {
           const dias = diasRestantes(p.data_prazo);
           return (
-            <motion.div 
-              key={p.id} 
+            <motion.div
+              key={p.id}
               variants={item}
               className={cn("flex items-center gap-4 px-5 py-4 table-row-hover", p.concluido && "opacity-40")}
             >
@@ -146,7 +146,7 @@ export default function PrazosPage() {
 
   return (
     <div className="p-6 max-w-6xl mx-auto space-y-6">
-      {/* Header */}
+
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-ink-100 flex items-center gap-2">
@@ -157,16 +157,16 @@ export default function PrazosPage() {
         </div>
 
         <div className="flex items-center gap-2 bg-dark-200/50 p-1 rounded-xl border border-white/[0.05]">
-          <button 
+          <button
             onClick={() => setViewMode("calendar")}
-            className={cn("flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all", 
+            className={cn("flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all",
               viewMode === "calendar" ? "bg-gold-500 text-dark-400 shadow-lg" : "text-ink-500 hover:text-ink-200")}
           >
             <CalendarIcon size={14} /> Calendário
           </button>
-          <button 
+          <button
             onClick={() => setViewMode("list")}
-            className={cn("flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all", 
+            className={cn("flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all",
               viewMode === "list" ? "bg-gold-500 text-dark-400 shadow-lg" : "text-ink-500 hover:text-ink-200")}
           >
             <List size={14} /> Lista
@@ -182,11 +182,11 @@ export default function PrazosPage() {
         </div>
       ) : viewMode === "list" ? renderLista() : (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-in fade-in slide-in-from-bottom-4">
-          
-          {/* Calendário Grid */}
+
+
           <div className="lg:col-span-8 space-y-4">
             <div className="glass-card rounded-2xl overflow-hidden overflow-hidden border border-white/[0.05]">
-              {/* Controles do Calendário */}
+
               <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.05] bg-white/[0.01]">
                 <h2 className="text-lg font-bold text-ink-100">
                   {MONTH_NAMES[currentMonth]} <span className="text-ink-500 font-normal">{currentYear}</span>
@@ -204,14 +204,14 @@ export default function PrazosPage() {
                 </div>
               </div>
 
-              {/* Grid de Dias */}
+
               <div className="grid grid-cols-7 text-center">
                 {DAY_NAMES.map(d => (
                   <div key={d} className="py-2 text-[10px] uppercase tracking-wider font-bold text-ink-600 border-b border-white/[0.03]">
                     {d}
                   </div>
                 ))}
-                
+
                 {calendarDays.map((cell, idx) => {
                   const iso = `${cell.year}-${String(cell.month + 1).padStart(2, '0')}-${String(cell.day).padStart(2, '0')}`;
                   const isSelected = selectedDayISO === iso;
@@ -237,16 +237,16 @@ export default function PrazosPage() {
                       )}>
                         {cell.day}
                       </span>
-                      
-                      {/* Indicadores de Prazos */}
+
+
                       <div className="mt-auto w-full flex flex-wrap gap-0.5">
                         {dayPrazos.slice(0, 3).map(p => (
-                          <div 
-                            key={p.id} 
+                          <div
+                            key={p.id}
                             className={cn(
                               "h-1 rounded-full",
                               p.concluido ? "bg-success-500/50 w-2" : temUrgente ? "bg-danger-500 w-full" : "bg-gold-500 w-full"
-                            )} 
+                            )}
                           />
                         ))}
                         {dayPrazos.length > 3 && <div className="text-[9px] text-ink-600 font-bold">+{dayPrazos.length - 3}</div>}
@@ -262,7 +262,7 @@ export default function PrazosPage() {
             </div>
           </div>
 
-          {/* Lateral: Detalhes do Dia Selecionado */}
+
           <div className="lg:col-span-4 space-y-4">
             <div className="glass-card rounded-2xl p-6 border border-white/[0.05] h-full min-h-[400px]">
               <div className="mb-6">
@@ -296,7 +296,7 @@ export default function PrazosPage() {
                         >
                           {p.concluido && <CheckCircle size={12} />}
                         </button>
-                        
+
                         <div className="flex-1 space-y-2 min-w-0">
                           <div className="flex items-start justify-between gap-2">
                              <Badge variant={p.concluido ? "ativo" : dias < 0 ? "urgente" : "gold"}>
@@ -319,7 +319,7 @@ export default function PrazosPage() {
                   })
                 )}
               </div>
-              
+
               <div className="mt-8 pt-6 border-t border-white/[0.05]">
                 <p className="text-[10px] text-ink-600 uppercase font-bold text-center">PrevGestão · Agenda de Prazos</p>
               </div>

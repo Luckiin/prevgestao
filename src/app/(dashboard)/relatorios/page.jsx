@@ -47,7 +47,7 @@ export default function RelatoriosPage() {
         </div>
       ) : (
         <>
-          {/* Tabela resumo anual */}
+
           <div className="glass-card rounded-2xl overflow-hidden">
             <div className="px-5 py-4 border-b border-white/[0.05]">
               <h2 className="text-sm font-semibold text-ink-200">Resumo por Ano</h2>
@@ -82,9 +82,9 @@ export default function RelatoriosPage() {
             </div>
           </div>
 
-          {/* Gráficos */}
+
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-            {/* Clientes por ano */}
+
             <div className="glass-card rounded-2xl p-5">
               <h3 className="text-sm font-semibold text-ink-200 mb-5 flex items-center gap-2">
                 <Users size={15} className="text-gold-500" />
@@ -104,7 +104,7 @@ export default function RelatoriosPage() {
               </ResponsiveContainer>
             </div>
 
-            {/* Valor por ano */}
+
             <div className="glass-card rounded-2xl p-5">
               <h3 className="text-sm font-semibold text-ink-200 mb-5 flex items-center gap-2">
                 <DollarSign size={15} className="text-gold-500" />

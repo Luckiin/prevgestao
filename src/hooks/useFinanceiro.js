@@ -19,9 +19,9 @@ export function useFinanceiroDashboard() {
 export function useLancamentos(params = {}) {
   const query = new URLSearchParams(params).toString();
   const url = `/api/financeiro/lancamentos${query ? '?' + query : ''}`;
-  
+
   const { data, error, isLoading, mutate } = useSWR(url, fetcher);
-  
+
   return {
     lancamentos: data?.data || data || [],
     isLoading,
@@ -51,9 +51,9 @@ export function useContas() {
 export function useMovimentacoes(params = {}) {
   const query = new URLSearchParams(params).toString();
   const url = `/api/financeiro/movimentacoes${query ? '?' + query : ''}`;
-  
+
   const { data, error, isLoading, mutate } = useSWR(url, fetcher);
-  
+
   return {
     movimentacoes: data?.data || data || [],
     isLoading,
@@ -92,7 +92,7 @@ export function useFluxoCaixa(ano) {
         despReal,
         saldoPrevisto: recPrevisto - despPrevisto,
         saldoReal:     recReal - despReal,
-        // Itens detalhados para o painel expansível
+
         receitas: doMes.filter(l => l.tipo === "receita").sort((a, b) => a.data_vencimento > b.data_vencimento ? 1 : -1),
         despesas: doMes.filter(l => l.tipo === "despesa").sort((a, b) => a.data_vencimento > b.data_vencimento ? 1 : -1),
       };

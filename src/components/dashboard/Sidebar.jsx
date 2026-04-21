@@ -71,7 +71,7 @@ export default function Sidebar({ isOpen, onClose }) {
         }}
         className="sidebar-root bg-dark-400 border-r border-gold-500/10"
       >
-        {/* Logo */}
+
         <div className="flex items-center gap-3 px-5 py-[18px] border-b border-gold-500/10">
           <Image src="/logo.svg" alt="Deise Lisboa" width={38} height={38} className="object-contain shrink-0" />
           <div className="flex-1 min-w-0">
@@ -85,7 +85,7 @@ export default function Sidebar({ isOpen, onClose }) {
 
         <div className="h-[2px] w-full" style={{ background:"linear-gradient(90deg,#C9A96E,rgba(201,169,110,.1))" }} />
 
-        {/* Nav */}
+
         <nav style={{ flex:1, overflowY:"auto", padding:"10px 12px", display:"flex", flexDirection:"column", gap:2 }}>
           {NAV_PRINCIPAL.map(item => (
             <NavItem key={item.href} {...item} active={isActive(item.href)} onClick={onClose} />
@@ -93,7 +93,7 @@ export default function Sidebar({ isOpen, onClose }) {
 
           <div className="h-px bg-gold-500/10 mx-1 my-2.5" />
 
-          {/* Financeiro colapsável */}
+
           <button onClick={() => setFinOpen(v => !v)}
             className={`flex items-center gap-2.5 w-full py-2.5 px-3.5 rounded font-semibold text-xs tracking-[0.08em] uppercase transition-all bg-transparent border-none cursor-pointer ${financeiroAtivo ? 'text-gold-500 bg-gold-500/10' : 'text-ink-500 hover:text-gold-500'}`}
           >
@@ -114,7 +114,7 @@ export default function Sidebar({ isOpen, onClose }) {
           <NavItem href="/configuracoes" icon={Settings} label="Configurações" active={isActive("/configuracoes")} onClick={onClose} />
         </nav>
 
-        {/* Rodapé */}
+
         <div className="flex flex-col gap-2.5 px-4 py-3.5 border-t border-gold-500/10">
           <div className="flex items-center gap-2.5">
             <div className="w-[30px] h-[30px] rounded shrink-0 flex items-center justify-center font-bold text-xs text-gold-500" style={{ background:"linear-gradient(135deg,#6B1530,#3d0a1a)" }}>
@@ -125,7 +125,7 @@ export default function Sidebar({ isOpen, onClose }) {
               <div className="text-[10px] text-gold-500/40 tracking-wider">Administrador</div>
             </div>
           </div>
-          <button onClick={logout} 
+          <button onClick={logout}
             className="flex items-center gap-2 w-full py-2 px-3 rounded text-xs font-medium text-ink-400 bg-gold-500/5 border border-gold-500/10 cursor-pointer transition-all hover:text-gold-500 hover:border-gold-500/20"
           >
             <LogOut size={13} /> Sair da conta

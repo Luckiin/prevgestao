@@ -40,8 +40,8 @@ export async function POST(request) {
     if (!user) return NextResponse.json({ erro: "Não autorizado" }, { status: 401 });
 
     const payload  = await request.json();
-    
-    // Validação básica de campos
+
+
     if (!payload.conta_id || !payload.valor || !payload.tipo || !payload.data_movimento) {
       return NextResponse.json({ erro: "Campos obrigatórios ausentes" }, { status: 400 });
     }
@@ -79,7 +79,7 @@ export async function DELETE(request) {
     const id = searchParams.get("id");
     const lancamento_id = searchParams.get("lancamento_id");
 
-    // Segurança Crítica: Bloquear DELETE sem filtro
+
     if (!id && !lancamento_id) {
       return NextResponse.json({ erro: "ID ou Lancamento ID é obrigatório para exclusão" }, { status: 400 });
     }

@@ -1,14 +1,7 @@
-/**
- * peticaoService.js
- * Gestão de modelos de petição e geração de DOCX via docxtemplater
- * Cada tipo de petição possui exatamente 1 modelo de arquivo.
- */
-
 import { TIPOS_DOC } from "@/lib/contratos/tipos";
 
 const BUCKET = "modelos-peticao";
 
-// ── Slug ─────────────────────────────────────────────────────────────────────
 
 function gerarSlug(nome) {
   return nome
@@ -20,7 +13,6 @@ function gerarSlug(nome) {
     .replace(/\s+/g, "-");
 }
 
-// ── Tipos de petição (dinâmicos) ──────────────────────────────────────────────
 
 export async function listarTiposPeticao(supabase) {
   const { data, error } = await supabase
@@ -74,7 +66,6 @@ export async function excluirTipoPeticao(supabase, id) {
   if (error) throw error;
 }
 
-// ── Modelos de petição ────────────────────────────────────────────────────────
 
 export async function listarModelosPeticao(supabase) {
   const { data, error } = await supabase
@@ -86,7 +77,7 @@ export async function listarModelosPeticao(supabase) {
 }
 
 export async function registrarModeloPeticao(supabase, { tipo_peticao, nome, storage_path }) {
-  // Upsert: 1 modelo por tipo_peticao
+
   const { data, error } = await supabase
     .from("modelos_peticao")
     .upsert({ tipo_peticao, nome, storage_path }, { onConflict: "tipo_peticao" })
@@ -152,10 +143,9 @@ export async function gerarUrlUploadModeloPeticao(supabase, tipo_peticao, nomeAr
   return { signedUrl: data.signedUrl, path };
 }
 
-// ── Gerar DOCX preenchido ─────────────────────────────────────────────────────
 
 export async function gerarPeticao(supabase, clienteId, tipoPeticao) {
-  // 1. Busca modelo
+
   const { data: modelo, error: errModelo } = await supabase
     .from("modelos_peticao")
     .select("storage_path, nome")
@@ -164,7 +154,7 @@ export async function gerarPeticao(supabase, clienteId, tipoPeticao) {
 
   if (errModelo || !modelo) throw new Error("Modelo não encontrado para este tipo de petição.");
 
-  // 2. Busca dados do cliente
+
   const { data: cliente, error: errCliente } = await supabase
     .from("clientes")
     .select(`
@@ -180,14 +170,14 @@ export async function gerarPeticao(supabase, clienteId, tipoPeticao) {
 
   if (errCliente || !cliente) throw new Error("Cliente não encontrado.");
 
-  // 3. Baixa o template do Storage
+
   const { data: arquivoData, error: errDownload } = await supabase.storage
     .from(BUCKET)
     .download(modelo.storage_path);
 
   if (errDownload || !arquivoData) throw new Error("Falha ao baixar o modelo do servidor.");
 
-  // 4. Prepara variáveis
+
   const hoje = new Date();
   const formatarData = (iso) => {
     if (!iso) return "—";
@@ -210,7 +200,7 @@ export async function gerarPeticao(supabase, clienteId, tipoPeticao) {
   };
 
   const variaveis = {
-    // Dados pessoais
+
     NOME:              cliente.nome || "—",
     CPF:               formatarCPF(cliente.cpf),
     RG:                cliente.rg || "—",
@@ -222,10 +212,10 @@ export async function gerarPeticao(supabase, clienteId, tipoPeticao) {
     ENDERECO:          cliente.endereco || "—",
     CEP:               cliente.cep || "—",
     TELEFONE:          cliente.telefone || "—",
-    // Credenciais INSS
+
     LOGIN_INSS:        cliente.login_inss || "—",
     SENHA_INSS:        cliente.senha_inss || "—",
-    // Processo
+
     TIPO_PROCESSO:     cliente.tipo_processo
                          ? cliente.tipo_processo.charAt(0).toUpperCase() + cliente.tipo_processo.slice(1)
                          : "—",
@@ -235,12 +225,12 @@ export async function gerarPeticao(supabase, clienteId, tipoPeticao) {
     SITUACAO:          cliente.situacao || "—",
     VALOR_BENEFICIO:   formatarMoeda(cliente.valor_beneficio),
     DESCRICAO:         cliente.observacoes || "—",
-    // Petição
+
     DATA_HOJE:         hoje.toLocaleDateString("pt-BR"),
     DATA:              hoje.toLocaleDateString("pt-BR", { day: "numeric", month: "long", year: "numeric" }),
   };
 
-  // 5. Preenche o template com docxtemplater
+
   const PizZip       = (await import("pizzip")).default;
   const Docxtemplater = (await import("docxtemplater")).default;
 

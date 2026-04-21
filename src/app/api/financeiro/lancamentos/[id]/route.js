@@ -9,7 +9,7 @@ export async function PUT(request, { params }) {
 
     const body = await request.json();
 
-    // Payload sanitizado — apenas campos permitidos
+
     const { descricao, valor, tipo, status, data_vencimento, conta_id, cliente_id, categoria_id, data_pagamento, valor_pago, recorrente, parcelas, observacoes } = body;
 
     const payload = {
@@ -28,7 +28,7 @@ export async function PUT(request, { params }) {
       ...(observacoes     !== undefined && { observacoes: String(observacoes).slice(0, 2000) }),
     };
 
-    // Validações básicas
+
     if (payload.tipo   && !["receita", "despesa"].includes(payload.tipo))
       return NextResponse.json({ erro: "Tipo inválido" }, { status: 400 });
     if (payload.status && !["pendente", "pago", "cancelado"].includes(payload.status))
@@ -36,7 +36,7 @@ export async function PUT(request, { params }) {
     if (payload.valor !== undefined && (typeof payload.valor !== "number" || payload.valor <= 0))
       return NextResponse.json({ erro: "Valor inválido" }, { status: 400 });
 
-    // 1. Atualizar o lançamento
+
     const { data: lancamento, error: errorLanc } = await supabase
       .from("lancamentos")
       .update(payload)
@@ -46,7 +46,7 @@ export async function PUT(request, { params }) {
 
     if (errorLanc) throw errorLanc;
 
-    // 2. Sincronizar com movimentacoes
+
     await supabase.from("movimentacoes").delete().eq("lancamento_id", params.id);
 
     if (lancamento.status === "pago") {
@@ -76,10 +76,10 @@ export async function DELETE(request, { params }) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ erro: "Não autorizado" }, { status: 401 });
 
-    // 1. Remover movimentações vinculadas
+
     await supabase.from("movimentacoes").delete().eq("lancamento_id", params.id);
 
-    // 2. Remover o lançamento
+
     const { error } = await supabase.from("lancamentos").delete().eq("id", params.id);
 
     if (error) throw error;

@@ -17,7 +17,7 @@ export default function ContratosPage() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [buscaTimeout, setBuscaTimeout] = useState(null);
 
-  // Carrega modelos e tipos
+
   useEffect(() => {
     fetch("/api/contratos/modelos")
       .then(r => r.json())
@@ -30,7 +30,7 @@ export default function ContratosPage() {
       .catch(() => {});
   }, []);
 
-  // Busca clientes conforme digitação
+
   useEffect(() => {
     if (buscaTimeout) clearTimeout(buscaTimeout);
     if (!busca.trim()) { setClientes([]); return; }
@@ -60,7 +60,7 @@ export default function ContratosPage() {
     setTipoAcao("");
   }
 
-  // Docs disponíveis para o tipoAcao selecionado
+
   const docsDisponiveis = tipoAcao
     ? TIPOS_DOC.filter(td => modelos.some(m => m.tipo_acao === tipoAcao && m.tipo_doc === td.value))
     : [];
@@ -84,7 +84,7 @@ export default function ContratosPage() {
         throw new Error(json.erro || "Erro ao gerar documento");
       }
 
-      // Dispara o download
+
       const blob = await res.blob();
       const disposition = res.headers.get("Content-Disposition") || "";
       const match = disposition.match(/filename\*=UTF-8''(.+)/);
@@ -111,7 +111,7 @@ export default function ContratosPage() {
 
   return (
     <div className="p-6 max-w-3xl mx-auto space-y-6">
-      {/* Header */}
+
       <div>
         <h1 className="text-xl font-bold text-ink-100 flex items-center gap-2">
           <FileSignature size={20} className="text-ink-400" />
@@ -122,11 +122,11 @@ export default function ContratosPage() {
         </p>
       </div>
 
-      {/* Formulário de geração */}
+
       <div className="glass-card rounded-2xl p-6 space-y-5">
         <h2 className="text-sm font-semibold text-ink-200">Gerar documentos</h2>
 
-        {/* Busca de cliente */}
+
         <div className="space-y-1.5">
           <label className="block text-xs font-medium text-ink-400">Cliente</label>
           <div className="relative">
@@ -146,7 +146,7 @@ export default function ContratosPage() {
               )}
             </div>
 
-            {/* Dropdown de resultados */}
+
             {dropdownOpen && clientes.length > 0 && !clienteSel && (
               <div className="absolute z-20 top-full mt-1 w-full bg-dark-200 border border-dark-50 rounded-xl overflow-hidden shadow-xl">
                 {clientes.map(c => (
@@ -168,7 +168,7 @@ export default function ContratosPage() {
             )}
           </div>
 
-          {/* Badge do cliente selecionado */}
+
           {clienteSel && (
             <div className="flex items-center gap-2 mt-2 px-3 py-2 bg-gold-500/10 border border-gold-500/20 rounded-lg">
               <div className="w-6 h-6 rounded bg-gradient-to-br from-wine-700 to-wine-900 flex items-center justify-center text-xs font-bold text-gold-500 shrink-0">
@@ -182,7 +182,7 @@ export default function ContratosPage() {
           )}
         </div>
 
-        {/* Tipo de ação */}
+
         <div className="space-y-1.5">
           <label className="block text-xs font-medium text-ink-400">Tipo de ação</label>
           <select
@@ -204,7 +204,7 @@ export default function ContratosPage() {
           )}
         </div>
 
-        {/* Documentos disponíveis */}
+
         {tipoAcao && clienteSel && (
           <div className="space-y-2 pt-1">
             <p className="text-xs font-medium text-ink-400">Documentos disponíveis</p>
@@ -244,7 +244,7 @@ export default function ContratosPage() {
           </div>
         )}
 
-        {/* Estado vazio */}
+
         {(!tipoAcao || !clienteSel) && (
           <div className="border border-dashed border-dark-50 rounded-xl py-8 flex flex-col items-center gap-2 text-center">
             <FileSignature size={24} className="text-ink-700" />

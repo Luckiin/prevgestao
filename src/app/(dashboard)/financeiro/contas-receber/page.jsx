@@ -23,7 +23,7 @@ const fmtDate = (d) => d ? new Date(d+"T12:00:00").toLocaleDateString("pt-BR") :
 
 function cn(...c) { return c.filter(Boolean).join(" "); }
 
-// ── Empty state ───────────────────────────────────────────────────────────────
+
 function EmptyState({ onNovo }) {
   return (
     <div className="flex flex-col items-center justify-center py-16 gap-3">
@@ -47,7 +47,7 @@ function EmptyState({ onNovo }) {
   );
 }
 
-// ── Página Contas a Receber ───────────────────────────────────────────────────
+
 export default function ContasReceber() {
   const hoje = new Date();
   const [ano,  setAno]  = useState(hoje.getFullYear());
@@ -92,31 +92,31 @@ export default function ContasReceber() {
     setIsDeleting(true);
     try {
       await fetch(`/api/financeiro/lancamentos/${excluindoId}`, { method:"DELETE" });
-      toast.success("Lançamento excluído com sucesso."); 
+      toast.success("Lançamento excluído com sucesso.");
       mutate();
-    } catch { 
-      toast.error("Erro ao excluir lançamento."); 
+    } catch {
+      toast.error("Erro ao excluir lançamento.");
     } finally {
       setIsDeleting(false);
       setExcluindoId(null);
     }
   }
 
-  // Filtragem
+
   const filtrados = useMemo(() => dados.filter(l => {
     if (l.status==="pago" && !filtRecebido) return false;
     if (l.status!=="pago" && !filtAReceber) return false;
     return true;
   }), [dados, filtRecebido, filtAReceber]);
 
-  // Ordenação
+
   const ordenados = useMemo(() => [...filtrados].sort((a,b) => {
     let va = a[sortCol]??"", vb = b[sortCol]??"";
     if (typeof va==="number") return sortAsc ? va-vb : vb-va;
     return sortAsc ? String(va).localeCompare(String(vb)) : String(vb).localeCompare(String(va));
   }), [filtrados, sortCol, sortAsc]);
 
-  // Paginação
+
   const totalPags = Math.max(1, Math.ceil(ordenados.length/pageSize));
   const pagActual = Math.min(page, totalPags);
   const inicio    = (pagActual-1)*pageSize;
@@ -141,7 +141,7 @@ export default function ContasReceber() {
     }
   }
 
-  // Totais
+
   const totalAReceber  = filtrados.filter(l=>l.status!=="pago").reduce((s,l)=>s+(l.valor||0),0);
   const totalRecebido  = filtrados.filter(l=>l.status==="pago").reduce((s,l)=>s+(l.valor_pago||l.valor||0),0);
   const totalGeral     = filtrados.reduce((s,l)=>s+(l.valor||0),0);
@@ -160,7 +160,7 @@ export default function ContasReceber() {
   return (
     <div className="flex flex-col h-full min-h-screen p-0">
 
-      {/* ── Toolbar ── */}
+
       <div className="flex items-center gap-2 px-5 py-3 border-b border-light/5 dark:border-white/[0.05] bg-dark-300 glass-card">
         <button onClick={()=>setModal(true)}
           className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-white transition-all"
@@ -185,7 +185,7 @@ export default function ContasReceber() {
         </button>
       </div>
 
-      {/* ── Navegação Mês/Ano ── */}
+
       <div className="flex items-center gap-3 px-5 py-3 border-b border-light/5 dark:border-white/[0.04] bg-dark-200">
         <div className="flex items-center gap-1">
           <button onClick={()=>setAno(a=>a-1)} className="p-1 rounded text-ink-500 hover:text-gold-500 hover:bg-gold-500/10 transition-all"><ChevronLeft size={16}/></button>
@@ -216,7 +216,7 @@ export default function ContasReceber() {
         </div>
       </div>
 
-      {/* ── Tabela ── */}
+
       <div className="flex-1 overflow-auto">
         <table className="w-full text-sm border-collapse min-w-[860px]">
           <thead style={{ background:"rgba(13,3,7,.6)", position:"sticky", top:0, zIndex:10 }}>
@@ -325,7 +325,7 @@ export default function ContasReceber() {
         </table>
       </div>
 
-      {/* ── Paginação ── */}
+
       <div className="flex items-center gap-3 px-5 py-2.5 border-t border-light/5 dark:border-white/[0.05] bg-dark-100">
         <div className="flex items-center gap-1">
           <button onClick={()=>setPage(1)} disabled={pagActual===1} className="p-1 rounded text-ink-500 hover:text-gold-500 disabled:opacity-30 transition-all"><ChevronsLeft size={14}/></button>
@@ -354,7 +354,7 @@ export default function ContasReceber() {
         </div>
       </div>
 
-      {/* ── Barra de Totais ── */}
+
       <div className="flex items-center gap-6 px-5 py-2.5 border-t border-light/5 dark:border-white/[0.06] bg-dark-300">
         <span className="text-[12px] font-bold">
           <span className="text-ink-500 mr-1">Total à Receber</span>
@@ -375,8 +375,8 @@ export default function ContasReceber() {
       </div>
 
       {modal && <ModalLancamento tipo="receita" original={typeof modal === 'object' ? modal : null} onClose={()=>setModal(false)} onSalvo={mutate}/>}
-      
-      {/* Confirmação de exclusão */}
+
+
       <Modal open={!!excluindoId} onClose={() => !isDeleting && setExcluindoId(null)} title="Excluir receita" size="sm">
         <p className="text-sm text-ink-300 mb-6">
           Tem certeza que deseja excluir este lançamento? Esta ação não pode ser desfeita.

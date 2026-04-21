@@ -10,7 +10,7 @@ export async function GET(request) {
     const { searchParams } = new URL(request.url);
     const tipo    = searchParams.get("tipo");
     const status  = searchParams.get("status");
-    const mes     = searchParams.get("mes"); // YYYY-MM
+    const mes     = searchParams.get("mes");
     const limit   = Math.min(Number(searchParams.get("limit")) || 100, 2000);
     const offset  = Number(searchParams.get("offset")) || 0;
 
@@ -46,7 +46,7 @@ export async function POST(request) {
 
     const body = await request.json();
 
-    // ── Validação de campos obrigatórios ──────────────────────
+
     const { descricao, valor, tipo, status, data_vencimento, conta_id, cliente_id, categoria_id, data_pagamento, valor_pago, recorrente, parcelas, observacoes } = body;
 
     if (!descricao || typeof descricao !== "string" || descricao.trim().length === 0)
@@ -60,7 +60,7 @@ export async function POST(request) {
     if (!data_vencimento)
       return NextResponse.json({ erro: "Data de vencimento obrigatória" }, { status: 400 });
 
-    // Payload sanitizado — apenas campos conhecidos
+
     const payload = {
       descricao: descricao.trim(),
       valor,
@@ -77,7 +77,7 @@ export async function POST(request) {
       ...(observacoes     && { observacoes: String(observacoes).slice(0, 2000) }),
     };
 
-    // 1. Criar o lançamento
+
     const { data: lancamento, error: errorLanc } = await supabase
       .from("lancamentos")
       .insert(payload)
@@ -86,7 +86,7 @@ export async function POST(request) {
 
     if (errorLanc) throw errorLanc;
 
-    // 2. Se estiver pago, criar a movimentação
+
     if (lancamento.status === "pago") {
       const { error: errorMov } = await supabase.from("movimentacoes").insert({
         lancamento_id:  lancamento.id,

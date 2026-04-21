@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase-server";
 import { listarModelos, registrarModelo } from "@/lib/services/contratoService";
 
-/** GET /api/contratos/modelos – lista todos os modelos */
+
 export async function GET() {
   try {
     const supabase = await createServerClient();
@@ -16,7 +16,7 @@ export async function GET() {
   }
 }
 
-/** POST /api/contratos/modelos – registra modelo após upload */
+
 export async function POST(request) {
   try {
     const supabase = await createServerClient();

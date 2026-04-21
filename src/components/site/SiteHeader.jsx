@@ -37,7 +37,7 @@ export default function SiteHeader() {
     }}>
       <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 32px", height: 80, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
 
-        {/* Logo */}
+
         <button onClick={() => go("#inicio")} style={{ display: "flex", alignItems: "center", gap: 12, background: "none", border: "none", cursor: "pointer" }}>
           <Image src="/logo.svg" alt="Deise Lisboa Advocacia" width={48} height={48} priority style={{ objectFit: "contain" }} />
           <div style={{ textAlign: "left", lineHeight: 1.2 }}>
@@ -46,7 +46,7 @@ export default function SiteHeader() {
           </div>
         </button>
 
-        {/* Nav desktop */}
+
         <nav style={{ display: "flex", gap: 36, alignItems: "center" }} className="hidden-mobile">
           {NAV.map(l => (
             <button key={l.href} onClick={() => go(l.href)}
@@ -57,7 +57,7 @@ export default function SiteHeader() {
           ))}
         </nav>
 
-        {/* CTA */}
+
         <a href="https://wa.me/5571987806608?text=Ol%C3%A1%2C%20gostaria%20de%20uma%20consulta%20."
           target="_blank" rel="noopener noreferrer"
           className="hidden-mobile"
@@ -68,14 +68,14 @@ export default function SiteHeader() {
           <MessageCircle size={14} /> Consulta
         </a>
 
-        {/* Burger */}
+
         <button onClick={() => setMenuOpen(v => !v)} className="show-mobile"
           style={{ background: "none", border: "none", cursor: "pointer", color: "#C9A96E", padding: 8 }}>
           {menuOpen ? <X size={22} /> : <Menu size={22} />}
         </button>
       </div>
 
-      {/* Mobile menu */}
+
       {menuOpen && (
         <div style={{ background: "rgba(8,1,3,.98)", backdropFilter: "blur(20px)", padding: "16px 32px 28px", borderTop: "1px solid rgba(201,169,110,.1)" }}>
           {NAV.map(l => (

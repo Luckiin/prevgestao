@@ -21,7 +21,7 @@ export default function ClientesPage() {
   const [editando, setEditando] = useState(null);
   const [excluindo, setExcluindo] = useState(null);
 
-  // Ordenação
+
   const [sortCol, setSortCol] = useState("nome");
   const [sortDir, setSortDir] = useState("asc");
 
@@ -34,7 +34,7 @@ export default function ClientesPage() {
     }
   }
 
-  // Filtros
+
   const [busca, setBusca]               = useState("");
   const [filtroStatus, setFiltroStatus] = useState("");
   const [filtroTipo, setFiltroTipo]     = useState("");
@@ -122,7 +122,7 @@ export default function ClientesPage() {
     }
   }
 
-  // Ordenação client-side
+
   const clientesOrdenados = [...clientes].sort((a, b) => {
     let va, vb;
     switch (sortCol) {
@@ -140,7 +140,7 @@ export default function ClientesPage() {
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-5">
-      {/* Header */}
+
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-xl font-bold text-ink-100">Clientes / Processos</h1>
@@ -151,7 +151,7 @@ export default function ClientesPage() {
         </Button>
       </div>
 
-      {/* Filtros */}
+
       <div className="glass-card rounded p-4 flex flex-wrap gap-3">
         <div className="relative flex-1 min-w-[200px]">
           <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-500" />
@@ -219,13 +219,13 @@ export default function ClientesPage() {
 
         {(busca || filtroStatus || filtroTipo || filtroSituacao || filtroSubdivisao || filtroAno !== String(ANO_ATUAL)) && (
           <button
-            onClick={() => { 
-              setBusca(""); 
-              setFiltroStatus(""); 
-              setFiltroTipo(""); 
-              setFiltroSituacao(""); 
+            onClick={() => {
+              setBusca("");
+              setFiltroStatus("");
+              setFiltroTipo("");
+              setFiltroSituacao("");
               setFiltroSubdivisao("");
-              setFiltroAno(String(ANO_ATUAL)); 
+              setFiltroAno(String(ANO_ATUAL));
             }}
             className="flex items-center gap-1 text-xs text-ink-500 hover:text-ink-200 transition-colors px-2"
           >
@@ -234,7 +234,7 @@ export default function ClientesPage() {
         )}
       </div>
 
-      {/* Tabela */}
+
       <div className="glass-card rounded overflow-hidden">
         <ClienteTable
           clientes={clientesOrdenados}
@@ -247,7 +247,7 @@ export default function ClientesPage() {
         />
       </div>
 
-      {/* Modal de cadastro/edição */}
+
       <Modal
         open={modalOpen}
         onClose={() => { setModalOpen(false); setEditando(null); }}
@@ -257,7 +257,7 @@ export default function ClientesPage() {
         <ClienteForm key={editando?.id || "novo"} inicial={editando || {}} onSubmit={handleSalvar} loading={saving} />
       </Modal>
 
-      {/* Modal de confirmação de exclusão */}
+
       <Modal
         open={!!excluindo}
         onClose={() => setExcluindo(null)}

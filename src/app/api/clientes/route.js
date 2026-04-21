@@ -37,8 +37,8 @@ export async function POST(request) {
     if (!user) return NextResponse.json({ erro: "Não autorizado" }, { status: 401 });
 
     const payload = await request.json();
-    
-    // Validação básica
+
+
     if (!payload.nome) {
       return NextResponse.json({ erro: "Nome do cliente é obrigatório" }, { status: 400 });
     }

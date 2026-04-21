@@ -2,7 +2,7 @@ import { createServerClient as _createServerClient } from "@supabase/ssr";
 import { createClient as _createClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 
-/** Cliente Supabase para Server Components e Route Handlers (usa cookies de sessão) */
+
 export async function createServerClient() {
   const cookieStore = await cookies();
 
@@ -20,7 +20,7 @@ export async function createServerClient() {
               cookieStore.set(name, value, options)
             );
           } catch {
-            // Ignorado em Server Components (somente leitura)
+
           }
         },
       },
@@ -30,7 +30,7 @@ export async function createServerClient() {
 
 export { createServerClient as createClient };
 
-/** Cliente admin com service_role (acesso total, bypass RLS) */
+
 export function createAdminClient() {
   return _createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -44,7 +44,7 @@ export function createAdminClient() {
   );
 }
 
-/** Cria cliente Supabase para Route Handlers (lê/escreve cookies do request/response) */
+
 export function createRouteClient(request, cookieCollector) {
   return _createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL,

@@ -12,7 +12,7 @@ export default function LoadingPrazos() {
       </div>
 
       <div style={{ display:"grid", gridTemplateColumns:"8fr 4fr", gap:24 }}>
-        {/* Calendário */}
+
         <SkCard>
           <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:16 }}>
             <Sk w={160} h={22} rounded={6} />
@@ -22,17 +22,17 @@ export default function LoadingPrazos() {
               <Sk w={32} h={32} rounded={8} />
             </div>
           </div>
-          {/* Dias da semana */}
+
           <div style={{ display:"grid", gridTemplateColumns:"repeat(7,1fr)", gap:2, marginBottom:2 }}>
             {[...Array(7)].map((_,i) => <Sk key={i} h={28} rounded={4} />)}
           </div>
-          {/* Células do calendário */}
+
           <div style={{ display:"grid", gridTemplateColumns:"repeat(7,1fr)", gap:2 }}>
             {[...Array(35)].map((_,i) => <Sk key={i} h={80} rounded={4} />)}
           </div>
         </SkCard>
 
-        {/* Detalhes do dia */}
+
         <SkCard>
           <Sk w={80} h={11} rounded={3} />
           <div style={{ marginTop:8 }}><Sk w={160} h={22} rounded={6} /></div>

@@ -15,7 +15,7 @@ export default function PeticoesPage() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [buscaTimeout, setBuscaTimeout] = useState(null);
 
-  // Carrega tipos e modelos
+
   useEffect(() => {
     fetch("/api/peticoes/tipos")
       .then(r => r.json())
@@ -28,7 +28,7 @@ export default function PeticoesPage() {
       .catch(() => {});
   }, []);
 
-  // Busca clientes conforme digitação
+
   useEffect(() => {
     if (buscaTimeout) clearTimeout(buscaTimeout);
     if (!busca.trim()) { setClientes([]); return; }
@@ -58,7 +58,7 @@ export default function PeticoesPage() {
     setTipoPeticao("");
   }
 
-  // Tipos que possuem modelo cadastrado
+
   const tiposComModelo = tipos.filter(t => modelos.some(m => m.tipo_peticao === t.slug));
 
   async function gerarDocumento() {
@@ -103,7 +103,7 @@ export default function PeticoesPage() {
 
   return (
     <div className="p-6 max-w-2xl mx-auto space-y-6">
-      {/* Header */}
+
       <div>
         <h1 className="text-xl font-bold text-ink-100 flex items-center gap-2">
           <Scale size={20} className="text-ink-400" />
@@ -114,11 +114,11 @@ export default function PeticoesPage() {
         </p>
       </div>
 
-      {/* Formulário */}
+
       <div className="glass-card rounded-2xl p-6 space-y-5">
         <h2 className="text-sm font-semibold text-ink-200">Gerar petição</h2>
 
-        {/* Busca de cliente */}
+
         <div className="space-y-1.5">
           <label className="block text-xs font-medium text-ink-400">Cliente</label>
           <div className="relative">
@@ -172,7 +172,7 @@ export default function PeticoesPage() {
           )}
         </div>
 
-        {/* Tipo de petição */}
+
         <div className="space-y-1.5">
           <label className="block text-xs font-medium text-ink-400">Tipo de petição</label>
           <select
@@ -195,7 +195,7 @@ export default function PeticoesPage() {
           )}
         </div>
 
-        {/* Botão gerar ou estado vazio */}
+
         {clienteSel && tipoPeticao ? (
           <button
             onClick={gerarDocumento}

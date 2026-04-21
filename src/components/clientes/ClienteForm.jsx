@@ -36,7 +36,7 @@ export default function ClienteForm({ inicial, onSubmit, loading }) {
   const [erros, setErros]             = useState({});
   const [mostraSenha, setMostraSenha] = useState(false);
 
-  // Carrega subdivisões filtradas por tipo
+
   useEffect(() => {
     fetch(`/api/subdivisoes?tipo=${form.tipo_processo}`)
       .then(r => r.json())
@@ -75,7 +75,7 @@ export default function ClienteForm({ inicial, onSubmit, loading }) {
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
-        {/* 1. Nome completo */}
+
         <Input
           label="Nome completo"
           value={form.nome}
@@ -86,7 +86,7 @@ export default function ClienteForm({ inicial, onSubmit, loading }) {
           containerClassName="sm:col-span-2"
         />
 
-        {/* 2. RG */}
+
         <Input
           label="RG"
           value={form.rg || ""}
@@ -94,7 +94,7 @@ export default function ClienteForm({ inicial, onSubmit, loading }) {
           placeholder="00.000.000-0"
         />
 
-        {/* 3. CPF */}
+
         <Input
           label="CPF"
           value={form.cpf ? formatCPF(form.cpf) : ""}
@@ -105,7 +105,7 @@ export default function ClienteForm({ inicial, onSubmit, loading }) {
           required
         />
 
-        {/* 4. Data de nascimento */}
+
         <Input
           label="Data de nascimento"
           type="date"
@@ -115,7 +115,7 @@ export default function ClienteForm({ inicial, onSubmit, loading }) {
           required
         />
 
-        {/* 5. Estado civil */}
+
         <Select
           label="Estado Civil"
           value={form.estado_civil || ""}
@@ -129,7 +129,7 @@ export default function ClienteForm({ inicial, onSubmit, loading }) {
           <option value="União Estável">União Estável</option>
         </Select>
 
-        {/* 6. Endereço */}
+
         <Input
           label="Endereço"
           value={form.endereco || ""}
@@ -138,7 +138,7 @@ export default function ClienteForm({ inicial, onSubmit, loading }) {
           containerClassName="sm:col-span-2"
         />
 
-        {/* 7. CEP */}
+
         <Input
           label="CEP"
           value={form.cep || ""}
@@ -147,7 +147,7 @@ export default function ClienteForm({ inicial, onSubmit, loading }) {
           maxLength={9}
         />
 
-        {/* 8. Nacionalidade */}
+
         <Input
           label="Nacionalidade"
           value={form.nacionalidade || ""}
@@ -155,7 +155,7 @@ export default function ClienteForm({ inicial, onSubmit, loading }) {
           placeholder="Brasileira"
         />
 
-        {/* 9. Telefone */}
+
         <Input
           label="Telefone"
           value={form.telefone || ""}
@@ -163,7 +163,7 @@ export default function ClienteForm({ inicial, onSubmit, loading }) {
           placeholder="(00) 00000-0000"
         />
 
-        {/* Profissão */}
+
         <Input
           label="Profissão"
           value={form.profissao || ""}
@@ -171,7 +171,7 @@ export default function ClienteForm({ inicial, onSubmit, loading }) {
           placeholder="Ex: Agricultor, Pedreiro..."
         />
 
-        {/* 10. Login INSS */}
+
         <Input
           label="Login INSS"
           value={form.login_inss || ""}
@@ -179,7 +179,7 @@ export default function ClienteForm({ inicial, onSubmit, loading }) {
           placeholder="CPF ou login Meu INSS"
         />
 
-        {/* 11. Senha INSS */}
+
         <div className="space-y-1.5">
           <label className="block text-xs font-medium text-ink-400">Senha INSS</label>
           <div className="relative">
@@ -201,10 +201,10 @@ export default function ClienteForm({ inicial, onSubmit, loading }) {
           </div>
         </div>
 
-        {/* Separador processo */}
+
         <div className="sm:col-span-2 border-t border-white/[0.05] pt-1" />
 
-        {/* 12. Tipo do processo */}
+
         <Select
           label="Tipo de Processo"
           value={form.tipo_processo}
@@ -217,7 +217,7 @@ export default function ClienteForm({ inicial, onSubmit, loading }) {
           ))}
         </Select>
 
-        {/* 13. Subdivisão */}
+
         <Select
           label="Subdivisão Previdenciária"
           value={form.subdivisao_id}
@@ -231,7 +231,7 @@ export default function ClienteForm({ inicial, onSubmit, loading }) {
           ))}
         </Select>
 
-        {/* 14. Status */}
+
         <Select
           label="Status"
           value={form.status}
@@ -242,7 +242,7 @@ export default function ClienteForm({ inicial, onSubmit, loading }) {
           ))}
         </Select>
 
-        {/* 15. Número do processo */}
+
         <Input
           label="Número do Processo"
           value={form.numero_processo || ""}
@@ -250,7 +250,7 @@ export default function ClienteForm({ inicial, onSubmit, loading }) {
           placeholder="INSS ou judicial"
         />
 
-        {/* 16. Situação */}
+
         <Select
           label="Situação"
           value={form.situacao}
@@ -260,7 +260,7 @@ export default function ClienteForm({ inicial, onSubmit, loading }) {
           <option value="Finalizado">Finalizado</option>
         </Select>
 
-        {/* 17. Valor */}
+
         <Input
           label="Valor Estimado do Benefício"
           type="number"
@@ -274,7 +274,7 @@ export default function ClienteForm({ inicial, onSubmit, loading }) {
 
       </div>
 
-      {/* 18. Descrição */}
+
       <Textarea
         label="Descrição / Observações"
         value={form.observacoes || ""}

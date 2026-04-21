@@ -1,14 +1,8 @@
-/**
- * contratoService.js
- * Gestão de modelos de contrato e geração de DOCX via docxtemplater
- */
-
 import { TIPOS_DOC } from "@/lib/contratos/tipos";
 export { TIPOS_DOC };
 
 const BUCKET = "modelos-contrato";
 
-// ── Tipos de ação (dinâmicos) ────────────────────────────────────────────────
 
 function gerarSlug(nome) {
   return nome
@@ -54,7 +48,7 @@ export async function atualizarTipoAcao(supabase, id, campos) {
 }
 
 export async function excluirTipoAcao(supabase, id) {
-  // Verifica se há modelos vinculados ao slug deste tipo
+
   const { data: tipo } = await supabase
     .from("tipos_acao_contrato")
     .select("slug")
@@ -73,7 +67,7 @@ export async function excluirTipoAcao(supabase, id) {
   if (error) throw error;
 }
 
-/** Lista todos os modelos cadastrados */
+
 export async function listarModelos(supabase) {
   const { data, error } = await supabase
     .from("modelos_contrato")
@@ -85,9 +79,9 @@ export async function listarModelos(supabase) {
   return data;
 }
 
-/** Registra modelo no banco após upload */
+
 export async function registrarModelo(supabase, { tipo_acao, tipo_doc, nome, storage_path }) {
-  // Upsert: substitui se já existir para o mesmo (tipo_acao, tipo_doc)
+
   const { data, error } = await supabase
     .from("modelos_contrato")
     .upsert({ tipo_acao, tipo_doc, nome, storage_path }, { onConflict: "tipo_acao,tipo_doc" })
@@ -98,7 +92,7 @@ export async function registrarModelo(supabase, { tipo_acao, tipo_doc, nome, sto
   return data;
 }
 
-/** Gera URL assinada para download/visualização de um modelo */
+
 export async function gerarUrlDownloadModelo(supabase, id) {
   const { data: modelo, error } = await supabase
     .from("modelos_contrato")
@@ -116,7 +110,7 @@ export async function gerarUrlDownloadModelo(supabase, id) {
   return { url: data.signedUrl, nome: modelo.nome };
 }
 
-/** Remove modelo do banco e do Storage */
+
 export async function excluirModelo(supabase, id) {
   const { data: modelo } = await supabase
     .from("modelos_contrato")
@@ -132,7 +126,7 @@ export async function excluirModelo(supabase, id) {
   if (error) throw error;
 }
 
-/** Sanitiza nome de arquivo removendo acentos, espaços e caracteres especiais */
+
 function sanitizarNome(nomeArquivo) {
   const partes = nomeArquivo.split(".");
   const ext  = partes.pop();
@@ -145,7 +139,7 @@ function sanitizarNome(nomeArquivo) {
   return `${base}.${ext}`;
 }
 
-/** Gera URL assinada para upload do modelo */
+
 export async function gerarUrlUploadModelo(supabase, tipo_acao, tipo_doc, nomeArquivo) {
   const nomeSeguro = sanitizarNome(nomeArquivo);
   const path = `${tipo_acao}/${tipo_doc}/${Date.now()}_${nomeSeguro}`;
@@ -158,9 +152,9 @@ export async function gerarUrlUploadModelo(supabase, tipo_acao, tipo_doc, nomeAr
   return { signedUrl: data.signedUrl, path };
 }
 
-/** Gera DOCX preenchido a partir do modelo e dados do cliente */
+
 export async function gerarDocx(supabase, clienteId, tipoAcao, tipoDoc) {
-  // 1. Busca modelo
+
   const { data: modelo, error: errModelo } = await supabase
     .from("modelos_contrato")
     .select("storage_path, nome")
@@ -170,7 +164,7 @@ export async function gerarDocx(supabase, clienteId, tipoAcao, tipoDoc) {
 
   if (errModelo || !modelo) throw new Error("Modelo não encontrado para este tipo de ação e documento.");
 
-  // 2. Busca dados do cliente
+
   const { data: cliente, error: errCliente } = await supabase
     .from("clientes")
     .select(`
@@ -186,14 +180,14 @@ export async function gerarDocx(supabase, clienteId, tipoAcao, tipoDoc) {
 
   if (errCliente || !cliente) throw new Error("Cliente não encontrado.");
 
-  // 3. Baixa o template do Storage
+
   const { data: arquivoData, error: errDownload } = await supabase.storage
     .from(BUCKET)
     .download(modelo.storage_path);
 
   if (errDownload || !arquivoData) throw new Error("Falha ao baixar o modelo do servidor.");
 
-  // 4. Prepara os dados para substituição
+
   const hoje = new Date();
   const formatarData = (iso) => {
     if (!iso) return "—";
@@ -217,7 +211,7 @@ export async function gerarDocx(supabase, clienteId, tipoAcao, tipoDoc) {
   const tipoAcaoLabel = TIPOS_ACAO.find(t => t.value === tipoAcao)?.label || tipoAcao;
 
   const variaveis = {
-    // Dados pessoais
+
     NOME:              cliente.nome || "—",
     CPF:               formatarCPF(cliente.cpf),
     RG:                cliente.rg || "—",
@@ -229,10 +223,10 @@ export async function gerarDocx(supabase, clienteId, tipoAcao, tipoDoc) {
     ENDERECO:          cliente.endereco || "—",
     CEP:               cliente.cep || "—",
     TELEFONE:          cliente.telefone || "—",
-    // Credenciais INSS
+
     LOGIN_INSS:        cliente.login_inss || "—",
     SENHA_INSS:        cliente.senha_inss || "—",
-    // Processo
+
     TIPO_PROCESSO:     cliente.tipo_processo
                          ? cliente.tipo_processo.charAt(0).toUpperCase() + cliente.tipo_processo.slice(1)
                          : "—",
@@ -242,13 +236,13 @@ export async function gerarDocx(supabase, clienteId, tipoAcao, tipoDoc) {
     SITUACAO:          cliente.situacao || "—",
     VALOR_BENEFICIO:   formatarMoeda(cliente.valor_beneficio),
     DESCRICAO:         cliente.observacoes || "—",
-    // Contrato
+
     TIPO_ACAO:         tipoAcaoLabel,
     DATA_HOJE:         hoje.toLocaleDateString("pt-BR"),
     DATA:              hoje.toLocaleDateString("pt-BR", { day: "numeric", month: "long", year: "numeric" }),
   };
 
-  // 5. Preenche o template com docxtemplater
+
   const PizZip     = (await import("pizzip")).default;
   const Docxtemplater = (await import("docxtemplater")).default;
 

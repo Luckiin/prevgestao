@@ -36,14 +36,14 @@ const FIELD_LABELS = {
 function AuditDiff({ anterior, novo }) {
   if (!anterior || !novo) return null;
   const changes = [];
-  
+
   Object.keys(novo).forEach(key => {
     let oldVal = anterior[key];
     let newVal = novo[key];
-    
+
     if ((oldVal || "") === (newVal || "")) return;
     if (key === "subdivisao_id" || key === "id" || key === "atualizado_em" || key === "criado_em") return;
-    
+
     changes.push({
       key,
       label: FIELD_LABELS[key] || key,
@@ -100,7 +100,7 @@ export default function AuditoriaPage() {
         <p className="text-sm text-ink-500 mt-0.5">Registro imutável de todas as ações</p>
       </div>
 
-      {/* Filtros */}
+
       <div className="glass-card rounded-2xl p-4 flex flex-wrap gap-3">
         <div className="relative flex-1 min-w-[200px]">
           <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-500" />
@@ -129,7 +129,7 @@ export default function AuditoriaPage() {
         <span className="self-center text-xs text-ink-500 px-2">{filtrados.length} registro(s)</span>
       </div>
 
-      {/* Timeline de Eventos */}
+
       <div className="glass-card rounded-2xl overflow-hidden min-h-[400px]">
         {loading ? (
           <div className="flex items-center justify-center py-20">
@@ -160,9 +160,9 @@ export default function AuditoriaPage() {
               return (
                 <div key={a.id} className="px-5 py-4 flex items-start gap-4 hover:bg-white/[0.01] transition-all">
                   <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
-                    isDoc ? "bg-brand-500/10 text-brand-400" : 
-                    isPrazo ? "bg-warn-500/10 text-warn-500" : 
-                    isAuth ? "bg-ink-500/10 text-ink-300" : 
+                    isDoc ? "bg-brand-500/10 text-brand-400" :
+                    isPrazo ? "bg-warn-500/10 text-warn-500" :
+                    isAuth ? "bg-ink-500/10 text-ink-300" :
                     "bg-gold-500/10 text-gold-500"
                   }`}>
                     <ScrollText size={14} />
@@ -171,7 +171,7 @@ export default function AuditoriaPage() {
                     <p className="text-sm font-medium text-ink-100">
                       {acaoMsg} <span className="text-ink-400 font-normal">{desc && `· ${desc}`}</span>
                     </p>
-                    
+
                     {a.acao === "UPDATE" && (
                       <AuditDiff anterior={a.dados_anteriores} novo={a.dados_novos} />
                     )}

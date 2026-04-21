@@ -9,10 +9,10 @@ export async function GET(request) {
 
     const { searchParams } = new URL(request.url);
     const tipo = searchParams.get("tipo");
-    
+
     let query = supabase.from("categorias_financeiras").select("*").eq("ativo", true).order("nome");
     if (tipo) query = query.eq("tipo", tipo);
-    
+
     const { data, error } = await query;
     if (error) throw error;
     return NextResponse.json(data);

@@ -9,7 +9,7 @@ const fmt  = (v) => new Intl.NumberFormat("pt-BR", { style: "currency", currency
 const fmtK = (v) => v >= 1000 ? `R$${(v/1000).toFixed(0)}k` : `R$${(v||0).toFixed(0)}`;
 const fmtDate = (d) => d ? new Date(d + "T12:00:00").toLocaleDateString("pt-BR", { day: "2-digit", month: "short" }) : "—";
 
-// ── Painel de detalhes do mês ─────────────────────────────────────────────────
+
 function PainelDetalhes({ mes }) {
   const temItens = mes.receitas.length > 0 || mes.despesas.length > 0;
 
@@ -21,10 +21,10 @@ function PainelDetalhes({ mes }) {
     );
   }
 
-  // Mini tabela reutilizável para receitas ou despesas
+
   const MiniTabela = ({ titulo, itens, cor, corFundo }) => (
     <div className="flex-1 min-w-0 overflow-hidden rounded-lg" style={{ border: `1px solid ${cor}20` }}>
-      {/* Cabeçalho da seção */}
+
       <div
         className="flex items-center justify-between px-3 py-2"
         style={{ background: corFundo }}
@@ -37,9 +37,9 @@ function PainelDetalhes({ mes }) {
         </span>
       </div>
 
-      {/* Tabela */}
+
       <table className="w-full border-collapse text-[10px]">
-        {/* Cabeçalhos das colunas */}
+
         <thead>
           <tr style={{ borderBottom: `1px solid ${cor}15`, background: "rgba(0,0,0,.2)" }}>
             <th className="text-left px-3 py-1.5 font-semibold text-ink-600 uppercase tracking-wider whitespace-nowrap w-16">Data</th>
@@ -68,10 +68,10 @@ function PainelDetalhes({ mes }) {
                     background: idx % 2 === 0 ? "transparent" : "rgba(0,0,0,.12)"
                   }}
                 >
-                  {/* Data */}
+
                   <td className="px-3 py-2 text-ink-500 whitespace-nowrap">{fmtDate(l.data_vencimento)}</td>
 
-                  {/* Descrição */}
+
                   <td className="px-3 py-2">
                     <div className="flex items-center gap-1.5">
                       <div className="w-1 h-1 rounded-full flex-shrink-0" style={{ background: pago ? cor : "rgba(255,255,255,.2)" }} />
@@ -81,7 +81,7 @@ function PainelDetalhes({ mes }) {
                     </div>
                   </td>
 
-                  {/* Cliente */}
+
                   <td className="px-3 py-2">
                     {l.clientes?.nome ? (
                       <span
@@ -99,7 +99,7 @@ function PainelDetalhes({ mes }) {
                     )}
                   </td>
 
-                  {/* Categoria */}
+
                   <td className="px-3 py-2">
                     {l.categorias_financeiras?.nome ? (
                       <span
@@ -114,7 +114,7 @@ function PainelDetalhes({ mes }) {
                     )}
                   </td>
 
-                  {/* Status */}
+
                   <td className="px-3 py-2 text-center">
                     <span
                       className="inline-block px-2 py-0.5 rounded-full font-semibold whitespace-nowrap"
@@ -127,7 +127,7 @@ function PainelDetalhes({ mes }) {
                     </span>
                   </td>
 
-                  {/* Valor */}
+
                   <td className="px-3 py-2 text-right font-mono font-bold whitespace-nowrap" style={{ color: pago ? cor : "#a9939e" }}>
                     {fmt(l.valor)}
                   </td>
@@ -142,17 +142,17 @@ function PainelDetalhes({ mes }) {
 
   return (
     <div className="px-4 pt-2 pb-4 space-y-3">
-      {/* Receitas */}
+
       {mes.receitas.length > 0 && (
         <MiniTabela titulo="Receitas" itens={mes.receitas} cor="#22c55e" corFundo="rgba(34,197,94,.07)" />
       )}
 
-      {/* Despesas */}
+
       {mes.despesas.length > 0 && (
         <MiniTabela titulo="Despesas" itens={mes.despesas} cor="#ef4444" corFundo="rgba(239,68,68,.07)" />
       )}
 
-      {/* Barra de totais */}
+
       <div
         className="flex items-center justify-end gap-6 px-3 py-1.5 rounded-lg text-[10px]"
         style={{ background: "rgba(201,169,110,.04)", border: "1px solid rgba(201,169,110,.08)" }}
@@ -168,10 +168,10 @@ function PainelDetalhes({ mes }) {
   );
 }
 
-// ── Página principal ──────────────────────────────────────────────────────────
+
 export default function FluxoCaixa() {
   const [ano, setAno] = useState(new Date().getFullYear());
-  const [expandido, setExpandido] = useState(null); // nomeMes do mês expandido
+  const [expandido, setExpandido] = useState(null);
   const { dados, isLoading } = useFluxoCaixa(ano);
 
   const totalRecReal  = dados.reduce((s, m) => s + m.recReal, 0);
@@ -184,7 +184,7 @@ export default function FluxoCaixa() {
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-5">
-      {/* Cabeçalho */}
+
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-xl font-bold text-ink-100 flex items-center gap-2">
@@ -199,7 +199,7 @@ export default function FluxoCaixa() {
         </div>
       </div>
 
-      {/* KPIs */}
+
       <div className="grid grid-cols-3 gap-4">
         {[
           { l: "Receita Realizada", v: fmt(totalRecReal),  c: "#22c55e" },
@@ -213,7 +213,7 @@ export default function FluxoCaixa() {
         ))}
       </div>
 
-      {/* Gráfico */}
+
       <div className="glass-card rounded-2xl p-6">
         <h2 className="text-sm font-semibold text-ink-300 mb-4">Fluxo de Caixa Mensal {ano}</h2>
         {isLoading ? (
@@ -238,12 +238,12 @@ export default function FluxoCaixa() {
         )}
       </div>
 
-      {/* Tabela mensal com accordion */}
+
       <div className="glass-card rounded-2xl overflow-hidden">
         <table className="w-full text-sm border-collapse" style={{ minWidth: 700 }}>
           <thead>
             <tr className="border-b border-white/[0.05]">
-              {/* Coluna da setinha */}
+
               <th className="px-3 py-3 w-8" />
               <th className="text-left px-4 py-3 text-xs font-medium text-ink-500">Mês</th>
               <th className="text-right px-4 py-3 text-xs font-medium text-success-500">Rec. Previsto</th>
@@ -260,14 +260,14 @@ export default function FluxoCaixa() {
 
               return (
                 <>
-                  {/* Linha principal do mês */}
+
                   <tr
                     key={m.mes}
                     className={`transition-colors ${aberto ? "" : "table-row-hover"} cursor-pointer`}
                     style={aberto ? { background: "rgba(201,169,110,.05)" } : {}}
                     onClick={() => toggleMes(m.nomeMes)}
                   >
-                    {/* Setinha */}
+
                     <td className="px-3 py-2.5 text-center">
                       <div
                         className="w-5 h-5 rounded flex items-center justify-center mx-auto transition-all duration-300"
@@ -300,7 +300,7 @@ export default function FluxoCaixa() {
                     <td className="px-4 py-2.5 text-right font-mono text-xs font-bold" style={{ color: m.saldoReal >= 0 ? "#22c55e" : "#ef4444" }}>{fmt(m.saldoReal)}</td>
                   </tr>
 
-                  {/* Painel expansível */}
+
                   {aberto && (
                     <tr key={`${m.mes}-detalhe`}>
                       <td
@@ -320,7 +320,7 @@ export default function FluxoCaixa() {
               );
             })}
 
-            {/* Linha de totais */}
+
             <tr style={{ borderTop: "1px solid rgba(201,169,110,.1)" }}>
               <td />
               <td className="px-4 py-3 text-gold-500 font-bold text-xs uppercase tracking-wider">Total</td>

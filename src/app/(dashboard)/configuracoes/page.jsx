@@ -19,7 +19,7 @@ export default function ConfiguracoesPage() {
   const [saving, setSaving]           = useState(false);
   const [form, setForm]               = useState({ nome: "", tipo: "administrativo" });
 
-  // Tipos de ação (dinâmicos)
+
   const [tiposAcao, setTiposAcao]           = useState([]);
   const [modalTipo, setModalTipo]           = useState(false);
   const [editandoTipo, setEditandoTipo]     = useState(null);
@@ -27,7 +27,7 @@ export default function ConfiguracoesPage() {
   const [formTipo, setFormTipo]             = useState({ nome: "" });
   const [excluindoTipoId, setExcluindoTipoId] = useState(null);
 
-  // Tipos de petição (dinâmicos)
+
   const [tiposPeticao, setTiposPeticao]           = useState([]);
   const [modalTipoPet, setModalTipoPet]           = useState(false);
   const [editandoTipoPet, setEditandoTipoPet]     = useState(null);
@@ -35,9 +35,9 @@ export default function ConfiguracoesPage() {
   const [formTipoPet, setFormTipoPet]             = useState({ nome: "" });
   const [excluindoTipoPetId, setExcluindoTipoPetId] = useState(null);
 
-  // Modelos de petição
+
   const [modelosPet, setModelosPet]             = useState([]);
-  const [uploadingPet, setUploadingPet]         = useState(null); // slug sendo uploadado
+  const [uploadingPet, setUploadingPet]         = useState(null);
   const [excluindoPetId, setExcluindoPetId]     = useState(null);
   const [acessandoPetId, setAcessandoPetId]     = useState(null);
   const [dragOverPet, setDragOverPet]           = useState(null);
@@ -45,18 +45,18 @@ export default function ConfiguracoesPage() {
   const fileInputPetRef = useRef(null);
   const uploadPetSlotRef = useRef(null);
 
-  // Modelos de contrato
+
   const [modelos, setModelos]               = useState([]);
   const [tipoAcaoAtivo, setTipoAcaoAtivo]   = useState(null);
   const [uploadingSlot, setUploadingSlot]   = useState(null);
   const [excluindoId, setExcluindoId]     = useState(null);
-  const [acessandoId, setAcessandoId]     = useState(null); // id do modelo sendo baixado/visualizado
+  const [acessandoId, setAcessandoId]     = useState(null);
   const [infoAberto, setInfoAberto]       = useState(false);
-  const [dragOver, setDragOver]           = useState(null); // tipo_doc sendo hovered
+  const [dragOver, setDragOver]           = useState(null);
   const fileInputRef = useRef(null);
   const uploadSlotRef = useRef(null);
 
-  // Módulo ativo (sidebar navigation)
+
   const [moduloAtivo, setModuloAtivo] = useState("subdivisoes");
 
   async function carregar() {
@@ -110,7 +110,7 @@ export default function ConfiguracoesPage() {
     carregarModelosPeticao();
   }, []);
 
-  // ── CRUD de tipos de ação ──────────────────────────────────────────────────
+
   async function handleSalvarTipo(e) {
     e.preventDefault();
     if (!formTipo.nome.trim()) return;
@@ -174,7 +174,7 @@ export default function ConfiguracoesPage() {
     setModalTipo(true);
   }
 
-  // ── Modelos: upload ────────────────────────────────────────────────────────
+
   function iniciarUpload(tipoDoc) {
     uploadSlotRef.current = tipoDoc;
     fileInputRef.current?.click();
@@ -262,7 +262,7 @@ export default function ConfiguracoesPage() {
         a.click();
         document.body.removeChild(a);
       } else {
-        // Visualizar via Microsoft Office Online
+
         const viewer = `https://view.officeapps.live.com/op/view.aspx?src=${encodeURIComponent(url)}`;
         window.open(viewer, "_blank");
       }
@@ -287,7 +287,7 @@ export default function ConfiguracoesPage() {
     }
   }
 
-  // ── CRUD de tipos de petição ──────────────────────────────────────────────
+
   async function handleSalvarTipoPet(e) {
     e.preventDefault();
     if (!formTipoPet.nome.trim()) return;
@@ -342,7 +342,7 @@ export default function ConfiguracoesPage() {
     }
   }
 
-  // ── Modelos de petição: upload ─────────────────────────────────────────────
+
   function iniciarUploadPet(tipoPeticaoSlug) {
     uploadPetSlotRef.current = tipoPeticaoSlug;
     fileInputPetRef.current?.click();
@@ -437,11 +437,11 @@ export default function ConfiguracoesPage() {
         body: JSON.stringify(form),
       });
       if (!res.ok) throw new Error("Erro ao salvar subdivisão");
-      
+
       toast.success(editando ? "Subdivisão atualizada" : "Subdivisão criada com sucesso");
-      setModal(false); 
-      setEditando(null); 
-      setForm({ nome: "", tipo: "administrativo" }); 
+      setModal(false);
+      setEditando(null);
+      setForm({ nome: "", tipo: "administrativo" });
       carregar();
     } catch (err) {
       toast.error(err.message);
@@ -458,7 +458,7 @@ export default function ConfiguracoesPage() {
         body: JSON.stringify({ ativo: !s.ativo }),
       });
       if (!res.ok) throw new Error("Falha ao atualizar status.");
-      
+
       toast.success(`Subdivisão ${!s.ativo ? "ativada" : "desativada"}`);
       carregar();
     } catch (err) {
@@ -475,7 +475,7 @@ export default function ConfiguracoesPage() {
   const adm = subdivisoes.filter(s => s.tipo === "administrativo");
   const jud = subdivisoes.filter(s => s.tipo === "judicial");
 
-  // Renderiza o módulo ativo
+
   const renderConteudo = () => {
     switch (moduloAtivo) {
       case "subdivisoes":
@@ -595,7 +595,7 @@ export default function ConfiguracoesPage() {
               </button>
             </div>
 
-            {/* Painel de variáveis */}
+
             {infoAberto && (
               <div className="border-b border-white/[0.05] text-xs">
                 <div className="px-5 py-3 bg-dark-300/70">
@@ -671,7 +671,7 @@ export default function ConfiguracoesPage() {
               </div>
             )}
 
-            {/* Tabs de tipo de ação (dinâmico) */}
+
             <div className="flex overflow-x-auto border-b border-white/[0.05] px-5 gap-1 pt-3">
               {tiposAcao.filter(t => t.ativo).length === 0 ? (
                 <p className="text-xs text-ink-600 pb-3">Nenhum tipo de ação ativo. Cadastre em "Tipos de Ação".</p>
@@ -690,7 +690,7 @@ export default function ConfiguracoesPage() {
               ))}
             </div>
 
-            {/* Grid de documentos para o tipo selecionado */}
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-5">
               {TIPOS_DOC.map(td => {
                 const modelo      = modelos.find(m => m.tipo_acao === tipoAcaoAtivo && m.tipo_doc === td.value);
@@ -716,7 +716,7 @@ export default function ConfiguracoesPage() {
                         : "border-dark-50 bg-dark-300/50"
                     }`}
                   >
-                    {/* Overlay de drag */}
+
                     {isDragOver && (
                       <div className="absolute inset-0 rounded-xl flex items-center justify-center pointer-events-none">
                         <div className="flex flex-col items-center gap-1">
@@ -750,7 +750,7 @@ export default function ConfiguracoesPage() {
                     </div>
 
                     <div className={`flex flex-col gap-2 mt-3 transition-opacity ${isDragOver ? "opacity-30" : ""}`}>
-                      {/* Linha 1: upload + excluir */}
+
                       <div className="flex gap-2">
                         <button
                           onClick={() => iniciarUpload(td.value)}
@@ -779,7 +779,7 @@ export default function ConfiguracoesPage() {
                         )}
                       </div>
 
-                      {/* Linha 2: visualizar + baixar (só se tiver modelo) */}
+
                       {modelo && (
                         <div className="flex gap-2">
                           <button
@@ -890,7 +890,7 @@ export default function ConfiguracoesPage() {
               </button>
             </div>
 
-            {/* Painel de variáveis */}
+
             {infoAbertoPet && (
               <div className="border-b border-white/[0.05] text-xs">
                 <div className="px-5 py-3 bg-dark-300/70">
@@ -1101,10 +1101,10 @@ export default function ConfiguracoesPage() {
 
   return (
     <div className="flex flex-col lg:flex-row gap-6 p-6 min-h-screen">
-      {/* Sidebar */}
+
       <aside className="w-full lg:w-[220px] flex-shrink-0">
         <nav className="glass-card rounded-2xl overflow-hidden sticky top-6 lg:top-24">
-          {/* PROCESSOS */}
+
           <div>
             <p className="px-4 py-2.5 text-[10px] font-semibold uppercase tracking-widest text-ink-600 border-b border-white/[0.05]">
               Processos
@@ -1123,7 +1123,7 @@ export default function ConfiguracoesPage() {
             </div>
           </div>
 
-          {/* CONTRATOS */}
+
           <div className="border-t border-white/[0.05]">
             <p className="px-4 py-2.5 text-[10px] font-semibold uppercase tracking-widest text-ink-600 border-b border-white/[0.05]">
               Contratos
@@ -1152,7 +1152,7 @@ export default function ConfiguracoesPage() {
             </div>
           </div>
 
-          {/* PETIÇÕES */}
+
           <div className="border-t border-white/[0.05]">
             <p className="px-4 py-2.5 text-[10px] font-semibold uppercase tracking-widest text-ink-600 border-b border-white/[0.05]">
               Petições
@@ -1183,9 +1183,9 @@ export default function ConfiguracoesPage() {
         </nav>
       </aside>
 
-      {/* Main content */}
+
       <main className="flex-1 min-w-0">
-        {/* Page header */}
+
         <div className="mb-6">
           <h1 className="text-xl font-bold text-ink-100 flex items-center gap-2">
             <Settings size={20} className="text-ink-400" />
@@ -1194,11 +1194,11 @@ export default function ConfiguracoesPage() {
           <p className="text-sm text-ink-500 mt-0.5">Gerenciar subdivisões, usuários e sistema</p>
         </div>
 
-        {/* Content area */}
+
         {renderConteudo()}
       </main>
 
-      {/* Hidden file input for model uploads (contratos) */}
+
       <input
         ref={fileInputRef}
         type="file"
@@ -1207,7 +1207,7 @@ export default function ConfiguracoesPage() {
         onChange={handleFileChange}
       />
 
-      {/* Hidden file input for petição model uploads */}
+
       <input
         ref={fileInputPetRef}
         type="file"
@@ -1221,7 +1221,7 @@ export default function ConfiguracoesPage() {
         }}
       />
 
-      {/* Modal de subdivisão */}
+
       <Modal
         open={modal}
         onClose={() => { setModal(false); setEditando(null); }}
@@ -1251,7 +1251,7 @@ export default function ConfiguracoesPage() {
         </form>
       </Modal>
 
-      {/* Modal de tipo de ação */}
+
       <Modal
         open={modalTipo}
         onClose={() => { setModalTipo(false); setEditandoTipo(null); }}
@@ -1274,7 +1274,7 @@ export default function ConfiguracoesPage() {
         </form>
       </Modal>
 
-      {/* Modal de tipo de petição */}
+
       <Modal
         open={modalTipoPet}
         onClose={() => { setModalTipoPet(false); setEditandoTipoPet(null); }}

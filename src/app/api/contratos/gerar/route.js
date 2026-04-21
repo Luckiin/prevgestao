@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase-server";
 import { gerarDocx } from "@/lib/services/contratoService";
 
-/** POST /api/contratos/gerar – gera e retorna DOCX preenchido */
+
 export async function POST(request) {
   try {
     const supabase = await createServerClient();

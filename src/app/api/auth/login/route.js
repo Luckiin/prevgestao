@@ -17,7 +17,7 @@ export async function POST(request) {
 
     const response = NextResponse.json(resultado);
 
-    // Aplica cookies de sessão do Supabase
+
     cookies.forEach(({ name, value, options }) =>
       response.cookies.set(name, value, { ...options, ...COOKIE_OPTS })
     );

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase-server";
 import { excluirModelo, gerarUrlDownloadModelo } from "@/lib/services/contratoService";
 
-/** GET /api/contratos/modelos/[id] – URL assinada para download/visualização */
+
 export async function GET(request, { params }) {
   try {
     const supabase = await createServerClient();
@@ -16,7 +16,7 @@ export async function GET(request, { params }) {
   }
 }
 
-/** DELETE /api/contratos/modelos/[id] – remove modelo */
+
 export async function DELETE(request, { params }) {
   try {
     const supabase = await createServerClient();

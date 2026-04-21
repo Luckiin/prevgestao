@@ -23,7 +23,7 @@ const fmtDate = (d) => d ? new Date(d+"T12:00:00").toLocaleDateString("pt-BR") :
 
 function cn(...c) { return c.filter(Boolean).join(" "); }
 
-// ── Empty state illustration ──────────────────────────────────────────────────
+
 function EmptyState({ onNovo }) {
   return (
     <div className="flex flex-col items-center justify-center py-16 gap-3">
@@ -32,10 +32,10 @@ function EmptyState({ onNovo }) {
         <path d="M20 75 Q35 40 55 35 Q65 32 75 40 Q90 50 100 75" stroke="rgba(201,169,110,0.15)" strokeWidth="1.5" fill="rgba(13,3,7,0.4)" />
         <path d="M38 75 Q48 48 60 42 Q72 48 82 75" stroke="rgba(201,169,110,0.2)" strokeWidth="1.5" fill="rgba(30,13,18,0.6)" />
         <path d="M52 75 Q57 55 60 50 Q63 55 68 75" stroke="rgba(201,169,110,0.3)" strokeWidth="1" fill="rgba(42,21,27,0.8)" />
-        {/* Flag */}
+
         <line x1="60" y1="50" x2="60" y2="36" stroke="#C9A96E" strokeWidth="1.2"/>
         <path d="M60 36 L68 40 L60 44 Z" fill="#C9A96E" opacity="0.7"/>
-        {/* Person */}
+
         <circle cx="60" cy="49" r="3" fill="#C9A96E" opacity="0.5"/>
         <line x1="60" y1="52" x2="60" y2="60" stroke="#C9A96E" strokeWidth="1.2" opacity="0.5"/>
         <line x1="56" y1="55" x2="60" y2="53" stroke="#C9A96E" strokeWidth="1" opacity="0.5"/>
@@ -50,11 +50,10 @@ function EmptyState({ onNovo }) {
 }
 
 
-// ── Página Contas a Pagar ─────────────────────────────────────────────────────
 export default function ContasPagar() {
   const hoje    = new Date();
   const [ano,   setAno]   = useState(hoje.getFullYear());
-  const [mes,   setMes]   = useState(hoje.getMonth()); // 0-11
+  const [mes,   setMes]   = useState(hoje.getMonth());
   const [filtPago,    setFiltPago]    = useState(true);
   const [filtAPagar,  setFiltAPagar]  = useState(true);
   const [modal,   setModal]   = useState(false);
@@ -95,17 +94,17 @@ export default function ContasPagar() {
     setIsDeleting(true);
     try {
       await fetch(`/api/financeiro/lancamentos/${excluindoId}`, { method:"DELETE" });
-      toast.success("Lançamento excluído com sucesso."); 
+      toast.success("Lançamento excluído com sucesso.");
       mutate();
-    } catch { 
-      toast.error("Erro ao excluir lançamento."); 
+    } catch {
+      toast.error("Erro ao excluir lançamento.");
     } finally {
       setIsDeleting(false);
       setExcluindoId(null);
     }
   }
 
-  // Filtragem por status
+
   const filtrados = useMemo(() => {
     return dados.filter(l => {
       if (l.status === "pago"     && !filtPago)   return false;
@@ -114,7 +113,7 @@ export default function ContasPagar() {
     });
   }, [dados, filtPago, filtAPagar]);
 
-  // Ordenação
+
   const ordenados = useMemo(() => {
     return [...filtrados].sort((a,b) => {
       let va = a[sortCol] ?? "", vb = b[sortCol] ?? "";
@@ -123,7 +122,7 @@ export default function ContasPagar() {
     });
   }, [filtrados, sortCol, sortAsc]);
 
-  // Paginação
+
   const totalPags  = Math.max(1, Math.ceil(ordenados.length / pageSize));
   const pagActual  = Math.min(page, totalPags);
   const inicio     = (pagActual-1)*pageSize;
@@ -148,7 +147,7 @@ export default function ContasPagar() {
     }
   }
 
-  // Totais
+
   const totalAPagar  = filtrados.filter(l=>l.status!=="pago").reduce((s,l)=>s+(l.valor||0),0);
   const totalPagoVal = filtrados.filter(l=>l.status==="pago").reduce((s,l)=>s+(l.valor_pago||l.valor||0),0);
   const totalGeral   = filtrados.reduce((s,l)=>s+(l.valor||0),0);
@@ -167,7 +166,7 @@ export default function ContasPagar() {
   return (
     <div className="flex flex-col h-full min-h-screen p-0">
 
-      {/* ── Toolbar ── */}
+
       <div className="flex items-center gap-2 px-5 py-3 border-b border-light/5 dark:border-white/[0.05] bg-dark-300 glass-card">
         <button onClick={()=>setModal(true)}
           className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-white transition-all"
@@ -189,16 +188,16 @@ export default function ContasPagar() {
         </button>
       </div>
 
-      {/* ── Navegação Mês/Ano ── */}
+
       <div className="flex items-center gap-3 px-5 py-3 border-b border-light/5 dark:border-white/[0.04] bg-dark-200">
-        {/* Ano */}
+
         <div className="flex items-center gap-1">
           <button onClick={()=>setAno(a=>a-1)} className="p-1 rounded text-ink-500 hover:text-gold-500 hover:bg-gold-500/10 transition-all"><ChevronLeft size={16}/></button>
           <span className="text-sm font-bold text-gold-500 min-w-[40px] text-center">{ano}</span>
           <button onClick={()=>setAno(a=>a+1)} className="p-1 rounded text-ink-500 hover:text-gold-500 hover:bg-gold-500/10 transition-all"><ChevronRight size={16}/></button>
         </div>
 
-        {/* Meses */}
+
         <div className="flex gap-1 flex-1 flex-wrap">
           {MESES_ABREV.map((m,i) => {
             const isAtivo = i===mes;
@@ -216,7 +215,7 @@ export default function ContasPagar() {
           })}
         </div>
 
-        {/* Checkboxes de status */}
+
         <div className="flex items-center gap-3">
           {[["filtPago","Pago",filtPago,setFiltPago],["filtAPagar","A Pagar",filtAPagar,setFiltAPagar]].map(([key,lbl,val,setVal])=>(
             <label key={key} className="flex items-center gap-1.5 cursor-pointer">
@@ -231,7 +230,7 @@ export default function ContasPagar() {
         </div>
       </div>
 
-      {/* ── Tabela ── */}
+
       <div className="flex-1 overflow-auto">
         <table className="w-full text-sm border-collapse min-w-[800px]">
           <thead className="bg-dark-300 sticky top-0 z-10 glass-card">
@@ -338,7 +337,7 @@ export default function ContasPagar() {
         </table>
       </div>
 
-      {/* ── Paginação ── */}
+
       <div className="flex items-center gap-3 px-5 py-2.5 border-t border-light/5 dark:border-white/[0.05] bg-dark-100">
         <div className="flex items-center gap-1">
           <button onClick={()=>setPage(1)} disabled={pagActual===1} className="p-1 rounded text-ink-500 hover:text-gold-500 disabled:opacity-30 transition-all"><ChevronsLeft size={14}/></button>
@@ -367,7 +366,7 @@ export default function ContasPagar() {
         </div>
       </div>
 
-      {/* ── Barra de Totais ── */}
+
       <div className="flex items-center gap-6 px-5 py-2.5 border-t border-light/5 dark:border-white/[0.06] bg-dark-300">
         <span className="text-[12px] font-bold">
           <span className="text-ink-500 mr-1">Total à Pagar</span>
@@ -388,8 +387,8 @@ export default function ContasPagar() {
       </div>
 
       {modal && <ModalLancamento tipo="despesa" original={typeof modal === 'object' ? modal : null} onClose={()=>setModal(false)} onSalvo={mutate}/>}
-      
-      {/* Confirmação de exclusão */}
+
+
       <Modal open={!!excluindoId} onClose={() => !isDeleting && setExcluindoId(null)} title="Excluir despesa" size="sm">
         <p className="text-sm text-ink-300 mb-6">
           Tem certeza que deseja excluir este lançamento? Esta ação não pode ser desfeita.

@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { 
-  X, CheckCircle, ChevronDown, Info, RefreshCw, 
-  ArrowDownCircle, ArrowUpCircle, Plus 
+import {
+  X, CheckCircle, ChevronDown, Info, RefreshCw,
+  ArrowDownCircle, ArrowUpCircle, Plus
 } from "lucide-react";
 import { toast } from "sonner";
 import { useCategorias } from "@/hooks/useFinanceiro";
@@ -12,13 +12,7 @@ import { maskMoeda } from "@/lib/utils";
 
 function cn(...c) { return c.filter(Boolean).join(" "); }
 
-/**
- * Componente unificado para inclusão e edição de Lançamentos Financeiros (Receitas e Despesas).
- * @param {string} tipo - "receita" ou "despesa"
- * @param {object} original - Dados do lançamento para edição (opcional)
- * @param {function} onClose - Função para fechar o modal
- * @param {function} onSalvo - Callback após sucesso no salvamento
- */
+
 export default function ModalLancamento({ tipo, original = null, onClose, onSalvo }) {
   const [tab, setTab]       = useState("lancamento");
   const [saving, setSaving] = useState(false);
@@ -56,15 +50,15 @@ export default function ModalLancamento({ tipo, original = null, onClose, onSalv
   const accentColor = isDespesa ? "#ef4444" : "#22c55e";
 
   async function salvar() {
-    if (!form.descricao || !form.valor) { 
-      toast.error("Preencha descrição e valor."); 
-      return; 
+    if (!form.descricao || !form.valor) {
+      toast.error("Preencha descrição e valor.");
+      return;
     }
     setSaving(true);
     try {
       const payload = {
-        tipo, 
-        descricao: form.descricao, 
+        tipo,
+        descricao: form.descricao,
         categoria_id: form.categoria_id || null,
         cliente_id: form.cliente_id || null,
         data_vencimento: form.data_vencimento,
@@ -73,9 +67,9 @@ export default function ModalLancamento({ tipo, original = null, onClose, onSalv
         data_pagamento: form.quitado ? form.data_pagamento : null,
         valor_pago: form.quitado && form.valor_pago ? parseFloat(form.valor_pago.replace(/\./g, "").replace(",", ".")) : null,
         observacoes: form.mais_info ? `Juros: ${form.juros_multa||0} | Desconto: ${form.desconto||0}` : null,
-        conta_id: "00000000-0000-0000-0000-000000000001" // Conta Principal Fixa
+        conta_id: "00000000-0000-0000-0000-000000000001"
       };
-      
+
       const url = form.id ? `/api/financeiro/lancamentos/${form.id}` : "/api/financeiro/lancamentos";
       const method = form.id ? "PUT" : "POST";
 
@@ -86,12 +80,12 @@ export default function ModalLancamento({ tipo, original = null, onClose, onSalv
       const saved = await res.json();
 
       toast.success(`${isDespesa ? "Despesa" : "Receita"} ${form.id ? "atualizada" : "cadastrada"}!`);
-      onSalvo?.(); 
+      onSalvo?.();
       onClose();
-    } catch { 
-      toast.error("Erro ao salvar."); 
-    } finally { 
-      setSaving(false); 
+    } catch {
+      toast.error("Erro ao salvar.");
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -119,7 +113,7 @@ export default function ModalLancamento({ tipo, original = null, onClose, onSalv
 
         {tab === "lancamento" ? (
           <div className="p-6 space-y-4 max-h-[68vh] overflow-y-auto">
-            {/* Descrição e Categoria */}
+
             <div className="grid grid-cols-3 gap-3">
               <div className="col-span-2">
                 <label className="block text-[11px] font-semibold text-ink-500 uppercase tracking-wider mb-1.5">Descrição</label>
@@ -140,7 +134,7 @@ export default function ModalLancamento({ tipo, original = null, onClose, onSalv
               </div>
             </div>
 
-            {/* Cliente, Vencimento e Valor */}
+
             <div className="grid grid-cols-3 gap-3">
               <div className="col-span-1">
                 <label className="block text-[11px] font-semibold text-ink-500 uppercase tracking-wider mb-1.5">Cliente</label>
@@ -168,7 +162,7 @@ export default function ModalLancamento({ tipo, original = null, onClose, onSalv
               </div>
             </div>
 
-            {/* Mais Informações Toggle */}
+
             <div className="flex gap-2">
               <button type="button" onClick={() => set("mais_info",!form.mais_info)}
                 className={cn("flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all",
@@ -194,7 +188,7 @@ export default function ModalLancamento({ tipo, original = null, onClose, onSalv
 
             <div className="border-t border-white/[0.06]" />
 
-            {/* Status de Pagamento */}
+
             <label className="flex items-center gap-3 cursor-pointer group w-fit">
               <div onClick={() => set("quitado",!form.quitado)}
                 className={cn("w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all flex-shrink-0",

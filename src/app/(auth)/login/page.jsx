@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Eye, EyeOff, ShieldCheck, Loader2, KeyRound } from "lucide-react";
 import Image from "next/image";
 
-/* ── estilos inline reutilizáveis ─────────────────────────── */
+
 const INPUT = {
   width: "100%", background: "rgba(255,255,255,.04)",
   border: "1px solid rgba(201,169,110,.15)", borderRadius: 4,
@@ -63,7 +63,7 @@ function EntrarContent() {
   return (
     <div style={{ animation: "fadeIn .5s ease-out forwards" }}>
 
-      {/* Logo + nome */}
+
       <div style={{ textAlign: "center", marginBottom: 40 }}>
         <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
           <Image src="/logo.svg" alt="Deise Lisboa Advocacia" width={72} height={72} priority style={{ objectFit: "contain" }} />
@@ -76,14 +76,14 @@ function EntrarContent() {
         </div>
       </div>
 
-      {/* Card */}
+
       <div style={{
         background: "rgba(255,255,255,.025)",
         border: "1px solid rgba(201,169,110,.12)",
         borderRadius: 6, padding: "36px 32px",
         backdropFilter: "blur(16px)",
       }}>
-        {/* Linha ouro topo */}
+
         <div style={{ height: 2, background: "linear-gradient(90deg, #C9A96E, rgba(201,169,110,.3))", borderRadius: 2, marginBottom: 32 }} />
 
         {etapa === 1 ? (

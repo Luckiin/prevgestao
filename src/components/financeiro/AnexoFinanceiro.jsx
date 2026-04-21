@@ -28,14 +28,14 @@ export default function AnexoFinanceiro({ lancamentoId }) {
   async function processarArquivo(file) {
     setUploading(true);
     try {
-      // 1. Obter URL de upload
+
       const resUrl = await fetch(`/api/financeiro/lancamentos/${lancamentoId}/documentos`, {
         method: "POST",
         body: JSON.stringify({ action: "upload_url", nome: file.name }),
       });
       const { signedUrl, path } = await resUrl.json();
 
-      // 2. Upload para o Storage
+
       const resStorage = await fetch(signedUrl, {
         method: "PUT",
         body: file,
@@ -43,7 +43,7 @@ export default function AnexoFinanceiro({ lancamentoId }) {
       });
       if (!resStorage.ok) throw new Error(`Erro no upload do arquivo ${file.name}`);
 
-      // 3. Registrar no Banco
+
       const resDB = await fetch(`/api/financeiro/lancamentos/${lancamentoId}/documentos`, {
         method: "POST",
         body: JSON.stringify({
@@ -64,14 +64,14 @@ export default function AnexoFinanceiro({ lancamentoId }) {
 
   async function handleFiles(files) {
     if (!files || files.length === 0 || !lancamentoId) return;
-    
+
     setUploading(true);
     let sucessos = 0;
     for (const file of files) {
       const ok = await processarArquivo(file);
       if (ok) sucessos++;
     }
-    
+
     if (sucessos > 0) {
       toast.success(`${sucessos} arquivo(s) anexado(s) com sucesso!`);
       carregar();

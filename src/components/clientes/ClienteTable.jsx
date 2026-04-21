@@ -87,7 +87,7 @@ export default function ClienteTable({ clientes, onEdit, onDelete, loading, sort
             ))}
           </tr>
         </thead>
-        <motion.tbody 
+        <motion.tbody
           variants={container}
           initial="hidden"
           animate="show"

@@ -1,10 +1,6 @@
-/**
- * prazoService.js
- * Gerenciamento de prazos (a inserção dispara trigger de ano no banco)
- */
 import { registrarAuditoria } from "./auditService";
 
-/** Lista prazos de um cliente */
+
 export async function listarPrazos(supabase, clienteId) {
   const { data, error } = await supabase
     .from("prazos")
@@ -16,7 +12,7 @@ export async function listarPrazos(supabase, clienteId) {
   return data;
 }
 
-/** Lista todos os prazos com filtros (para a agenda geral) */
+
 export async function listarTodosPrazos(supabase, { concluido, dias_ate, limit = 100 } = {}) {
   let query = supabase
     .from("prazos")
@@ -36,7 +32,7 @@ export async function listarTodosPrazos(supabase, { concluido, dias_ate, limit =
   return data;
 }
 
-/** Cria prazo (dispara trigger fn_trigger_prazo_ano no banco) */
+
 export async function criarPrazo(supabase, payload, usuarioEmail, usuarioNome) {
   const { data, error } = await supabase
     .from("prazos")
@@ -59,7 +55,7 @@ export async function criarPrazo(supabase, payload, usuarioEmail, usuarioNome) {
   return data;
 }
 
-/** Atualiza prazo (ex: marcar como concluído) */
+
 export async function atualizarPrazo(supabase, id, payload, usuarioEmail, usuarioNome) {
   const { data: anterior } = await supabase
     .from("prazos")
@@ -90,7 +86,7 @@ export async function atualizarPrazo(supabase, id, payload, usuarioEmail, usuari
   return data;
 }
 
-/** Exclui prazo */
+
 export async function excluirPrazo(supabase, id, usuarioEmail, usuarioNome) {
   const { data: anterior } = await supabase
     .from("prazos")

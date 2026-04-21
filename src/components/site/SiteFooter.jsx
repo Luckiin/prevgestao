@@ -32,10 +32,10 @@ export default function SiteFooter() {
     <footer style={{ background: "#040001", borderTop: "1px solid rgba(201,169,110,.08)" }}>
       <div style={{ maxWidth: 1280, margin: "0 auto", padding: "80px 32px 40px" }}>
 
-        {/* Top row */}
+
         <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr", gap: 64, marginBottom: 80 }}>
 
-          {/* Brand */}
+
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 24 }}>
               <Image src="/logo.svg" alt="Deise Lisboa Advocacia" width={52} height={52} style={{ objectFit: "contain" }} />
@@ -49,7 +49,7 @@ export default function SiteFooter() {
             </p>
           </div>
 
-          {/* Link cols */}
+
           {COLS.map(col => (
             <div key={col.title}>
               <div style={{ fontSize: 11, letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(201,169,110,.5)", marginBottom: 24 }}>{col.title}</div>
@@ -68,10 +68,10 @@ export default function SiteFooter() {
           ))}
         </div>
 
-        {/* Divider */}
+
         <div style={{ height: 1, background: "rgba(201,169,110,.08)", marginBottom: 32 }} />
 
-        {/* Bottom row */}
+
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 16 }}>
           <p style={{ fontSize: 12, color: "rgba(245,240,232,.2)" }}>
             © {ANO} Deise Lisboa Advocacia. Todos os direitos reservados.

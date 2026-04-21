@@ -1,7 +1,3 @@
-/**
- * authService.js
- * Autenticação com Supabase Auth + 2FA (TOTP)
- */
 import { registrarAuditoria } from "./auditService";
 
 const COOKIE_OPTS = {
@@ -14,10 +10,7 @@ const COOKIE_OPTS = {
 
 export { COOKIE_OPTS };
 
-/**
- * Etapa 1 do login: e-mail + senha
- * Retorna { mfa_required, aal, next_id, session, usuario }
- */
+
 export async function loginEtapa1(supabase, email, senha) {
   const { data, error } = await supabase.auth.signInWithPassword({ email, password: senha });
 
@@ -25,12 +18,12 @@ export async function loginEtapa1(supabase, email, senha) {
 
   const { user, session } = data;
 
-  // Verifica se MFA está habilitado para o usuário
+
   const { data: factors } = await supabase.auth.mfa.listFactors();
   const totpFactor = factors?.totp?.find((f) => f.status === "verified");
 
   if (totpFactor) {
-    // Inicia desafio TOTP
+
     const { data: challengeData, error: challengeErr } =
       await supabase.auth.mfa.challenge({ factorId: totpFactor.id });
 
@@ -48,7 +41,7 @@ export async function loginEtapa1(supabase, email, senha) {
     };
   }
 
-  // Sem MFA — login direto
+
   await registrarAuditoria({
     tabela:        "auth",
     acao:          "LOGIN",
@@ -68,9 +61,7 @@ export async function loginEtapa1(supabase, email, senha) {
   };
 }
 
-/**
- * Etapa 2 do login: verificar código TOTP
- */
+
 export async function loginEtapa2(supabase, factorId, challengeId, codigo) {
   const { data, error } = await supabase.auth.mfa.verify({
     factorId,
@@ -100,9 +91,7 @@ export async function loginEtapa2(supabase, factorId, challengeId, codigo) {
   };
 }
 
-/**
- * Logout
- */
+
 export async function logout(supabase, usuarioEmail) {
   await registrarAuditoria({
     tabela:        "auth",

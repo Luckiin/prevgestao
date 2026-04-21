@@ -90,17 +90,17 @@ export default function Depoimentos() {
     <section id="depoimentos" style={{ background: "#070102", padding: "120px 0", borderTop: "1px solid rgba(201,169,110,.06)" }}>
       <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 32px" }}>
 
-        {/* Counters */}
+
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 48, marginBottom: 100 }}>
           {STATS.map(s => <StatItem key={s.label} {...s} />)}
         </div>
 
         <div style={{ height: 1, background: "linear-gradient(90deg, transparent, rgba(201,169,110,.2), transparent)", marginBottom: 80 }} />
 
-        {/* Depoimentos */}
+
         <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: 80, alignItems: "start" }}>
 
-          {/* Nav lateral */}
+
           <div>
             <div style={{ fontSize: 11, letterSpacing: "0.3em", textTransform: "uppercase", color: "#C9A96E", marginBottom: 32, display: "flex", alignItems: "center", gap: 12 }}>
               <span style={{ display: "block", width: 28, height: 1, background: "#C9A96E" }} />
@@ -123,7 +123,7 @@ export default function Depoimentos() {
             </div>
           </div>
 
-          {/* Texto */}
+
           <div style={{ paddingTop: 8 }}>
             <div style={{ fontSize: 64, fontFamily: "Georgia, serif", color: "rgba(201,169,110,.2)", lineHeight: 1, marginBottom: 16, userSelect: "none" }}>"</div>
             <blockquote style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: "clamp(18px, 2.2vw, 26px)", lineHeight: 1.6, color: "rgba(245,240,232,.85)", margin: 0, marginBottom: 32, fontStyle: "italic" }}>

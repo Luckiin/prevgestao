@@ -8,7 +8,7 @@ export default function Contato() {
       <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 32px" }}>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 80, alignItems: "center" }}>
 
-          {/* Esquerda — CTA principal */}
+
           <div>
             <div style={{ fontSize: 11, letterSpacing: "0.3em", textTransform: "uppercase", color: "#470002", opacity: 0.8, marginBottom: 24, display: "flex", alignItems: "center", gap: 12 }}>
               <span style={{ display: "block", width: 28, height: 1, background: "#470002" }} />
@@ -30,7 +30,7 @@ export default function Contato() {
             </a>
           </div>
 
-          {/* Direita — Infos de contato */}
+
           <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
             {[
               { icon: Phone, label: "Telefone / WhatsApp", value: "(71) 98780-6608" },

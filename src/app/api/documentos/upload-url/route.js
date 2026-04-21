@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase-server";
 import { gerarUrlUpload } from "@/lib/services/documentoService";
 
-/** POST /api/documentos/upload-url – gera URL assinada para upload direto */
+
 export async function POST(request) {
   try {
     const supabase = await createServerClient();

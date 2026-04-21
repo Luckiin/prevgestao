@@ -1,12 +1,8 @@
-/**
- * financeiroDocumentoService.js
- * Upload e gerenciamento de documentos do módulo financeiro
- */
 import { registrarAuditoria } from "./auditService";
 
 const BUCKET = "financeiro-documentos";
 
-/** Lista documentos de um lançamento */
+
 export async function listarDocumentosFinanceiro(supabase, lancamentoId) {
   const { data, error } = await supabase
     .from("lancamentos_documentos")
@@ -18,7 +14,7 @@ export async function listarDocumentosFinanceiro(supabase, lancamentoId) {
   return data;
 }
 
-/** Gera URL temporária para download (1 hora de validade) */
+
 export async function gerarUrlDownloadFinanceiro(supabase, storagePath, download = false) {
   const { data, error } = await supabase.storage
     .from(BUCKET)
@@ -28,7 +24,7 @@ export async function gerarUrlDownloadFinanceiro(supabase, storagePath, download
   return data.signedUrl;
 }
 
-/** Registra documento no banco após upload */
+
 export async function registrarDocumentoFinanceiro(supabase, {
   lancamento_id,
   nome,
@@ -64,7 +60,7 @@ export async function registrarDocumentoFinanceiro(supabase, {
   return data;
 }
 
-/** Gera URL para upload direto pelo browser */
+
 export async function gerarUrlUploadFinanceiro(supabase, lancamentoId, nomeArquivo) {
   const ext  = nomeArquivo.split(".").pop();
   const path = `${lancamentoId}/${Date.now()}_${nomeArquivo}`;
@@ -77,7 +73,7 @@ export async function gerarUrlUploadFinanceiro(supabase, lancamentoId, nomeArqui
   return { signedUrl: data.signedUrl, path };
 }
 
-/** Exclui documento do Storage e do banco */
+
 export async function excluirDocumentoFinanceiro(supabase, id, usuarioEmail, usuarioNome) {
   const { data: doc } = await supabase
     .from("lancamentos_documentos")
