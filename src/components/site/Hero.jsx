@@ -65,7 +65,7 @@ export default function Hero() {
         </div>
 
         {/* Headline */}
-        <h1 style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: "clamp(36px, 5.5vw, 72px)", fontWeight: 700, lineHeight: 1.1, letterSpacing: "-0.02em", color: "#f5f0e8", marginBottom: 28 }}>
+        <h1 style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: "clamp(36px, 5.5vw, 72px)", fontWeight: 700, lineHeight: 1.1, letterSpacing: "-0.02em", color: "var(--ink-200)", marginBottom: 28 }}>
           {slide.headline[0]}<br />
           <span style={{ color: "#C9A96E" }}>{slide.headline[1]}</span>
         </h1>

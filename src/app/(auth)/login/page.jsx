@@ -9,7 +9,7 @@ import Image from "next/image";
 const INPUT = {
   width: "100%", background: "rgba(255,255,255,.04)",
   border: "1px solid rgba(201,169,110,.15)", borderRadius: 4,
-  padding: "13px 16px", fontSize: 14, color: "#f5f0e8",
+  padding: "13px 16px", fontSize: 14, color: "var(--ink-200)",
   outline: "none", transition: "border-color .2s",
   boxSizing: "border-box",
 };
@@ -88,7 +88,7 @@ function EntrarContent() {
 
         {etapa === 1 ? (
           <>
-            <p style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: 18, fontWeight: 600, color: "#f5f0e8", marginBottom: 28 }}>
+            <p style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: 18, fontWeight: 600, color: "var(--ink-200)", marginBottom: 28 }}>
               Acesso ao sistema
             </p>
 
@@ -139,12 +139,12 @@ function EntrarContent() {
           <>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
               <ShieldCheck size={20} style={{ color: "#C9A96E" }} />
-              <p style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: 18, fontWeight: 600, color: "#f5f0e8" }}>
+              <p style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: 18, fontWeight: 600, color: "var(--ink-200)" }}>
                 Verificação em 2 etapas
               </p>
             </div>
 
-            <p style={{ fontSize: 13, color: "rgba(245,240,232,.45)", marginBottom: 28, lineHeight: 1.7 }}>
+            <p style={{ fontSize: 13, color: "var(--ink-400)", marginBottom: 28, lineHeight: 1.7 }}>
               Abra o aplicativo autenticador e insira o código de 6 dígitos.
             </p>
 
@@ -187,7 +187,7 @@ function EntrarContent() {
         )}
       </div>
 
-      <p style={{ textAlign: "center", fontSize: 11, color: "rgba(245,240,232,.18)", marginTop: 24, letterSpacing: "0.05em" }}>
+      <p style={{ textAlign: "center", fontSize: 11, color: "var(--ink-600)", marginTop: 24, letterSpacing: "0.05em" }}>
         PrevGestão v3.0 — Acesso restrito ao escritório
       </p>
     </div>

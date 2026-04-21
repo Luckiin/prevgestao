@@ -27,7 +27,7 @@ export default function FluxoCaixa() {
         </div>
         <div className="flex items-center gap-2">
           <button onClick={() => setAno(a => a - 1)} style={{ padding: "6px 12px", background: "rgba(201,169,110,.08)", border: "1px solid rgba(201,169,110,.15)", borderRadius: 4, color: "#C9A96E", fontSize: 13, cursor: "pointer" }}>‹</button>
-          <span style={{ fontSize: 15, fontWeight: 700, color: "#f5f0e8", minWidth: 60, textAlign: "center" }}>{ano}</span>
+          <span style={{ fontSize: 15, fontWeight: 700, color: "var(--ink-200)", minWidth: 60, textAlign: "center" }}>{ano}</span>
           <button onClick={() => setAno(a => a + 1)} style={{ padding: "6px 12px", background: "rgba(201,169,110,.08)", border: "1px solid rgba(201,169,110,.15)", borderRadius: 4, color: "#C9A96E", fontSize: 13, cursor: "pointer" }}>›</button>
         </div>
       </div>

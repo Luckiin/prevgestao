@@ -30,7 +30,7 @@ function CustomTooltip({ active, payload }) {
   if (!active || !payload?.length) return null;
   return (
     <div style={{ background:"#14050a", border:"1px solid rgba(201,169,110,.2)", borderRadius:8, padding:"8px 12px", fontSize:12 }}>
-      <p style={{ color:"#f5f0e8", fontWeight:600, marginBottom:2 }}>{payload[0].name}</p>
+      <p style={{ color:"var(--ink-200)", fontWeight:600, marginBottom:2 }}>{payload[0].name}</p>
       <p style={{ color:"#C9A96E" }}>{fmt(payload[0].value)}</p>
     </div>
   );
@@ -44,7 +44,7 @@ function CenterLabel({ viewBox, total, linha1 }) {
       <text x={cx} y={cy - 10} textAnchor="middle" fill="#8a7280" fontSize="11" fontFamily="Inter, sans-serif">
         {linha1}
       </text>
-      <text x={cx} y={cy + 10} textAnchor="middle" fill="#f5f0e8" fontSize="14" fontWeight="700" fontFamily="Inter, sans-serif">
+      <text x={cx} y={cy + 10} textAnchor="middle" fill="var(--ink-200)" fontSize="14" fontWeight="700" fontFamily="Inter, sans-serif">
         {fmt(total)}
       </text>
     </g>

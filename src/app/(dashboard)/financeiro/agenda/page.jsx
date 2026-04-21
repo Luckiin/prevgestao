@@ -69,7 +69,7 @@ export default function AgendaFinanceiro() {
           <div className="flex items-center gap-1 glass-card rounded px-1 py-1">
             {["dia","semana","mes"].map(v => (
               <button key={v} onClick={() => setView(v)}
-                style={{ padding: "4px 12px", borderRadius: 3, fontSize: 12, fontWeight: 500, border: "none", cursor: "pointer", background: view === v ? "#C9A96E" : "transparent", color: view === v ? "#080102" : "rgba(245,240,232,.5)", transition: "all .2s" }}>
+                style={{ padding: "4px 12px", borderRadius: 3, fontSize: 12, fontWeight: 500, border: "none", cursor: "pointer", background: view === v ? "#C9A96E" : "transparent", color: view === v ? "#080102" : "var(--ink-500)", transition: "all .2s" }}>
                 {v.charAt(0).toUpperCase() + v.slice(1)}
               </button>
             ))}
@@ -96,7 +96,7 @@ export default function AgendaFinanceiro() {
       <div className="glass-card rounded-2xl overflow-hidden">
         <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 20px", borderBottom: "1px solid rgba(201,169,110,.07)" }}>
           <button onClick={() => navMes(-1)} style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(201,169,110,.6)", display: "flex", alignItems: "center", padding: 4, borderRadius: 4 }}><ChevronLeft size={16} /></button>
-          <span style={{ fontSize: 15, fontWeight: 700, color: "#f5f0e8", minWidth: 180, textAlign: "center" }}>{MESES_PT[mes]} {ano}</span>
+          <span style={{ fontSize: 15, fontWeight: 700, color: "var(--ink-200)", minWidth: 180, textAlign: "center" }}>{MESES_PT[mes]} {ano}</span>
           <button onClick={() => navMes(1)} style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(201,169,110,.6)", display: "flex", alignItems: "center", padding: 4, borderRadius: 4 }}><ChevronRight size={16} /></button>
           <button onClick={() => { setMes(hoje.getMonth()); setAno(hoje.getFullYear()); }}
             style={{ marginLeft: 8, padding: "4px 12px", background: "rgba(201,169,110,.1)", border: "1px solid rgba(201,169,110,.2)", borderRadius: 4, color: "#C9A96E", fontSize: 12, cursor: "pointer" }}>
@@ -124,7 +124,7 @@ export default function AgendaFinanceiro() {
               }}>
                 {dia && (
                   <>
-                    <div style={{ fontSize: 13, fontWeight: isHoje ? 700 : 400, color: isHoje ? "#C9A96E" : "rgba(245,240,232,.6)", marginBottom: 4, textAlign: "right" }}>{dia}</div>
+                    <div style={{ fontSize: 13, fontWeight: isHoje ? 700 : 400, color: isHoje ? "#C9A96E" : "var(--ink-400)", marginBottom: 4, textAlign: "right" }}>{dia}</div>
                     <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
                       {eventos.slice(0, 3).map(ev => (
                         <div key={ev.id} style={{

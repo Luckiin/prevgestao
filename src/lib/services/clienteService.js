@@ -46,7 +46,15 @@ export async function listarClientes(supabase, {
   if (tipo_processo)  query = query.eq("tipo_processo", tipo_processo);
   if (situacao)       query = query.eq("situacao", situacao);
   if (subdivisao_id)   query = query.eq("subdivisao_id", subdivisao_id);
-  if (subdivisao_nome) query = query.eq("subdivisoes.nome", subdivisao_nome);
+  
+  if (subdivisao_nome) {
+    const { data: subs } = await supabase.from("subdivisoes").select("id").eq("nome", subdivisao_nome);
+    if (subs && subs.length > 0) {
+      query = query.in("subdivisao_id", subs.map(s => s.id));
+    } else {
+      query = query.eq("id", "00000000-0000-0000-0000-000000000000");
+    }
+  }
   if (ano_referencia) query = query.eq("ano_referencia", Number(ano_referencia));
   if (busca) {
     query = query.or(

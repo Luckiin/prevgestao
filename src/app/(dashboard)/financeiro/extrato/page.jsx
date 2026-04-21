@@ -44,7 +44,7 @@ export default function Extrato() {
   const totalSaida    = movs.filter(m => m.tipo === "saida").reduce((s, m) => s + m.valor, 0);
   const saldoPeriodo  = totalEntrada - totalSaida;
 
-  const S = { background: "rgba(255,255,255,.04)", border: "1px solid rgba(201,169,110,.12)", borderRadius: 4, padding: "8px 12px", fontSize: 12, color: "#f5f0e8", outline: "none" };
+  const S = { background: "rgba(255,255,255,.04)", border: "1px solid rgba(201,169,110,.12)", borderRadius: 4, padding: "8px 12px", fontSize: 12, color: "var(--ink-200)", outline: "none" };
 
   return (
     <div className="p-6 max-w-6xl mx-auto space-y-5">

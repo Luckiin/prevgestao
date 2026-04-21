@@ -4,8 +4,49 @@
 
 /* ── Base ─────────────────────────────────────────────────── */
 :root {
+  /* Dark Mode Default */
+  --dark-50: #2a151b;
+  --dark-100: #1e0d12;
+  --dark-200: #160a0e;
+  --dark-300: #12060b;
+  --dark-400: #0d0307;
+  
+  --ink-100: #ffffff;
+  --ink-200: #fdfaf5;
+  --ink-300: #e5dadd;
+  --ink-400: #c8b7bd;
+  --ink-500: #a9939e;
+  --ink-600: #8a7a81;
+  --ink-700: #5c4f54;
+
   --scrollbar-bg:    #0d0307;
   --scrollbar-thumb: #3d0a1a;
+  
+  --glass-bg: rgba(42, 21, 27, 0.6);
+  --glass-border: rgba(201, 169, 110, 0.15);
+}
+
+[data-theme='light'] {
+  /* Light Mode Equivalents */
+  --dark-50: #ffffff;  
+  --dark-100: #fcfcfc; 
+  --dark-200: #f7f7f7; 
+  --dark-300: #f0f0f0; 
+  --dark-400: #e5e5e5; 
+
+  --ink-100: #11080a; 
+  --ink-200: #2a151b; 
+  --ink-300: #4a2d37; 
+  --ink-400: #6b4d57; 
+  --ink-500: #8c6a76; 
+  --ink-600: #ad8f9a; 
+  --ink-700: #d1b8c2; 
+
+  --scrollbar-bg: #e5e5e5;
+  --scrollbar-thumb: #ad8f9a;
+
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(0, 0, 0, 0.1);
 }
 
 * {
@@ -17,8 +58,8 @@ html {
 }
 
 body {
-  background-color: #12060b;
-  color: #f5f0e8;
+  background-color: var(--dark-300);
+  color: var(--ink-200);
   font-family: 'Inter', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -54,9 +95,9 @@ body {
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus {
-  -webkit-box-shadow: 0 0 0 1000px #1e0d12 inset !important;
-  -webkit-text-fill-color: #f5f0e8 !important;
-  caret-color: #f5f0e8;
+  -webkit-box-shadow: 0 0 0 1000px var(--dark-100) inset !important;
+  -webkit-text-fill-color: var(--ink-200) !important;
+  caret-color: var(--ink-200);
 }
 
 /* ── Tabela ──────────────────────────────────────────────── */
@@ -66,9 +107,9 @@ input:-webkit-autofill:focus {
 
 /* ── Card de glass ────────────────────────────────────────── */
 .glass-card {
-  background: rgba(42, 21, 27, 0.6);
+  background: var(--glass-bg);
   backdrop-filter: blur(16px);
-  border: 1px solid rgba(201, 169, 110, 0.15);
+  border: 1px solid var(--glass-border);
 }
 
 /* Tooltips nativas usam cursor padrão ou pointer no dash */

@@ -135,7 +135,7 @@ export default function ContasReceber() {
     <div className="flex flex-col h-full min-h-screen p-0">
 
       {/* ── Toolbar ── */}
-      <div className="flex items-center gap-2 px-5 py-3 border-b border-white/[0.05]" style={{ background:"rgba(13,3,7,.5)" }}>
+      <div className="flex items-center gap-2 px-5 py-3 border-b border-light/5 dark:border-white/[0.05] bg-dark-300 glass-card">
         <button onClick={()=>setModal(true)}
           className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-white transition-all"
           style={{ background:"linear-gradient(135deg,#22c55e,#16a34a)" }}>
@@ -160,7 +160,7 @@ export default function ContasReceber() {
       </div>
 
       {/* ── Navegação Mês/Ano ── */}
-      <div className="flex items-center gap-3 px-5 py-3 border-b border-white/[0.04]" style={{ background:"rgba(13,3,7,.3)" }}>
+      <div className="flex items-center gap-3 px-5 py-3 border-b border-light/5 dark:border-white/[0.04] bg-dark-200">
         <div className="flex items-center gap-1">
           <button onClick={()=>setAno(a=>a-1)} className="p-1 rounded text-ink-500 hover:text-gold-500 hover:bg-gold-500/10 transition-all"><ChevronLeft size={16}/></button>
           <span className="text-sm font-bold text-gold-500 min-w-[40px] text-center">{ano}</span>
@@ -291,7 +291,7 @@ export default function ContasReceber() {
       </div>
 
       {/* ── Paginação ── */}
-      <div className="flex items-center gap-3 px-5 py-2.5 border-t border-white/[0.05]" style={{ background:"rgba(13,3,7,.4)" }}>
+      <div className="flex items-center gap-3 px-5 py-2.5 border-t border-light/5 dark:border-white/[0.05] bg-dark-100">
         <div className="flex items-center gap-1">
           <button onClick={()=>setPage(1)} disabled={pagActual===1} className="p-1 rounded text-ink-500 hover:text-gold-500 disabled:opacity-30 transition-all"><ChevronsLeft size={14}/></button>
           <button onClick={()=>setPage(p=>Math.max(1,p-1))} disabled={pagActual===1} className="p-1 rounded text-ink-500 hover:text-gold-500 disabled:opacity-30 transition-all"><ChevronLeft size={14}/></button>
@@ -320,7 +320,7 @@ export default function ContasReceber() {
       </div>
 
       {/* ── Barra de Totais ── */}
-      <div className="flex items-center gap-6 px-5 py-2.5 border-t border-white/[0.06]" style={{ background:"rgba(10,2,5,.6)" }}>
+      <div className="flex items-center gap-6 px-5 py-2.5 border-t border-light/5 dark:border-white/[0.06] bg-dark-300">
         <span className="text-[12px] font-bold">
           <span className="text-ink-500 mr-1">Total à Receber</span>
           <span className="text-danger-400">{fmt(totalAReceber)}</span>

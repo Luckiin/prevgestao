@@ -8,7 +8,7 @@ import SiteFooter  from "@/components/site/SiteFooter";
 
 export default function LandingPage() {
   return (
-    <main style={{ backgroundColor: "#080102", color: "#f5f0e8", overflowX: "hidden" }}>
+    <main style={{ backgroundColor: "#080102", color: "var(--ink-200)", overflowX: "hidden" }}>
       <SiteHeader />
       <Hero />
       <Areas />

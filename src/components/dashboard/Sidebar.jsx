@@ -31,22 +31,13 @@ const NAV_FINANCEIRO = [
   { href: "/financeiro/fluxo-caixa",   icon: TrendingUp,      label: "Fluxo de Caixa"  },
 ];
 
-function NavItem({ href, icon: Icon, label, active, sub = false }) {
+function NavItem({ href, icon: Icon, label, active, sub = false, onClick }) {
   return (
-    <Link href={href} prefetch={true} style={{
-      display: "flex", alignItems: "center", gap: 10,
-      padding: sub ? "8px 14px 8px 28px" : "10px 14px",
-      borderRadius: 4, fontSize: sub ? 12 : 13, fontWeight: 500,
-      textDecoration: "none", transition: "all .15s",
-      color:      active ? "#C9A96E"               : "rgba(245,240,232,.45)",
-      background: active ? "rgba(201,169,110,.08)" : "transparent",
-      borderLeft: active ? "2px solid #C9A96E"     : "2px solid transparent",
-    }}
-      onMouseEnter={e => { if (!active) { e.currentTarget.style.color = "rgba(245,240,232,.85)"; e.currentTarget.style.background = "rgba(255,255,255,.03)"; }}}
-      onMouseLeave={e => { if (!active) { e.currentTarget.style.color = "rgba(245,240,232,.45)"; e.currentTarget.style.background = "transparent"; }}}
+    <Link href={href} prefetch={true} onClick={onClick}
+      className={`flex items-center gap-2.5 rounded font-medium transition-all no-underline ${sub ? 'py-2 pr-3.5 pl-7 text-[12px]' : 'py-2.5 px-3.5 text-[13px]'} ${active ? 'text-gold-500 bg-gold-500/10 border-l-2 border-gold-500' : 'text-ink-500 border-l-2 border-transparent hover:text-ink-200 hover:bg-dark-300'}`}
     >
-      <Icon size={sub ? 13 : 15} style={{ flexShrink: 0, color: active ? "#C9A96E" : "rgba(245,240,232,.3)" }} />
-      <span style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{label}</span>
+      <Icon size={sub ? 13 : 15} className={`shrink-0 ${active ? 'text-gold-500' : 'opacity-70'}`} />
+      <span className="whitespace-nowrap overflow-hidden text-ellipsis">{label}</span>
     </Link>
   );
 }
@@ -74,84 +65,68 @@ export default function Sidebar({ isOpen, onClose }) {
         style={{
           position:"fixed", top:0, left:0, height:"100vh", width:256, zIndex:50,
           display:"flex", flexDirection:"column",
-          background:"rgba(8,1,3,.97)",
-          borderRight:"1px solid rgba(201,169,110,.08)",
           backdropFilter:"blur(20px)",
           transition:"transform .25s ease",
           transform: isOpen ? "translateX(0)" : "translateX(-100%)",
         }}
-        className="sidebar-root"
+        className="sidebar-root bg-dark-400 border-r border-gold-500/10"
       >
         {/* Logo */}
-        <div style={{ display:"flex", alignItems:"center", gap:12, padding:"18px 20px", borderBottom:"1px solid rgba(201,169,110,.07)" }}>
-          <Image src="/logo.svg" alt="Deise Lisboa" width={38} height={38} style={{ objectFit:"contain", flexShrink:0 }} />
-          <div style={{ flex:1, minWidth:0 }}>
-            <div style={{ fontFamily:"'Playfair Display',Georgia,serif", fontSize:13, fontWeight:700, color:"#C9A96E", letterSpacing:"0.08em", textTransform:"uppercase" }}>Deise Lisboa</div>
-            <div style={{ fontSize:10, color:"rgba(201,169,110,.4)", letterSpacing:"0.15em", textTransform:"uppercase", marginTop:2 }}>Advocacia</div>
+        <div className="flex items-center gap-3 px-5 py-[18px] border-b border-gold-500/10">
+          <Image src="/logo.svg" alt="Deise Lisboa" width={38} height={38} className="object-contain shrink-0" />
+          <div className="flex-1 min-w-0">
+            <div className="font-serif text-[13px] font-bold text-gold-500 tracking-[0.08em] uppercase">Deise Lisboa</div>
+            <div className="text-[10px] text-ink-200 opacity-60 tracking-[0.15em] uppercase mt-0.5">Advocacia</div>
           </div>
-          <button onClick={onClose} className="sidebar-close-btn"
-            style={{ background:"none", border:"none", cursor:"pointer", color:"rgba(201,169,110,.4)", display:"flex", alignItems:"center", padding:4 }}>
+          <button onClick={onClose} className="sidebar-close-btn p-1 text-gold-500/40 hover:text-gold-500 transition-colors bg-transparent border-none cursor-pointer">
             <X size={16} />
           </button>
         </div>
 
-        <div style={{ height:2, background:"linear-gradient(90deg,#C9A96E,rgba(201,169,110,.1))" }} />
+        <div className="h-[2px] w-full" style={{ background:"linear-gradient(90deg,#C9A96E,rgba(201,169,110,.1))" }} />
 
         {/* Nav */}
         <nav style={{ flex:1, overflowY:"auto", padding:"10px 12px", display:"flex", flexDirection:"column", gap:2 }}>
           {NAV_PRINCIPAL.map(item => (
-            <NavItem key={item.href} {...item} active={isActive(item.href)} />
+            <NavItem key={item.href} {...item} active={isActive(item.href)} onClick={onClose} />
           ))}
 
-          <div style={{ height:1, background:"rgba(201,169,110,.07)", margin:"10px 4px" }} />
+          <div className="h-px bg-gold-500/10 mx-1 my-2.5" />
 
           {/* Financeiro colapsável */}
           <button onClick={() => setFinOpen(v => !v)}
-            style={{
-              display:"flex", alignItems:"center", gap:10, width:"100%",
-              padding:"9px 14px", borderRadius:4, fontSize:12, fontWeight:600,
-              background: financeiroAtivo ? "rgba(201,169,110,.06)" : "transparent",
-              border:"none", cursor:"pointer", letterSpacing:"0.08em",
-              textTransform:"uppercase", color: financeiroAtivo ? "#C9A96E" : "rgba(245,240,232,.35)",
-              transition:"all .15s",
-            }}
-            onMouseEnter={e => { e.currentTarget.style.color="#C9A96E"; }}
-            onMouseLeave={e => { if (!financeiroAtivo) e.currentTarget.style.color="rgba(245,240,232,.35)"; }}
+            className={`flex items-center gap-2.5 w-full py-2.5 px-3.5 rounded font-semibold text-xs tracking-[0.08em] uppercase transition-all bg-transparent border-none cursor-pointer ${financeiroAtivo ? 'text-gold-500 bg-gold-500/10' : 'text-ink-500 hover:text-gold-500'}`}
           >
-            <DollarSign size={14} style={{ flexShrink:0 }} />
-            <span style={{ flex:1, textAlign:"left" }}>Financeiro</span>
+            <DollarSign size={14} className="shrink-0" />
+            <span className="flex-1 text-left">Financeiro</span>
             <ChevronDown size={13} style={{ transition:"transform .2s", transform: finOpen ? "rotate(180deg)" : "rotate(0deg)" }} />
           </button>
 
           {finOpen && (
             <div style={{ display:"flex", flexDirection:"column", gap:1 }}>
               {NAV_FINANCEIRO.map(item => (
-                <NavItem key={item.href} {...item} active={isActive(item.href)} sub />
+                <NavItem key={item.href} {...item} active={isActive(item.href)} sub onClick={onClose} />
               ))}
             </div>
           )}
 
-          <div style={{ height:1, background:"rgba(201,169,110,.07)", margin:"10px 4px" }} />
-          <NavItem href="/configuracoes" icon={Settings} label="Configurações" active={isActive("/configuracoes")} />
+          <div className="h-px bg-gold-500/10 mx-1 my-2.5" />
+          <NavItem href="/configuracoes" icon={Settings} label="Configurações" active={isActive("/configuracoes")} onClick={onClose} />
         </nav>
 
         {/* Rodapé */}
-        <div style={{ borderTop:"1px solid rgba(201,169,110,.07)", padding:"14px 16px", display:"flex", flexDirection:"column", gap:10 }}>
-          <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-            <div style={{ width:30, height:30, borderRadius:2, flexShrink:0, background:"linear-gradient(135deg,#6B1530,#3d0a1a)", display:"flex", alignItems:"center", justifyContent:"center", color:"#C9A96E", fontSize:12, fontWeight:700 }}>{inicial}</div>
-            <div style={{ flex:1, minWidth:0 }}>
-              <div style={{ fontSize:12, fontWeight:600, color:"rgba(245,240,232,.8)", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{nome}</div>
-              <div style={{ fontSize:10, color:"rgba(201,169,110,.4)", letterSpacing:"0.05em" }}>Administrador</div>
+        <div className="flex flex-col gap-2.5 px-4 py-3.5 border-t border-gold-500/10">
+          <div className="flex items-center gap-2.5">
+            <div className="w-[30px] h-[30px] rounded shrink-0 flex items-center justify-center font-bold text-xs text-gold-500" style={{ background:"linear-gradient(135deg,#6B1530,#3d0a1a)" }}>
+              {inicial}
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-xs font-semibold text-ink-200 overflow-hidden text-ellipsis whitespace-nowrap">{nome}</div>
+              <div className="text-[10px] text-gold-500/40 tracking-wider">Administrador</div>
             </div>
           </div>
-          <button onClick={logout} style={{
-            display:"flex", alignItems:"center", gap:8, width:"100%",
-            padding:"8px 12px", borderRadius:4, fontSize:12, fontWeight:500,
-            background:"rgba(201,169,110,.04)", border:"1px solid rgba(201,169,110,.08)",
-            color:"rgba(245,240,232,.4)", cursor:"pointer", transition:"all .2s",
-          }}
-            onMouseEnter={e => { e.currentTarget.style.color="#C9A96E"; e.currentTarget.style.borderColor="rgba(201,169,110,.2)"; }}
-            onMouseLeave={e => { e.currentTarget.style.color="rgba(245,240,232,.4)"; e.currentTarget.style.borderColor="rgba(201,169,110,.08)"; }}
+          <button onClick={logout} 
+            className="flex items-center gap-2 w-full py-2 px-3 rounded text-xs font-medium text-ink-400 bg-gold-500/5 border border-gold-500/10 cursor-pointer transition-all hover:text-gold-500 hover:border-gold-500/20"
           >
             <LogOut size={13} /> Sair da conta
           </button>

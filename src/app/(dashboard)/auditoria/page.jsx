@@ -15,6 +15,59 @@ const ACOES_CORES = {
   DESATIVAR:     "text-warn-500 bg-warn-500/10",
 };
 
+const FIELD_LABELS = {
+  nome: "Nome",
+  cpf: "CPF",
+  data_nascimento: "Data Nasc.",
+  tipo_processo: "Tipo",
+  subdivisao_id: "ID Subdiv.",
+  subdivisao_nome: "Subdivisão",
+  status: "Status",
+  situacao: "Situação",
+  numero_processo: "Nº Processo",
+  valor_beneficio: "Valor",
+  observacoes: "Obs.",
+  ano_referencia: "Ano",
+  descricao: "Descrição",
+  data_prazo: "Data do Prazo",
+  concluido: "Concluído"
+};
+
+function AuditDiff({ anterior, novo }) {
+  if (!anterior || !novo) return null;
+  const changes = [];
+  
+  Object.keys(novo).forEach(key => {
+    let oldVal = anterior[key];
+    let newVal = novo[key];
+    
+    if ((oldVal || "") === (newVal || "")) return;
+    if (key === "subdivisao_id" || key === "id" || key === "atualizado_em" || key === "criado_em") return;
+    
+    changes.push({
+      key,
+      label: FIELD_LABELS[key] || key,
+      old: typeof oldVal === 'boolean' ? (oldVal ? "Sim" : "Não") : oldVal,
+      new: typeof newVal === 'boolean' ? (newVal ? "Sim" : "Não") : newVal,
+    });
+  });
+
+  if (changes.length === 0) return null;
+
+  return (
+    <div className="mt-2.5 space-y-1.5 border-l-2 border-white/[0.05] pl-3 py-1">
+      {changes.map(c => (
+        <div key={c.key} className="flex items-baseline gap-2 text-[11px]">
+          <span className="text-ink-500 font-medium min-w-[50px]">{c.label}:</span>
+          <span className="text-ink-600 line-through truncate max-w-[150px]">{c.old || "—"}</span>
+          <span className="text-ink-500">→</span>
+          <span className="text-gold-500 font-semibold truncate max-w-[150px]">{c.new || "—"}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function AuditoriaPage() {
   const [registros, setRegistros] = useState([]);
   const [loading, setLoading]     = useState(true);
@@ -76,8 +129,8 @@ export default function AuditoriaPage() {
         <span className="self-center text-xs text-ink-500 px-2">{filtrados.length} registro(s)</span>
       </div>
 
-      {/* Tabela */}
-      <div className="glass-card rounded-2xl overflow-hidden">
+      {/* Timeline de Eventos */}
+      <div className="glass-card rounded-2xl overflow-hidden min-h-[400px]">
         {loading ? (
           <div className="flex items-center justify-center py-20">
             <div className="w-7 h-7 border-2 border-gold-500 border-t-transparent rounded-full animate-spin" />
@@ -85,41 +138,56 @@ export default function AuditoriaPage() {
         ) : filtrados.length === 0 ? (
           <p className="p-8 text-center text-sm text-ink-500">Nenhum registro encontrado.</p>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-white/[0.05]">
-                  {["Data/Hora", "Tabela", "Ação", "Usuário", "Detalhes"].map(h => (
-                    <th key={h} className="text-left px-4 py-3 text-xs font-medium text-ink-500 whitespace-nowrap">{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/[0.03]">
-                {filtrados.map(r => (
-                  <tr key={r.id} className="table-row-hover">
-                    <td className="px-4 py-3 text-xs text-ink-500 whitespace-nowrap">
-                      {formatDataHora(r.criado_em)}
-                    </td>
-                    <td className="px-4 py-3 text-xs text-ink-400 capitalize">
-                      {r.tabela}
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className={`text-[11px] font-medium px-2 py-0.5 rounded-lg ${ACOES_CORES[r.acao] || "text-ink-300 bg-ink-500/10"}`}>
-                        {r.acao}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-xs text-ink-400">
-                      {r.usuario_nome || r.usuario_email || "sistema"}
-                    </td>
-                    <td className="px-4 py-3 text-xs text-ink-500 max-w-[200px] truncate">
-                      {r.dados_novos
-                        ? JSON.stringify(r.dados_novos).slice(0, 80)
-                        : "—"}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="divide-y divide-white/[0.03]">
+            {filtrados.map(a => {
+              const isDoc = a.tabela === "documentos";
+              const isPrazo = a.tabela === "prazos";
+              const isCliente = a.tabela === "clientes";
+              const isAuth = a.tabela === "auth" || a.acao.startsWith("LOG");
+
+              let acaoMsg = a.acao;
+              if (a.acao === "INSERT") acaoMsg = isDoc ? "Anexou documento" : isPrazo ? "Adicionou prazo" : isCliente ? "Cadastrou cliente" : `Inseriu ${a.tabela}`;
+              if (a.acao === "UPDATE") acaoMsg = isPrazo ? "Atualizou prazo" : isCliente ? "Editou cliente" : `Atualizou ${a.tabela}`;
+              if (a.acao === "DELETE") acaoMsg = isDoc ? "Excluiu documento" : isPrazo ? "Removeu prazo" : isCliente ? "Excluiu cliente" : `Deletou de ${a.tabela}`;
+
+              if (a.acao === "LOGIN" || a.acao === "LOGIN_2FA") acaoMsg = "Acessou o sistema";
+              if (a.acao === "LOGOUT") acaoMsg = "Saiu do sistema";
+              if (a.acao === "MIGRAÇÃO_ANO") acaoMsg = "Rotina de virada de ano executada";
+              if (a.acao === "DESATIVAR") acaoMsg = "Registro inativado";
+
+              const desc = a.dados_novos?.nome || a.dados_novos?.descricao || a.dados_anteriores?.nome || a.dados_anteriores?.descricao || "";
+
+              return (
+                <div key={a.id} className="px-5 py-4 flex items-start gap-4 hover:bg-white/[0.01] transition-all">
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
+                    isDoc ? "bg-brand-500/10 text-brand-400" : 
+                    isPrazo ? "bg-warn-500/10 text-warn-500" : 
+                    isAuth ? "bg-ink-500/10 text-ink-300" : 
+                    "bg-gold-500/10 text-gold-500"
+                  }`}>
+                    <ScrollText size={14} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-ink-100">
+                      {acaoMsg} <span className="text-ink-400 font-normal">{desc && `· ${desc}`}</span>
+                    </p>
+                    
+                    {a.acao === "UPDATE" && (
+                      <AuditDiff anterior={a.dados_anteriores} novo={a.dados_novos} />
+                    )}
+
+                    <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                      <span className="text-[11px] text-ink-500 bg-white/5 px-2 py-0.5 rounded-md font-medium">{a.usuario_nome || a.usuario_email || "Sistema"}</span>
+                      {a.tabela && <span className="text-[11px] text-ink-600 font-mono lowercase border border-white/5 px-1.5 rounded bg-black/20">{a.tabela}</span>}
+                    </div>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <p className="text-[11px] text-ink-500 font-medium">{formatDataHora(a.criado_em).split(' às ')[0]}</p>
+                    <p className="text-[10px] text-ink-600">{formatDataHora(a.criado_em).split(' às ')[1]}</p>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
       </div>

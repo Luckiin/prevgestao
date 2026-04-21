@@ -16,8 +16,8 @@ export default function StatCard({ icon: Icon, label, value, sub, color = "brand
     <motion.div 
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      whileHover={{ y: -4, backgroundColor: "rgba(255,255,255,0.03)" }}
-      className="glass-card rounded-2xl p-5 border border-white/[0.05] transition-colors"
+      whileHover={{ y: -4 }}
+      className="glass-card rounded-2xl p-5 border border-white/[0.05] transition-all hover:bg-ink-100/5"
     >
       <div className="flex items-start justify-between">
         <div className="flex-1 min-w-0">

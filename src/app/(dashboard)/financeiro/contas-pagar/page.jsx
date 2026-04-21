@@ -134,7 +134,7 @@ export default function ContasPagar() {
     <div className="flex flex-col h-full min-h-screen p-0">
 
       {/* ── Toolbar ── */}
-      <div className="flex items-center gap-2 px-5 py-3 border-b border-white/[0.05]" style={{ background:"rgba(13,3,7,.5)" }}>
+      <div className="flex items-center gap-2 px-5 py-3 border-b border-light/5 dark:border-white/[0.05] bg-dark-300 glass-card">
         <button onClick={()=>setModal(true)}
           className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-white transition-all"
           style={{ background:"linear-gradient(135deg,#C9A96E,#b08840)" }}>
@@ -156,7 +156,7 @@ export default function ContasPagar() {
       </div>
 
       {/* ── Navegação Mês/Ano ── */}
-      <div className="flex items-center gap-3 px-5 py-3 border-b border-white/[0.04]" style={{ background:"rgba(13,3,7,.3)" }}>
+      <div className="flex items-center gap-3 px-5 py-3 border-b border-light/5 dark:border-white/[0.04] bg-dark-200">
         {/* Ano */}
         <div className="flex items-center gap-1">
           <button onClick={()=>setAno(a=>a-1)} className="p-1 rounded text-ink-500 hover:text-gold-500 hover:bg-gold-500/10 transition-all"><ChevronLeft size={16}/></button>
@@ -200,7 +200,7 @@ export default function ContasPagar() {
       {/* ── Tabela ── */}
       <div className="flex-1 overflow-auto">
         <table className="w-full text-sm border-collapse min-w-[800px]">
-          <thead style={{ background:"rgba(13,3,7,.6)", position:"sticky", top:0, zIndex:10 }}>
+          <thead className="bg-dark-300 sticky top-0 z-10 glass-card">
             <tr className="border-b border-white/[0.06]">
               <th className="px-3 py-2.5 w-8">
                 <div className="w-4 h-4 rounded border-2 border-ink-600 hover:border-gold-500 cursor-pointer transition-colors"/>
@@ -284,7 +284,7 @@ export default function ContasPagar() {
       </div>
 
       {/* ── Paginação ── */}
-      <div className="flex items-center gap-3 px-5 py-2.5 border-t border-white/[0.05]" style={{ background:"rgba(13,3,7,.4)" }}>
+      <div className="flex items-center gap-3 px-5 py-2.5 border-t border-light/5 dark:border-white/[0.05] bg-dark-100">
         <div className="flex items-center gap-1">
           <button onClick={()=>setPage(1)} disabled={pagActual===1} className="p-1 rounded text-ink-500 hover:text-gold-500 disabled:opacity-30 transition-all"><ChevronsLeft size={14}/></button>
           <button onClick={()=>setPage(p=>Math.max(1,p-1))} disabled={pagActual===1} className="p-1 rounded text-ink-500 hover:text-gold-500 disabled:opacity-30 transition-all"><ChevronLeft size={14}/></button>
@@ -313,7 +313,7 @@ export default function ContasPagar() {
       </div>
 
       {/* ── Barra de Totais ── */}
-      <div className="flex items-center gap-6 px-5 py-2.5 border-t border-white/[0.06]" style={{ background:"rgba(10,2,5,.6)" }}>
+      <div className="flex items-center gap-6 px-5 py-2.5 border-t border-light/5 dark:border-white/[0.06] bg-dark-300">
         <span className="text-[12px] font-bold">
           <span className="text-ink-500 mr-1">Total à Pagar</span>
           <span className="text-danger-400">{fmt(totalAPagar)}</span>
