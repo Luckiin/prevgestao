@@ -11,10 +11,10 @@ const fmtDate = (d) => d ? new Date(d + "T12:00:00").toLocaleDateString("pt-BR")
 export default function Extrato() {
   const hoje = new Date();
   const inicioDefault = new Date(hoje.getFullYear(), hoje.getMonth(), 1).toISOString().split("T")[0];
-  const fimDefault    = hoje.toISOString().split("T")[0];
+  const fimDefault = hoje.toISOString().split("T")[0];
 
-  const [inicio,  setInicio]  = useState(inicioDefault);
-  const [fim,     setFim]     = useState(fimDefault);
+  const [inicio, setInicio] = useState(inicioDefault);
+  const [fim, setFim] = useState(fimDefault);
 
   const { movimentacoes: movs, isLoading: loadingMovs, mutate } = useMovimentacoes({
     data_inicio: inicio,
@@ -48,35 +48,42 @@ export default function Extrato() {
     }
   }
 
-  const totalEntrada  = movs.filter(m => m.tipo === "entrada").reduce((s, m) => s + m.valor, 0);
-  const totalSaida    = movs.filter(m => m.tipo === "saida").reduce((s, m) => s + m.valor, 0);
-  const saldoPeriodo  = totalEntrada - totalSaida;
+  const totalEntrada = movs.filter(m => m.tipo === "entrada").reduce((s, m) => s + m.valor, 0);
+  const totalSaida = movs.filter(m => m.tipo === "saida").reduce((s, m) => s + m.valor, 0);
+  const saldoPeriodo = totalEntrada - totalSaida;
 
   // ── PDF Exportação ────────────────────────────────────────────────────────
   function exportarPDF() {
     const movsOrdenados = [...movs].sort((a, b) => a.data_movimento > b.data_movimento ? 1 : -1);
     let saldoAcumulado = 0;
 
+    // Cores do sistema
+    const VINHO = "#6B1530";  // brand-600
+    const VINHO_DARK = "#3d0a1a";  // dark background
+    const GOLD = "#C9A96E";  // gold-500
+    const GOLD_LIGHT = "#e8d5a3";  // gold-300
+    const VINHO_BG = "#fdf2f5";  // brand-50 — linha par
+
     const linhas = movsOrdenados.map((m, i) => {
       const entrada = m.tipo === "entrada" ? m.valor : 0;
-      const saida   = m.tipo === "saida"   ? m.valor : 0;
+      const saida = m.tipo === "saida" ? m.valor : 0;
       saldoAcumulado += (entrada - saida);
-      const corSaldo = saldoAcumulado >= 0 ? "#166534" : "#991b1b";
+      const corSaldo = saldoAcumulado >= 0 ? "#15803d" : "#b91c1c";
       return `
-        <tr style="background:${i % 2 === 0 ? "#f9fafb" : "#ffffff"}">
+        <tr style="background:${i % 2 === 0 ? VINHO_BG : "#ffffff"}">
           <td>${fmtDate(m.data_movimento)}</td>
           <td>${m.descricao || "—"}</td>
-          <td style="color:#166534;text-align:right">${entrada > 0 ? fmt(entrada) : "—"}</td>
-          <td style="color:#991b1b;text-align:right">${saida > 0 ? fmt(saida) : "—"}</td>
+          <td style="color:#15803d;text-align:right">${entrada > 0 ? fmt(entrada) : "—"}</td>
+          <td style="color:#b91c1c;text-align:right">${saida > 0 ? fmt(saida) : "—"}</td>
           <td style="color:${corSaldo};text-align:right;font-weight:700">${fmt(saldoAcumulado)}</td>
-          <td style="text-align:center;color:${m.conciliado ? "#166534" : "#9ca3af"}">${m.conciliado ? "&#10003;" : "&#9675;"}</td>
+          <td style="text-align:center;color:${m.conciliado ? "#15803d" : "#9ca3af"}">${m.conciliado ? "&#10003;" : "&#9675;"}</td>
         </tr>`;
     }).join("");
 
     const dataGeracao = hoje.toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" });
-    const periodoFmt  = `${fmtDate(inicio)} a ${fmtDate(fim)}`;
-    const numExtrato  = `EXT-${Date.now().toString().slice(-6)}`;
-    const corSaldoFinal = saldoPeriodo >= 0 ? "#166534" : "#991b1b";
+    const periodoFmt = `${fmtDate(inicio)} a ${fmtDate(fim)}`;
+    const numExtrato = `EXT-${Date.now().toString().slice(-6)}`;
+    const corSaldoFinal = saldoPeriodo >= 0 ? "#15803d" : "#b91c1c";
 
     const html = `<!DOCTYPE html>
 <html lang="pt-BR">
@@ -86,28 +93,33 @@ export default function Extrato() {
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
     *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:'Inter',Arial,sans-serif;font-size:11px;color:#1f2937;background:#fff}
+    body{font-family:'Inter',Arial,sans-serif;font-size:11px;color:#2a151b;background:#fff}
     .page{width:210mm;min-height:297mm;padding:14mm 14mm 10mm;margin:0 auto}
-    .header{display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:10px;border-bottom:3px solid #1e3a5f;margin-bottom:14px}
-    .company-name{font-size:20px;font-weight:700;color:#1e3a5f}
-    .company-slogan{font-size:10px;color:#6b7280;margin-top:2px}
-    .stmt-title{font-size:24px;font-weight:700;color:#1e3a5f;text-align:right}
+    /* Cabecalho */
+    .header{display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:12px;border-bottom:3px solid ${VINHO};margin-bottom:14px}
+    .company-name{font-size:20px;font-weight:700;color:${VINHO}}
+    .company-slogan{font-size:10px;color:#8a6628;margin-top:3px;font-style:italic}
+    .stmt-title{font-size:24px;font-weight:700;color:${VINHO};text-align:right;letter-spacing:-.5px}
+    .gold-bar{width:56px;height:2px;background:linear-gradient(90deg,${GOLD},${GOLD_LIGHT});margin-top:4px;margin-left:auto}
+    /* Meta info */
     .meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
-    .meta-box{border:1px solid #d1d5db}
-    .section-hdr{background:#1e3a5f;color:#fff;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:5px 10px}
-    .meta-row{display:flex;justify-content:space-between;font-size:10.5px;padding:4px 10px;border-bottom:1px solid #f3f4f6}
+    .meta-box{border:1px solid rgba(107,21,48,.2);overflow:hidden}
+    .section-hdr{background:${VINHO};color:${GOLD_LIGHT};font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:5px 10px}
+    .meta-row{display:flex;justify-content:space-between;font-size:10.5px;padding:4px 10px;border-bottom:1px solid rgba(107,21,48,.08)}
     .meta-row:last-child{border-bottom:none}
-    .meta-label{color:#6b7280}
-    .meta-value{font-weight:600;color:#111827}
+    .meta-label{color:#6b4d57}
+    .meta-value{font-weight:600;color:#2a151b}
+    /* Tabela */
     table{width:100%;border-collapse:collapse;font-size:10px}
-    thead tr{background:#1e3a5f;color:#fff}
-    thead th{padding:7px 8px;text-align:left;font-weight:600;font-size:10px;letter-spacing:.05em}
-    tbody td{padding:6px 8px;border-bottom:1px solid #e5e7eb;vertical-align:middle}
-    tfoot td{padding:8px;font-weight:700;font-size:11px;background:#1e3a5f;color:#fff}
-    .footer{margin-top:20px;border-top:2px solid #1e3a5f;padding-top:12px;text-align:center}
-    .footer-h{font-size:13px;font-weight:700;color:#1e3a5f;margin-bottom:4px}
-    .footer-t{font-size:9px;color:#6b7280;line-height:1.6}
-    .footer-c{font-size:9px;color:#374151;margin-top:6px;padding-top:6px;border-top:1px solid #e5e7eb}
+    thead tr{background:${VINHO}}
+    thead th{padding:7px 8px;text-align:left;font-weight:600;font-size:10px;letter-spacing:.05em;color:${GOLD_LIGHT}}
+    tbody td{padding:6px 8px;border-bottom:1px solid rgba(107,21,48,.08);vertical-align:middle;color:#2a151b}
+    tfoot td{padding:8px;font-weight:700;font-size:11px;background:${VINHO_DARK};color:${GOLD}}
+    /* Rodape */
+    .footer{margin-top:20px;border-top:3px solid ${GOLD};padding-top:12px;text-align:center}
+    .footer-h{font-size:13px;font-weight:700;color:${VINHO};margin-bottom:4px}
+    .footer-t{font-size:9px;color:#6b4d57;line-height:1.6}
+    .footer-c{font-size:9px;color:#4a2d37;margin-top:6px;padding-top:6px;border-top:1px solid rgba(201,169,110,.3)}
     @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}.page{padding:10mm}}
   </style>
 </head>
@@ -118,7 +130,10 @@ export default function Extrato() {
       <div class="company-name">PrevGestao</div>
       <div class="company-slogan">Sistema de Gestao Previdenciaria</div>
     </div>
-    <div class="stmt-title">Extrato</div>
+    <div>
+      <div class="stmt-title">Extrato</div>
+      <div class="gold-bar"></div>
+    </div>
   </div>
 
   <div class="meta-grid">
@@ -131,8 +146,8 @@ export default function Extrato() {
     </div>
     <div class="meta-box">
       <div class="section-hdr">Resumo do Periodo</div>
-      <div class="meta-row"><span class="meta-label">Total de Entradas</span><span class="meta-value" style="color:#166534">${fmt(totalEntrada)}</span></div>
-      <div class="meta-row"><span class="meta-label">Total de Saidas</span><span class="meta-value" style="color:#991b1b">${fmt(totalSaida)}</span></div>
+      <div class="meta-row"><span class="meta-label">Total de Entradas</span><span class="meta-value" style="color:#15803d">${fmt(totalEntrada)}</span></div>
+      <div class="meta-row"><span class="meta-label">Total de Saidas</span><span class="meta-value" style="color:#b91c1c">${fmt(totalSaida)}</span></div>
       <div class="meta-row"><span class="meta-label">N&#xBA; de Movimentacoes</span><span class="meta-value">${movs.length}</span></div>
       <div class="meta-row"><span class="meta-label" style="font-weight:700">Saldo do Periodo</span><span class="meta-value" style="color:${corSaldoFinal};font-size:13px">${fmt(saldoPeriodo)}</span></div>
     </div>
@@ -167,9 +182,7 @@ export default function Extrato() {
   <div class="footer">
     <div class="footer-h">Saldo do Periodo: ${fmt(saldoPeriodo)}</div>
     <div class="footer-t">
-      Este extrato foi gerado automaticamente pelo sistema PrevGestao e e valido como documento de controle interno.<br/>
-      Movimentacoes marcadas como Conciliadas (&#10003;) foram verificadas e confirmadas com o extrato bancario fisico.
-    </div>
+      Este extrato foi gerado automaticamente pelo sistema PrevGestao e e valido como documento de controle interno.
     <div class="footer-c">
       PrevGestao &mdash; Sistema de Gestao Previdenciaria &nbsp;|&nbsp;
       Gerado em: ${hoje.toLocaleString("pt-BR")} &nbsp;|&nbsp;
@@ -181,7 +194,7 @@ export default function Extrato() {
 </html>`;
 
     const janela = window.open("", "_blank", "width=900,height=700");
-    if (!janela) { toast.error("Habilite popups para exportar o PDF."); return; }
+    if (!janela) { toast.error("Habilite popups no navegador para exportar o PDF."); return; }
     janela.document.write(html);
     janela.document.close();
     janela.onload = () => setTimeout(() => janela.print(), 500);
@@ -200,8 +213,8 @@ export default function Extrato() {
             onClick={exportarPDF}
             disabled={loading || movs.length === 0}
             title="Exportar extrato em formato PDF bancario"
-            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-            style={{ background: "linear-gradient(135deg,#1e3a5f,#2563eb)", color: "#fff", border: "1px solid rgba(37,99,235,.4)" }}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-dark-400 transition-all hover:opacity-90 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
+            style={{ background: "linear-gradient(135deg,#C9A96E,#b08840)", color: "#12060b" }}
           >
             <FileText size={14} />
             Exportar PDF
@@ -227,10 +240,10 @@ export default function Extrato() {
       {/* Totais */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
-          { l: "Total de Entrada", v: fmt(totalEntrada),  c: "#22c55e" },
-          { l: "Total de Saida",   v: fmt(totalSaida),    c: "#ef4444" },
-          { l: "Saldo do Periodo", v: fmt(saldoPeriodo),  c: saldoPeriodo >= 0 ? "#22c55e" : "#ef4444" },
-          { l: "Movimentacoes",    v: movs.length,         c: "#C9A96E" },
+          { l: "Total de Entrada", v: fmt(totalEntrada), c: "#22c55e" },
+          { l: "Total de Saida", v: fmt(totalSaida), c: "#ef4444" },
+          { l: "Saldo do Periodo", v: fmt(saldoPeriodo), c: saldoPeriodo >= 0 ? "#22c55e" : "#ef4444" },
+          { l: "Movimentacoes", v: movs.length, c: "#C9A96E" },
         ].map(c => (
           <div key={c.l} className="glass-card rounded-xl p-4">
             <p className="text-[11px] text-ink-500 mb-1">{c.l}</p>
