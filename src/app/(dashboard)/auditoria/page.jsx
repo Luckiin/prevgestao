@@ -30,7 +30,15 @@ const FIELD_LABELS = {
   ano_referencia: "Ano",
   descricao: "Descrição",
   data_prazo: "Data do Prazo",
-  concluido: "Concluído"
+  concluido: "Concluído",
+  valor: "Valor",
+  valor_pago: "Valor Pago",
+  data_vencimento: "Vencimento",
+  data_pagamento: "Pagamento",
+  conta_id: "ID Conta",
+  categoria_id: "ID Categoria",
+  tipo: "Tipo",
+  status: "Status"
 };
 
 function AuditDiff({ anterior, novo }) {
@@ -122,6 +130,9 @@ export default function AuditoriaPage() {
           <option value="clientes">Clientes</option>
           <option value="prazos">Prazos</option>
           <option value="documentos">Documentos</option>
+          <option value="lancamentos">Lançamentos</option>
+          <option value="movimentacoes">Movimentações</option>
+          <option value="contas">Contas Bancárias</option>
           <option value="subdivisoes">Subdivisões</option>
           <option value="auth">Autenticação</option>
         </select>
@@ -146,9 +157,30 @@ export default function AuditoriaPage() {
               const isAuth = a.tabela === "auth" || a.acao.startsWith("LOG");
 
               let acaoMsg = a.acao;
-              if (a.acao === "INSERT") acaoMsg = isDoc ? "Anexou documento" : isPrazo ? "Adicionou prazo" : isCliente ? "Cadastrou cliente" : `Inseriu ${a.tabela}`;
-              if (a.acao === "UPDATE") acaoMsg = isPrazo ? "Atualizou prazo" : isCliente ? "Editou cliente" : `Atualizou ${a.tabela}`;
-              if (a.acao === "DELETE") acaoMsg = isDoc ? "Excluiu documento" : isPrazo ? "Removeu prazo" : isCliente ? "Excluiu cliente" : `Deletou de ${a.tabela}`;
+              if (a.acao === "INSERT") {
+                acaoMsg = isDoc ? "Anexou documento" : 
+                          isPrazo ? "Adicionou prazo" : 
+                          isCliente ? "Cadastrou cliente" : 
+                          a.tabela === "lancamentos" ? "Criou lançamento" :
+                          a.tabela === "movimentacoes" ? "Registrou movimentação" :
+                          a.tabela === "contas" ? "Cadastrou conta" :
+                          `Inseriu em ${a.tabela}`;
+              }
+              if (a.acao === "UPDATE") {
+                acaoMsg = isPrazo ? "Atualizou prazo" : 
+                          isCliente ? "Editou cliente" : 
+                          a.tabela === "lancamentos" ? "Alterou lançamento" :
+                          a.tabela === "movimentacoes" ? "Editou movimentação" :
+                          `Atualizou ${a.tabela}`;
+              }
+              if (a.acao === "DELETE") {
+                acaoMsg = isDoc ? "Excluiu documento" : 
+                          isPrazo ? "Removeu prazo" : 
+                          isCliente ? "Excluiu cliente" : 
+                          a.tabela === "lancamentos" ? "Removeu lançamento" :
+                          a.tabela === "movimentacoes" ? "Excluiu movimentação" :
+                          `Deletou de ${a.tabela}`;
+              }
 
               if (a.acao === "LOGIN" || a.acao === "LOGIN_2FA") acaoMsg = "Acessou o sistema";
               if (a.acao === "LOGOUT") acaoMsg = "Saiu do sistema";

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Fragment } from "react";
 import { TrendingUp, ChevronDown, ArrowUpCircle, ArrowDownCircle } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { useFluxoCaixa } from "@/hooks/useFinanceiro";
@@ -259,7 +259,7 @@ export default function FluxoCaixa() {
               const temItens = m.receitas.length > 0 || m.despesas.length > 0;
 
               return (
-                <>
+                <Fragment key={m.mes}>
 
                   <tr
                     key={m.mes}
@@ -316,7 +316,7 @@ export default function FluxoCaixa() {
                       </td>
                     </tr>
                   )}
-                </>
+                </Fragment>
               );
             })}
 

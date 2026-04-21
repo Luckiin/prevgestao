@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase-server";
+import { registrarAuditoria } from "@/lib/services/auditService";
 
 export async function PUT(request, { params }) {
   try {
@@ -37,6 +38,8 @@ export async function PUT(request, { params }) {
       return NextResponse.json({ erro: "Valor inválido" }, { status: 400 });
 
 
+    const { data: anterior } = await supabase.from("lancamentos").select("*").eq("id", params.id).single();
+
     const { data: lancamento, error: errorLanc } = await supabase
       .from("lancamentos")
       .update(payload)
@@ -45,6 +48,16 @@ export async function PUT(request, { params }) {
       .single();
 
     if (errorLanc) throw errorLanc;
+
+    await registrarAuditoria({
+      tabela:           "lancamentos",
+      registro_id:      params.id,
+      acao:             "UPDATE",
+      dados_anteriores: anterior,
+      dados_novos:      lancamento,
+      usuario_email:    user.email,
+      usuario_nome:     user.user_metadata?.nome || user.email
+    });
 
 
     await supabase.from("movimentacoes").delete().eq("lancamento_id", params.id);
@@ -77,12 +90,22 @@ export async function DELETE(request, { params }) {
     if (!user) return NextResponse.json({ erro: "Não autorizado" }, { status: 401 });
 
 
-    await supabase.from("movimentacoes").delete().eq("lancamento_id", params.id);
+    const { data: anterior } = await supabase.from("lancamentos").select("*").eq("id", params.id).single();
 
+    await supabase.from("movimentacoes").delete().eq("lancamento_id", params.id);
 
     const { error } = await supabase.from("lancamentos").delete().eq("id", params.id);
 
     if (error) throw error;
+
+    await registrarAuditoria({
+      tabela:           "lancamentos",
+      registro_id:      params.id,
+      acao:             "DELETE",
+      dados_anteriores: anterior,
+      usuario_email:    user.email,
+      usuario_nome:     user.user_metadata?.nome || user.email
+    });
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error("[DELETE /api/financeiro/lancamentos/[id]]", err.message);

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase-server";
+import { registrarAuditoria } from "@/lib/services/auditService";
 
 export async function GET(request) {
   try {
@@ -61,6 +62,16 @@ export async function POST(request) {
       .single();
 
     if (error) throw error;
+
+    await registrarAuditoria({
+      tabela:        "movimentacoes",
+      registro_id:   data.id,
+      acao:          "INSERT",
+      dados_novos:   data,
+      usuario_email: user.email,
+      usuario_nome:  user.user_metadata?.nome || user.email
+    });
+
     return NextResponse.json(data, { status: 201 });
   } catch (err) {
     console.error("[POST /api/financeiro/movimentacoes]", err.message);
@@ -90,6 +101,16 @@ export async function DELETE(request) {
 
     const { error } = await query;
     if (error) throw error;
+
+    await registrarAuditoria({
+      tabela:        "movimentacoes",
+      registro_id:   id || lancamento_id,
+      acao:          "DELETE",
+      dados_anteriores: { id, lancamento_id },
+      usuario_email: user.email,
+      usuario_nome:  user.user_metadata?.nome || user.email
+    });
+
     return NextResponse.json({ sucesso: true });
   } catch (err) {
     console.error("[DELETE /api/financeiro/movimentacoes]", err.message);

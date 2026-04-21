@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase-server";
+import { registrarAuditoria } from "@/lib/services/auditService";
 
 export async function GET(request) {
   try {
@@ -99,6 +100,20 @@ export async function POST(request) {
       });
       if (errorMov) console.error("Erro ao criar movimentação automática:", errorMov);
     }
+
+    await registrarAuditoria({
+      tabela:        "lancamentos",
+      registro_id:   lancamento.id,
+      acao:          "INSERT",
+      dados_novos:   {
+        descricao: lancamento.descricao,
+        valor:     lancamento.valor,
+        tipo:      lancamento.tipo,
+        status:    lancamento.status
+      },
+      usuario_email: user.email,
+      usuario_nome:  user.user_metadata?.nome || user.email
+    });
 
     return NextResponse.json(lancamento, { status: 201 });
   } catch (err) {

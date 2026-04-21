@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase-server";
+import { registrarAuditoria } from "@/lib/services/auditService";
 
 export async function GET() {
   try {
@@ -42,6 +43,16 @@ export async function POST(request) {
       .single();
 
     if (error) throw error;
+
+    await registrarAuditoria({
+      tabela:        "contas",
+      registro_id:   data.id,
+      acao:          "INSERT",
+      dados_novos:   data,
+      usuario_email: user.email,
+      usuario_nome:  user.user_metadata?.nome || user.email
+    });
+
     return NextResponse.json(data, { status: 201 });
   } catch (err) {
     console.error("[POST /api/financeiro/contas]", err.message);

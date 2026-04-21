@@ -5,7 +5,7 @@ import {
   Plus, Filter, RefreshCw, ChevronLeft, ChevronRight,
   ChevronDown, CheckCircle, Trash2, AlertTriangle, X,
   Receipt, FileText, Download, Repeat, SplitSquareHorizontal, Info,
-  ChevronsLeft, ChevronsRight, ArrowUpDown, User, BarChart3, Pencil
+  ArrowUpCircle, ChevronsLeft, ChevronsRight, ArrowUpDown, User, BarChart3, Pencil
 } from "lucide-react";
 import { toast } from "sonner";
 import { useLancamentos, useCategorias } from "@/hooks/useFinanceiro";
@@ -158,10 +158,17 @@ export default function ContasReceber() {
   );
 
   return (
-    <div className="flex flex-col h-full min-h-screen p-0">
+    <div className="p-6 max-w-7xl mx-auto space-y-5">
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <div>
+          <h1 className="text-xl font-bold text-ink-100 flex items-center gap-2">
+            <ArrowUpCircle size={20} className="text-gold-500" /> Contas a Receber
+          </h1>
+          <p className="text-sm text-ink-500 mt-0.5">Gestão de faturamento e entradas financeiras</p>
+        </div>
+      </div>
 
-
-      <div className="flex items-center gap-2 px-5 py-3 border-b border-light/5 dark:border-white/[0.05] bg-dark-300 glass-card">
+      <div className="flex items-center gap-2 px-5 py-3 border-b border-light/5 dark:border-white/[0.05] bg-dark-300 glass-card rounded-t-xl">
         <button onClick={()=>setModal(true)}
           className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-white transition-all"
           style={{ background:"linear-gradient(135deg,#22c55e,#16a34a)" }}>
@@ -171,18 +178,6 @@ export default function ContasReceber() {
           <Filter size={12}/> Filtros
         </button>
         <div className="flex-1"/>
-        <button className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold text-ink-400 border border-white/10 hover:text-ink-200 transition-all" title="Recibo">
-          <Receipt size={12}/> Recibo
-        </button>
-        <button className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold text-ink-400 border border-white/10 hover:text-ink-200 transition-all" title="Boleto">
-          <BarChart3 size={12}/> Boleto
-        </button>
-        <button className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold text-ink-400 border border-white/10 hover:text-ink-200 transition-all">
-          <FileText size={12}/> Relatório
-        </button>
-        <button className="p-2 rounded-lg text-ink-500 hover:text-ink-200 hover:bg-white/5 transition-all" title="Exportar">
-          <Download size={15}/>
-        </button>
       </div>
 
 
