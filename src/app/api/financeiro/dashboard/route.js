@@ -4,6 +4,9 @@ import { createServerClient } from "@/lib/supabase-server";
 export async function GET() {
   try {
     const supabase = await createServerClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return NextResponse.json({ erro: "Não autorizado" }, { status: 401 });
+
     const hoje = new Date().toISOString().split("T")[0];
     const mesAtual = hoje.slice(0, 7); // YYYY-MM
     const inicioMes = `${mesAtual}-01`;
@@ -57,7 +60,9 @@ export async function GET() {
     const porMes = (arr, campo = "data_vencimento") => {
       const meses = Array(12).fill(0);
       (arr || []).forEach(r => {
-        const m = new Date(r[campo] || r.data_vencimento).getMonth();
+        const dStr = r[campo] || r.data_vencimento;
+        if (!dStr) return;
+        const m = new Date(dStr).getMonth();
         meses[m] += r.valor || 0;
       });
       return meses;
@@ -79,6 +84,7 @@ export async function GET() {
     });
   } catch (err) {
     console.error("[GET /api/financeiro/dashboard]", err.message);
-    return NextResponse.json({ erro: err.message }, { status: 500 });
+    const msg = process.env.NODE_ENV === "production" ? "Erro ao carregar dados do dashboard" : err.message;
+    return NextResponse.json({ erro: msg }, { status: 500 });
   }
 }

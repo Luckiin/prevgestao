@@ -15,12 +15,14 @@ export async function GET(request) {
       registro_id:   searchParams.get("registro_id")   || undefined,
       entidade_id:   searchParams.get("entidade_id")   || undefined,
       usuario_email: searchParams.get("usuario_email") || undefined,
-      limit:         Number(searchParams.get("limit")) || 100,
+      limit:         Math.min(Number(searchParams.get("limit")) || 100, 1000),
       offset:        Number(searchParams.get("offset")) || 0,
     });
 
     return NextResponse.json(data);
   } catch (err) {
-    return NextResponse.json({ erro: err.message }, { status: 500 });
+    console.error("[GET /api/auditoria]", err.message);
+    const msg = process.env.NODE_ENV === "production" ? "Erro ao buscar logs de auditoria" : err.message;
+    return NextResponse.json({ erro: msg }, { status: 500 });
   }
 }

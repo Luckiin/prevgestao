@@ -4,11 +4,14 @@ import { createServerClient } from "@/lib/supabase-server";
 export async function GET(request) {
   try {
     const supabase = await createServerClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return NextResponse.json({ erro: "Não autorizado" }, { status: 401 });
+
     const { searchParams } = new URL(request.url);
     const tipo    = searchParams.get("tipo");
     const status  = searchParams.get("status");
     const mes     = searchParams.get("mes"); // YYYY-MM
-    const limit   = Number(searchParams.get("limit")) || 100;
+    const limit   = Math.min(Number(searchParams.get("limit")) || 100, 2000);
     const offset  = Number(searchParams.get("offset")) || 0;
 
     let query = supabase
@@ -29,22 +32,58 @@ export async function GET(request) {
     if (error) throw error;
     return NextResponse.json({ data, total: count });
   } catch (err) {
-    return NextResponse.json({ erro: err.message }, { status: 500 });
+    console.error("[GET /api/financeiro/lancamentos]", err.message);
+    const msg = process.env.NODE_ENV === "production" ? "Erro interno ao buscar lançamentos" : err.message;
+    return NextResponse.json({ erro: msg }, { status: 500 });
   }
 }
 
 export async function POST(request) {
   try {
     const supabase = await createServerClient();
-    const payload = await request.json();
-    
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return NextResponse.json({ erro: "Não autorizado" }, { status: 401 });
+
+    const body = await request.json();
+
+    // ── Validação de campos obrigatórios ──────────────────────
+    const { descricao, valor, tipo, status, data_vencimento, conta_id, cliente_id, categoria_id, data_pagamento, valor_pago, recorrente, parcelas, observacoes } = body;
+
+    if (!descricao || typeof descricao !== "string" || descricao.trim().length === 0)
+      return NextResponse.json({ erro: "Descrição obrigatória" }, { status: 400 });
+    if (typeof valor !== "number" || valor <= 0)
+      return NextResponse.json({ erro: "Valor inválido" }, { status: 400 });
+    if (!["receita", "despesa"].includes(tipo))
+      return NextResponse.json({ erro: "Tipo inválido" }, { status: 400 });
+    if (!["pendente", "pago", "cancelado"].includes(status))
+      return NextResponse.json({ erro: "Status inválido" }, { status: 400 });
+    if (!data_vencimento)
+      return NextResponse.json({ erro: "Data de vencimento obrigatória" }, { status: 400 });
+
+    // Payload sanitizado — apenas campos conhecidos
+    const payload = {
+      descricao: descricao.trim(),
+      valor,
+      tipo,
+      status,
+      data_vencimento,
+      ...(conta_id        && { conta_id }),
+      ...(cliente_id      && { cliente_id }),
+      ...(categoria_id    && { categoria_id }),
+      ...(data_pagamento  && { data_pagamento }),
+      ...(valor_pago      && { valor_pago }),
+      ...(recorrente !== undefined && { recorrente }),
+      ...(parcelas        && { parcelas }),
+      ...(observacoes     && { observacoes: String(observacoes).slice(0, 2000) }),
+    };
+
     // 1. Criar o lançamento
     const { data: lancamento, error: errorLanc } = await supabase
       .from("lancamentos")
       .insert(payload)
       .select("*, categorias_financeiras(id,nome,cor), contas(id,nome)")
       .single();
-    
+
     if (errorLanc) throw errorLanc;
 
     // 2. Se estiver pago, criar a movimentação
@@ -63,6 +102,8 @@ export async function POST(request) {
 
     return NextResponse.json(lancamento, { status: 201 });
   } catch (err) {
-    return NextResponse.json({ erro: err.message }, { status: 400 });
+    console.error("[POST /api/financeiro/lancamentos]", err.message);
+    const msg = process.env.NODE_ENV === "production" ? "Erro interno ao criar lançamento" : err.message;
+    return NextResponse.json({ erro: msg }, { status: 400 });
   }
 }

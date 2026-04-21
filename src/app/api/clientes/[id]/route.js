@@ -10,8 +10,10 @@ import {
 export async function GET(request, { params }) {
   try {
     const supabase = await createServerClient();
-    const { id } = await params;
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return NextResponse.json({ erro: "Não autorizado" }, { status: 401 });
 
+    const { id } = await params;
     const { searchParams } = new URL(request.url);
 
     if (searchParams.get("historico") === "1") {
@@ -20,10 +22,13 @@ export async function GET(request, { params }) {
     }
 
     const data = await buscarCliente(supabase, id);
+    if (!data) return NextResponse.json({ erro: "Cliente não encontrado" }, { status: 404 });
+    
     return NextResponse.json(data);
   } catch (err) {
     console.error("[GET /api/clientes/[id]]", err.message);
-    return NextResponse.json({ erro: err.message }, { status: 404 });
+    const msg = process.env.NODE_ENV === "production" ? "Erro ao buscar detalhes do cliente" : err.message;
+    return NextResponse.json({ erro: msg }, { status: 500 });
   }
 }
 
@@ -47,7 +52,8 @@ export async function PUT(request, { params }) {
     return NextResponse.json(data);
   } catch (err) {
     console.error("[PUT /api/clientes/[id]]", err.message);
-    return NextResponse.json({ erro: err.message }, { status: 400 });
+    const msg = process.env.NODE_ENV === "production" ? "Erro ao atualizar cliente" : err.message;
+    return NextResponse.json({ erro: msg }, { status: 400 });
   }
 }
 
@@ -68,6 +74,7 @@ export async function DELETE(request, { params }) {
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error("[DELETE /api/clientes/[id]]", err.message);
-    return NextResponse.json({ erro: err.message }, { status: 400 });
+    const msg = process.env.NODE_ENV === "production" ? "Erro ao excluir cliente" : err.message;
+    return NextResponse.json({ erro: msg }, { status: 400 });
   }
 }

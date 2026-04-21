@@ -5,6 +5,9 @@ import { estatisticasDashboard, resumoAnual, clientesPorAno, prazosProximos } fr
 export async function GET(request) {
   try {
     const supabase = await createServerClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return NextResponse.json({ erro: "Não autorizado" }, { status: 401 });
+
     const { searchParams } = new URL(request.url);
     const tipo = searchParams.get("tipo") || "dashboard";
 
@@ -18,7 +21,7 @@ export async function GET(request) {
         break;
       case "por-ano":
         data = await clientesPorAno(supabase, Number(searchParams.get("ano")), {
-          limit:  Number(searchParams.get("limit"))  || 200,
+          limit:  Math.min(Number(searchParams.get("limit")) || 200, 1000),
           offset: Number(searchParams.get("offset")) || 0,
           busca:  searchParams.get("busca") || undefined,
         });
@@ -27,12 +30,13 @@ export async function GET(request) {
         data = await prazosProximos(supabase, Number(searchParams.get("dias")) || 30);
         break;
       default:
-        return NextResponse.json({ erro: "Tipo inválido" }, { status: 400 });
+        return NextResponse.json({ erro: "Tipo de relatório inválido" }, { status: 400 });
     }
 
     return NextResponse.json(data);
   } catch (err) {
     console.error("[GET /api/relatorios]", err.message);
-    return NextResponse.json({ erro: err.message }, { status: 500 });
+    const msg = process.env.NODE_ENV === "production" ? "Erro ao gerar relatório" : err.message;
+    return NextResponse.json({ erro: msg }, { status: 500 });
   }
 }

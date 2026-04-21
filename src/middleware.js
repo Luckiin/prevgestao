@@ -14,9 +14,13 @@ const ROTAS_PROTEGIDAS = [
 export async function middleware(request) {
   const { pathname } = request.nextUrl;
 
-  // RSC Bypass: Torna as navegações internas (cliques no dashboard) instantâneas.
-  // A segurança continuará ativa para acessos diretos via URL e carregamento de dados.
-  if (request.headers.get("RSC") || request.headers.get("Next-Router-State-Tree") || request.headers.get("Next-Router-Prefetch")) {
+  // RSC Bypass: Torna as navegações internas instantâneas.
+  // Segurança: Só permitimos o bypass se NÃO for uma rota de API (APIs SEMPRE devem ser validadas internamente)
+  // E apenas se for uma requisição interna do Next.js.
+  const isApi = pathname.startsWith("/api/");
+  const isRSC = request.headers.get("RSC") || request.headers.get("Next-Router-State-Tree") || request.headers.get("Next-Router-Prefetch");
+
+  if (isRSC && !isApi) {
     return NextResponse.next();
   }
 
@@ -46,7 +50,6 @@ export async function middleware(request) {
   } = await supabase.auth.getSession();
 
   const user = session?.user;
-
   const rotaProtegida = ROTAS_PROTEGIDAS.some((r) => pathname.startsWith(r));
 
   // Usuário autenticado tentando acessar login → redireciona para home
