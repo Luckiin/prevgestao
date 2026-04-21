@@ -92,6 +92,9 @@ export function useFluxoCaixa(ano) {
         despReal,
         saldoPrevisto: recPrevisto - despPrevisto,
         saldoReal:     recReal - despReal,
+        // Itens detalhados para o painel expansível
+        receitas: doMes.filter(l => l.tipo === "receita").sort((a, b) => a.data_vencimento > b.data_vencimento ? 1 : -1),
+        despesas: doMes.filter(l => l.tipo === "despesa").sort((a, b) => a.data_vencimento > b.data_vencimento ? 1 : -1),
       };
     });
   }, [data, ano]);
