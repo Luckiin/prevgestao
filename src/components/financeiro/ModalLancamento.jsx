@@ -85,26 +85,6 @@ export default function ModalLancamento({ tipo, original = null, onClose, onSalv
       if (!res.ok) throw new Error();
       const saved = await res.json();
 
-      // Automação: Sincronizar movimentação
-      // 1. Limpa qualquer movimentação anterior vinculada a este lançamento para evitar duplicidade
-      await fetch(`/api/financeiro/movimentacoes?lancamento_id=${saved.id}`, { method: "DELETE" });
-
-      // 2. Se estiver quitado, cria a nova movimentação
-      if (payload.status === "pago") {
-        await fetch("/api/financeiro/movimentacoes", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            tipo: payload.tipo === "receita" ? "entrada" : "saida",
-            descricao: payload.descricao,
-            valor: payload.valor_pago || payload.valor,
-            data_movimento: payload.data_pagamento,
-            conta_id: "00000000-0000-0000-0000-000000000001",
-            lancamento_id: saved.id
-          }),
-        });
-      }
-
       toast.success(`${isDespesa ? "Despesa" : "Receita"} ${form.id ? "atualizada" : "cadastrada"}!`);
       onSalvo?.(); 
       onClose();

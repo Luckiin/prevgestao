@@ -8,7 +8,7 @@ export async function GET(request) {
     const conta_id   = searchParams.get("conta_id");
     const data_inicio = searchParams.get("data_inicio");
     const data_fim    = searchParams.get("data_fim");
-    const limit       = Number(searchParams.get("limit")) || 200;
+    const limit       = Number(searchParams.get("limit")) || 1000;
 
     let query = supabase
       .from("movimentacoes")

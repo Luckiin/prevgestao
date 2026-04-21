@@ -14,6 +14,8 @@ import { toast } from "sonner";
 import { useFinanceiroDashboard, useLancamentos, useCategorias } from "@/hooks/useFinanceiro";
 import AnexoFinanceiro from "@/components/financeiro/AnexoFinanceiro";
 import ModalLancamento from "@/components/financeiro/ModalLancamento";
+import Modal from "@/components/ui/Modal";
+import Button from "@/components/ui/Button";
 import { maskMoeda } from "@/lib/utils";
 
 const MESES      = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
@@ -55,6 +57,8 @@ function CenterLabel({ viewBox, total, linha1 }) {
 // ── Seção Despesas / Receitas do mês ─────────────────────────────────────────
 function SecaoMes({ tipo, lancamentos, loading, onAbrirModal, onRecarregar }) {
   const [viewTab, setViewTab] = useState("grafico");
+  const [excluindoId, setExcluindoId] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const isDespesa   = tipo === "despesa";
   const accentColor = isDespesa ? "#ef4444" : "#22c55e";
   const titulo      = isDespesa ? "Despesas" : "Receitas";
@@ -94,12 +98,19 @@ function SecaoMes({ tipo, lancamentos, loading, onAbrirModal, onRecarregar }) {
     } catch { toast.error("Erro ao atualizar."); }
   }
 
-  async function excluir(id) {
-    if (!confirm("Excluir este lançamento?")) return;
+  async function confirmarExclusao() {
+    if (!excluindoId) return;
+    setIsDeleting(true);
     try {
-      await fetch(`/api/financeiro/lancamentos/${id}`, { method:"DELETE" });
-      toast.success("Excluído."); onRecarregar();
-    } catch { toast.error("Erro ao excluir."); }
+      await fetch(`/api/financeiro/lancamentos/${excluindoId}`, { method:"DELETE" });
+      toast.success("Excluído com sucesso.");
+      onRecarregar();
+    } catch {
+      toast.error("Erro ao excluir.");
+    } finally {
+      setIsDeleting(false);
+      setExcluindoId(null);
+    }
   }
 
   return (
@@ -254,7 +265,7 @@ function SecaoMes({ tipo, lancamentos, loading, onAbrirModal, onRecarregar }) {
                           className="p-1.5 rounded text-ink-600 hover:text-gold-500 hover:bg-gold-500/10 transition-all">
                           <Pencil size={12} />
                         </button>
-                        <button onClick={() => excluir(l.id)}
+                        <button onClick={() => setExcluindoId(l.id)}
                           className="p-1.5 rounded text-ink-600 hover:text-danger-500 hover:bg-danger-500/10 transition-all">
                           <Trash2 size={12} />
                         </button>
@@ -276,6 +287,17 @@ function SecaoMes({ tipo, lancamentos, loading, onAbrirModal, onRecarregar }) {
           )}
         </div>
       )}
+
+      {/* Modal de confirmação de exclusão */}
+      <Modal open={!!excluindoId} onClose={() => !isDeleting && setExcluindoId(null)} title={`Excluir ${isDespesa ? "despesa" : "receita"}`} size="sm">
+        <p className="text-sm text-ink-300 mb-6">
+          Tem certeza que deseja excluir este lançamento? Esta ação não pode ser desfeita.
+        </p>
+        <div className="flex gap-3 justify-end">
+          <Button variant="secondary" onClick={() => setExcluindoId(null)} disabled={isDeleting}>Cancelar</Button>
+          <Button variant="danger" onClick={confirmarExclusao} loading={isDeleting}>Excluir Agora</Button>
+        </div>
+      </Modal>
     </div>
   );
 }

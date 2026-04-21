@@ -5,12 +5,14 @@ import {
   Plus, Filter, RefreshCw, ChevronLeft, ChevronRight,
   ChevronDown, CheckCircle, Trash2, AlertTriangle, X,
   Receipt, FileText, Download, Repeat, SplitSquareHorizontal, Info,
-  ChevronsLeft, ChevronsRight, ArrowUpDown, Pencil
+  ChevronsLeft, ChevronsRight, ArrowUpDown, Pencil, User
 } from "lucide-react";
 import { toast } from "sonner";
 import { useLancamentos, useCategorias } from "@/hooks/useFinanceiro";
 import AnexoFinanceiro from "@/components/financeiro/AnexoFinanceiro";
 import ModalLancamento from "@/components/financeiro/ModalLancamento";
+import Modal from "@/components/ui/Modal";
+import Button from "@/components/ui/Button";
 import { maskMoeda } from "@/lib/utils";
 
 const MESES_ABREV = ["JAN","FEV","MAR","ABR","MAI","JUN","JUL","AGO","SET","OUT","NOV","DEZ"];
@@ -56,14 +58,25 @@ export default function ContasPagar() {
   const [filtPago,    setFiltPago]    = useState(true);
   const [filtAPagar,  setFiltAPagar]  = useState(true);
   const [modal,   setModal]   = useState(false);
+  const [excluindoId, setExcluindoId] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [clientes, setClientes] = useState([]);
   const [pageSize, setPageSize] = useState(50);
   const [page,     setPage]    = useState(1);
   const [sortCol,  setSortCol] = useState("data_vencimento");
   const [sortAsc,  setSortAsc] = useState(true);
+  const [selecionados, setSelecionados] = useState(new Set());
 
   const mesISO = `${ano}-${String(mes+1).padStart(2,"0")}`;
 
   const { lancamentos: dados, isLoading, mutate } = useLancamentos({ tipo: 'despesa', mes: mesISO, limit: 500 });
+
+  useEffect(() => {
+    fetch(`/api/clientes?limit=500&status=ativo`)
+      .then(r => r.json())
+      .then(j => setClientes(j?.data || j || []))
+      .catch(() => {});
+  }, []);
 
   async function marcarPago(id, statusAtual) {
     const novoStatus = statusAtual === "pago" ? "pendente" : "pago";
@@ -77,12 +90,19 @@ export default function ContasPagar() {
     } catch { toast.error("Erro."); }
   }
 
-  async function excluir(id) {
-    if (!confirm("Excluir este lançamento?")) return;
+  async function confirmarExclusao() {
+    if (!excluindoId) return;
+    setIsDeleting(true);
     try {
-      await fetch(`/api/financeiro/lancamentos/${id}`, { method:"DELETE" });
-      toast.success("Excluído."); mutate();
-    } catch { toast.error("Erro."); }
+      await fetch(`/api/financeiro/lancamentos/${excluindoId}`, { method:"DELETE" });
+      toast.success("Lançamento excluído com sucesso."); 
+      mutate();
+    } catch { 
+      toast.error("Erro ao excluir lançamento."); 
+    } finally {
+      setIsDeleting(false);
+      setExcluindoId(null);
+    }
   }
 
   // Filtragem por status
@@ -112,6 +132,20 @@ export default function ContasPagar() {
   function toggleSort(col) {
     if (sortCol===col) setSortAsc(a=>!a);
     else { setSortCol(col); setSortAsc(true); }
+  }
+
+  function toggleUm(id) {
+    const s = new Set(selecionados);
+    s.has(id) ? s.delete(id) : s.add(id);
+    setSelecionados(s);
+  }
+
+  function toggleAll() {
+    if (selecionados.size === pagina.length && pagina.length > 0) {
+      setSelecionados(new Set());
+    } else {
+      setSelecionados(new Set(pagina.map(l => l.id)));
+    }
   }
 
   // Totais
@@ -203,7 +237,12 @@ export default function ContasPagar() {
           <thead className="bg-dark-300 sticky top-0 z-10 glass-card">
             <tr className="border-b border-white/[0.06]">
               <th className="px-3 py-2.5 w-8">
-                <div className="w-4 h-4 rounded border-2 border-ink-600 hover:border-gold-500 cursor-pointer transition-colors"/>
+                <div onClick={toggleAll} className={cn("w-4 h-4 rounded border-2 flex items-center justify-center transition-colors cursor-pointer",
+                  selecionados.size > 0 && selecionados.size === pagina.length ? "bg-gold-500 border-gold-500 text-dark-300" :
+                  selecionados.size > 0 ? "bg-gold-500/20 border-gold-500 text-gold-500" : "border-ink-600 hover:border-gold-500"
+                )}>
+                  {selecionados.size > 0 && <CheckCircle size={10} />}
+                </div>
               </th>
               <th className="px-2 py-2.5 w-6">
                 <ArrowUpDown size={12} className="text-ink-600"/>
@@ -214,7 +253,7 @@ export default function ContasPagar() {
               <ThBtn col="valor_pago">Pago</ThBtn>
               <ThBtn col="data_pagamento">Pagamento</ThBtn>
               <th className="text-left px-3 py-2.5 text-[11px] font-bold text-ink-500 uppercase tracking-wider">Tipo</th>
-              <th className="text-left px-3 py-2.5 text-[11px] font-bold text-ink-500 uppercase tracking-wider">Fornecedor</th>
+              <th className="text-left px-3 py-2.5 text-[11px] font-bold text-ink-500 uppercase tracking-wider">Cliente</th>
               <ThBtn col="categoria">Categoria de Despesa</ThBtn>
               <th className="px-3 py-2.5 w-20"/>
             </tr>
@@ -230,10 +269,15 @@ export default function ContasPagar() {
               pagina.map(l => {
                 const pago     = l.status === "pago";
                 const vencido  = !pago && l.data_vencimento < hojeISO;
+                const nomeCliente = l.clientes?.nome || clientes.find(c=>c.id===l.cliente_id)?.nome || "—";
                 return (
-                  <tr key={l.id} className={cn("table-row-hover transition-colors group", pago && "opacity-60")}>
+                  <tr key={l.id} className={cn("table-row-hover transition-colors group", pago && "opacity-60", selecionados.has(l.id) && "bg-gold-500/5")}>
                     <td className="px-3 py-2.5">
-                      <div className="w-4 h-4 rounded border-2 border-ink-600 cursor-pointer hover:border-gold-500 transition-colors"/>
+                      <div onClick={()=>toggleUm(l.id)} className={cn("w-4 h-4 rounded border-2 flex items-center justify-center cursor-pointer transition-colors",
+                        selecionados.has(l.id) ? "bg-gold-500 border-gold-500 text-dark-300" : "border-ink-600 hover:border-gold-500"
+                      )}>
+                        {selecionados.has(l.id) && <CheckCircle size={10}/>}
+                      </div>
                     </td>
                     <td className="px-2 py-2.5">
                       <button onClick={()=>marcarPago(l.id, l.status)}
@@ -261,7 +305,18 @@ export default function ContasPagar() {
                         {pago ? "Pago" : vencido ? "Vencido" : "A Pagar"}
                       </span>
                     </td>
-                    <td className="px-3 py-2.5 text-xs text-ink-400">{l.fornecedor || "—"}</td>
+                    <td className="px-3 py-2.5">
+                      {nomeCliente !== "—" ? (
+                        <div className="flex items-center gap-1.5">
+                          <div className="w-5 h-5 rounded-full bg-gold-500/20 flex items-center justify-center flex-shrink-0">
+                            <User size={10} className="text-gold-500"/>
+                          </div>
+                          <span className="text-xs text-ink-300 truncate max-w-[120px]">{nomeCliente}</span>
+                        </div>
+                      ) : (
+                        <span className="text-xs text-ink-600">—</span>
+                      )}
+                    </td>
                     <td className="px-3 py-2.5 text-xs text-ink-400">{l.categoria || l.categorias_financeiras?.nome || "—"}</td>
                     <td className="px-3 py-2.5">
                       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -269,7 +324,7 @@ export default function ContasPagar() {
                           className="w-6 h-6 flex items-center justify-center rounded text-ink-600 hover:text-gold-500 hover:bg-gold-500/10 transition-all">
                           <Pencil size={12}/>
                         </button>
-                        <button onClick={()=>excluir(l.id)}
+                        <button onClick={()=>setExcluindoId(l.id)}
                           className="w-6 h-6 flex items-center justify-center rounded text-ink-600 hover:text-danger-400 hover:bg-danger-500/10 transition-all">
                           <Trash2 size={12}/>
                         </button>
@@ -333,6 +388,17 @@ export default function ContasPagar() {
       </div>
 
       {modal && <ModalLancamento tipo="despesa" original={typeof modal === 'object' ? modal : null} onClose={()=>setModal(false)} onSalvo={mutate}/>}
+      
+      {/* Confirmação de exclusão */}
+      <Modal open={!!excluindoId} onClose={() => !isDeleting && setExcluindoId(null)} title="Excluir despesa" size="sm">
+        <p className="text-sm text-ink-300 mb-6">
+          Tem certeza que deseja excluir este lançamento? Esta ação não pode ser desfeita.
+        </p>
+        <div className="flex gap-3 justify-end">
+          <Button variant="secondary" onClick={() => setExcluindoId(null)} disabled={isDeleting}>Cancelar</Button>
+          <Button variant="danger" onClick={confirmarExclusao} loading={isDeleting}>Excluir Agora</Button>
+        </div>
+      </Modal>
     </div>
   );
 }
