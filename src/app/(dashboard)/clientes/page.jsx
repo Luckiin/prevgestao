@@ -8,6 +8,7 @@ import Modal from "@/components/ui/Modal";
 import Button from "@/components/ui/Button";
 import { Select } from "@/components/ui/Input";
 import { Plus, Search, X } from "lucide-react";
+import { toast } from "sonner";
 
 const ANO_ATUAL = new Date().getFullYear();
 const ANOS = Array.from({ length: ANO_ATUAL - 2020 + 3 }, (_, i) => 2020 + i).reverse();
@@ -90,7 +91,7 @@ export default function ClientesPage() {
       setEditando(null);
       carregar();
     } catch (err) {
-      alert("Erro: " + err.message);
+      toast.error("Erro: " + err.message);
     } finally {
       setSaving(false);
     }
@@ -100,7 +101,7 @@ export default function ClientesPage() {
     if (!excluindo) return;
     const res = await fetch(`/api/clientes/${excluindo.id}`, { method: "DELETE" });
     if (res.ok) { setExcluindo(null); carregar(); }
-    else alert("Erro ao excluir");
+    else toast.error("Erro ao excluir");
   }
 
   function abrirNovo() {
@@ -116,7 +117,7 @@ export default function ClientesPage() {
       setEditando(full);
       setModalOpen(true);
     } catch (err) {
-      alert("Erro ao carregar dados do cliente");
+      toast.error("Erro ao carregar dados do cliente");
     } finally {
       setCarregandoDetalhe(false);
     }
