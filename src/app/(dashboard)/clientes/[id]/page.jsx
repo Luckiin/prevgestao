@@ -392,7 +392,16 @@ export default function ClienteDetalhePage() {
 
           <Campo label="Número do processo" value={cliente.numero_processo || "—"} />
 
-          <Campo label="Situação" value={cliente.situacao || "—"} />
+          <div>
+            <p className="text-xs text-ink-500 mb-1">Situação</p>
+            <Badge variant={
+              cliente.situacao === "Finalizado" ? "ativo" :
+              ["Peticionar", "Requerimento", "Protocolar"].includes(cliente.situacao) ? "urgente" :
+              "aviso"
+            }>
+              {cliente.situacao || "Pendente"}
+            </Badge>
+          </div>
 
           <Campo label="Valor estimado" value={formatMoeda(cliente.valor_beneficio)} />
           <Campo label="Data de entrada" value={formatDataHora(cliente.data_entrada)} />

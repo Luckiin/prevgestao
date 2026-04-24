@@ -120,7 +120,11 @@ export default function ClienteTable({ clientes, onEdit, onDelete, loading, sort
               </td>
 
               <td className="px-4 py-3">
-                <Badge variant={c.situacao === "Finalizado" ? "ativo" : "aviso"}>
+                <Badge variant={
+                  c.situacao === "Finalizado" ? "ativo" :
+                  ["Peticionar", "Requerimento", "Protocolar"].includes(c.situacao) ? "urgente" :
+                  "aviso"
+                }>
                   {c.situacao || "Pendente"}
                 </Badge>
               </td>

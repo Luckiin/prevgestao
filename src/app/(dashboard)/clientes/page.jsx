@@ -192,6 +192,11 @@ export default function ClientesPage() {
         >
           <option value="">A situação (Todos)</option>
           <option value="Pendente">Pendente</option>
+          <option value="Em análise Administrativa">Em análise Administrativa</option>
+          <option value="Em análise Judicial">Em análise Judicial</option>
+          <option value="Peticionar">Peticionar</option>
+          <option value="Requerimento">Requerimento</option>
+          <option value="Protocolar">Protocolar</option>
           <option value="Finalizado">Finalizado</option>
         </select>
 

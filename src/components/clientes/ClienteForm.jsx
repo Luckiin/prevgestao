@@ -257,6 +257,11 @@ export default function ClienteForm({ inicial, onSubmit, loading }) {
           onChange={e => set("situacao", e.target.value)}
         >
           <option value="Pendente">Pendente</option>
+          <option value="Em análise Administrativa">Em análise Administrativa</option>
+          <option value="Em análise Judicial">Em análise Judicial</option>
+          <option value="Peticionar">Peticionar</option>
+          <option value="Requerimento">Requerimento</option>
+          <option value="Protocolar">Protocolar</option>
           <option value="Finalizado">Finalizado</option>
         </Select>
 
