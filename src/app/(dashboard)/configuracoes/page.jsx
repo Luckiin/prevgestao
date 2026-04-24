@@ -5,19 +5,35 @@ import Button from "@/components/ui/Button";
 import Modal from "@/components/ui/Modal";
 import Input, { Select } from "@/components/ui/Input";
 import Badge from "@/components/ui/Badge";
-import { Settings, Plus, Pencil, Power, Upload, Trash2, FileText, CheckCircle2, Info, Download, Eye, Loader2 } from "lucide-react";
+import { Settings, Plus, Pencil, Power, Upload, Trash2, FileText, CheckCircle2, Info, Download, Eye, Loader2, User, Lock, Mail } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 import { TIPOS_DOC } from "@/lib/contratos/tipos";
 
 export default function ConfiguracoesPage() {
-  const { usuario } = useAuth();
+  const { usuario, updateProfile } = useAuth();
   const [subdivisoes, setSubdivisoes] = useState([]);
   const [loading, setLoading]         = useState(true);
   const [modal, setModal]             = useState(false);
   const [editando, setEditando]       = useState(null);
   const [saving, setSaving]           = useState(false);
   const [form, setForm]               = useState({ nome: "", tipo: "administrativo" });
+
+  const [moduloAtivo, setModuloAtivo] = useState("perfil");
+
+  const [perfilForm, setPerfilForm] = useState({ nome: "", email: "" });
+  const [senhaForm, setSenhaForm] = useState({ atual: "", nova: "", confirmacao: "" });
+  const [savingPerfil, setSavingPerfil] = useState(false);
+  const [savingSenha, setSavingSenha] = useState(false);
+
+  useEffect(() => {
+    if (usuario) {
+      setPerfilForm({ 
+        nome: usuario.nome || "", 
+        email: usuario.email || "" 
+      });
+    }
+  }, [usuario]);
 
 
   const [tiposAcao, setTiposAcao]           = useState([]);
@@ -55,9 +71,6 @@ export default function ConfiguracoesPage() {
   const [dragOver, setDragOver]           = useState(null);
   const fileInputRef = useRef(null);
   const uploadSlotRef = useRef(null);
-
-
-  const [moduloAtivo, setModuloAtivo] = useState("subdivisoes");
 
   async function carregar() {
     setLoading(true);
@@ -313,6 +326,61 @@ export default function ConfiguracoesPage() {
     }
   }
 
+  async function handleUpdatePerfil(e) {
+    e.preventDefault();
+    if (!perfilForm.nome.trim()) return;
+    setSavingPerfil(true);
+    try {
+      const res = await fetch("/api/auth/perfil", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nome: perfilForm.nome.trim() }),
+      });
+      
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Falha ao atualizar perfil");
+      
+      // Atualiza o contexto local para refletir a mudança imediatamente
+      await updateProfile({ nome: perfilForm.nome.trim() });
+      
+      toast.success("Perfil atualizado com sucesso");
+    } catch (err) {
+      toast.error("Erro ao atualizar perfil: " + err.message);
+    } finally {
+      setSavingPerfil(false);
+    }
+  }
+
+  async function handleUpdateSenha(e) {
+    e.preventDefault();
+    if (senhaForm.nova !== senhaForm.confirmacao) {
+      toast.error("As senhas não coincidem");
+      return;
+    }
+    if (senhaForm.nova.length < 6) {
+      toast.error("A nova senha deve ter pelo menos 6 caracteres");
+      return;
+    }
+    setSavingSenha(true);
+    try {
+      const res = await fetch("/api/auth/senha", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: senhaForm.nova }),
+      });
+      
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Falha ao alterar senha");
+      
+      toast.success("Senha alterada com sucesso");
+      setSenhaForm({ atual: "", nova: "", confirmacao: "" });
+    } catch (err) {
+      toast.error("Erro ao alterar senha: " + err.message);
+    } finally {
+      setSavingSenha(false);
+    }
+  }
+
   async function handleToggleAtivoPet(t) {
     try {
       const res = await fetch(`/api/peticoes/tipos/${t.id}`, {
@@ -478,6 +546,78 @@ export default function ConfiguracoesPage() {
 
   const renderConteudo = () => {
     switch (moduloAtivo) {
+      case "perfil":
+        return (
+          <div className="space-y-6">
+            {!usuario && (
+              <div className="glass-card rounded-2xl p-4 flex items-center gap-3 text-ink-500 bg-gold-500/5 border border-gold-500/10">
+                <div className="w-4 h-4 border-2 border-gold-500 border-t-transparent rounded-full animate-spin" />
+                <p className="text-xs">Sincronizando dados do perfil...</p>
+              </div>
+            )}
+            
+            <div className="glass-card rounded-2xl overflow-hidden">
+              <div className="px-5 py-4 border-b border-white/[0.05]">
+                <h2 className="text-sm font-semibold text-ink-200">Meus Dados</h2>
+                <p className="text-xs text-ink-500 mt-0.5">Atualize suas informações de perfil</p>
+              </div>
+              <form onSubmit={handleUpdatePerfil} className="p-6 space-y-4 max-w-xl">
+                <Input
+                  label="Nome completo"
+                  icon={User}
+                  placeholder="Seu nome completo"
+                  value={perfilForm.nome || ""}
+                  onChange={e => setPerfilForm(p => ({ ...p, nome: e.target.value }))}
+                  required
+                />
+                <Input
+                  label="E-mail (apenas leitura)"
+                  icon={Mail}
+                  placeholder="seu@email.com"
+                  value={perfilForm.email || ""}
+                  disabled
+                  hint="O e-mail não pode ser alterado diretamente"
+                />
+                <div className="pt-2">
+                  <Button type="submit" loading={savingPerfil}>
+                    Salvar alterações
+                  </Button>
+                </div>
+              </form>
+            </div>
+
+            <div className="glass-card rounded-2xl overflow-hidden">
+              <div className="px-5 py-4 border-b border-white/[0.05]">
+                <h2 className="text-sm font-semibold text-ink-200">Segurança</h2>
+                <p className="text-xs text-ink-500 mt-0.5">Altere sua senha de acesso</p>
+              </div>
+              <form onSubmit={handleUpdateSenha} className="p-6 space-y-4 max-w-xl">
+                <Input
+                  label="Nova senha"
+                  type="password"
+                  icon={Lock}
+                  value={senhaForm.nova}
+                  onChange={e => setSenhaForm(p => ({ ...p, nova: e.target.value }))}
+                  required
+                />
+                <Input
+                  label="Confirmar nova senha"
+                  type="password"
+                  icon={Lock}
+                  value={senhaForm.confirmacao}
+                  onChange={e => setSenhaForm(p => ({ ...p, confirmacao: e.target.value }))}
+                  required
+                />
+                <div className="pt-2">
+                  <Button type="submit" loading={savingSenha} variant="secondary">
+                    Alterar senha
+                  </Button>
+                </div>
+              </form>
+            </div>
+          </div>
+        );
+
       case "subdivisoes":
         return (
           <div className="glass-card rounded-2xl overflow-hidden">
@@ -1106,6 +1246,24 @@ export default function ConfiguracoesPage() {
         <nav className="glass-card rounded-2xl overflow-hidden sticky top-6 lg:top-24">
 
           <div>
+            <p className="px-4 py-2.5 text-[10px] font-semibold uppercase tracking-widest text-ink-600 border-b border-white/[0.05]">
+              Sua Conta
+            </p>
+            <div className="divide-y divide-white/[0.03]">
+              <button
+                onClick={() => setModuloAtivo("perfil")}
+                className={`w-full text-left px-4 py-3 text-sm transition-all flex items-center gap-2 ${
+                  moduloAtivo === "perfil"
+                    ? "text-gold-400 bg-gold-500/10 border-l-2 border-gold-500 font-medium"
+                    : "text-ink-300 hover:text-ink-100 hover:bg-white/[0.02]"
+                }`}
+              >
+                <User size={14} /> Perfil do Usuário
+              </button>
+            </div>
+          </div>
+
+          <div className="border-t border-white/[0.05]">
             <p className="px-4 py-2.5 text-[10px] font-semibold uppercase tracking-widest text-ink-600 border-b border-white/[0.05]">
               Processos
             </p>

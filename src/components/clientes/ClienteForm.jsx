@@ -127,6 +127,7 @@ export default function ClienteForm({ inicial, onSubmit, loading }) {
           <option value="Divorciado(a)">Divorciado(a)</option>
           <option value="Viúvo(a)">Viúvo(a)</option>
           <option value="União Estável">União Estável</option>
+          <option value="Separado(a) de Fato">Separado(a) de Fato</option>
         </Select>
 
 

@@ -16,11 +16,6 @@ export async function middleware(request) {
 
 
   const isApi = pathname.startsWith("/api/");
-  const isRSC = request.headers.get("RSC") || request.headers.get("Next-Router-State-Tree") || request.headers.get("Next-Router-Prefetch");
-
-  if (isRSC && !isApi) {
-    return NextResponse.next();
-  }
 
   let supabaseResponse = NextResponse.next({ request });
 

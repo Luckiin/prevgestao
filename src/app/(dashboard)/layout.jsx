@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
+import Link from "next/link";
 import { AuthProvider } from "@/context/AuthContext";
 import { ThemeProvider, useTheme } from "@/context/ThemeContext";
 import Sidebar from "@/components/dashboard/Sidebar";
-import { Menu, Sun, Moon } from "lucide-react";
+import { Menu, Sun, Moon, ChevronDown, LogOut, Settings, User } from "lucide-react";
 import { Toaster } from "sonner";
 import { useAuth } from "@/context/AuthContext";
 import { SWRConfig } from "swr";
@@ -12,10 +13,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { usePathname, useSearchParams } from "next/navigation";
 
 function TopBar({ onMenuOpen }) {
-  const { usuario } = useAuth();
-  const nome    = usuario?.nome ?? "Usuário";
-  const inicial = nome.charAt(0).toUpperCase();
-
   return (
     <header className="sticky top-0 z-30 h-14 flex items-center gap-3 px-6 bg-dark-300 border-b border-gold-500/10"
       style={{ backdropFilter: "blur(20px)" }}>
@@ -33,20 +30,76 @@ function TopBar({ onMenuOpen }) {
       <div className="flex-1" />
 
       <ThemeToggle />
+      <UserDropdown />
+    </header>
+  );
+}
 
+function UserDropdown() {
+  const { usuario, loading, logout } = useAuth();
+  const [open, setOpen] = useState(false);
 
-      <div className="flex items-center gap-2.5 px-3 py-1.5 bg-gold-500/5 border border-gold-500/10 rounded">
+  if (loading) {
+    return (
+      <div className="flex items-center gap-2.5 px-3 py-1.5 bg-gold-500/5 border border-gold-500/10 rounded opacity-50">
+        <div className="w-6 h-6 rounded bg-dark-200 animate-pulse" />
+        <div className="h-3 w-16 bg-dark-200 rounded animate-pulse hidden sm:block" />
+      </div>
+    );
+  }
+
+  const nome    = usuario?.nome ?? usuario?.email ?? "Usuário";
+  const inicial = (nome || "U").charAt(0).toUpperCase();
+
+  return (
+    <div className="relative">
+      <button 
+        onClick={() => setOpen(!open)}
+        className="flex items-center gap-2.5 px-3 py-1.5 bg-gold-500/5 border border-gold-500/10 rounded hover:bg-gold-500/10 transition-all cursor-pointer"
+      >
         <div style={{
           width: 26, height: 26, borderRadius: 2,
           background: "linear-gradient(135deg, #6B1530, #3d0a1a)",
           display: "flex", alignItems: "center", justifyContent: "center",
           color: "#C9A96E", fontSize: 11, fontWeight: 700, flexShrink: 0,
         }}>{inicial}</div>
-        <span className="topbar-nome text-xs text-ink-300 whitespace-nowrap">
+        <span className="topbar-nome text-xs text-ink-300 whitespace-nowrap hidden sm:inline">
           {nome}
         </span>
-      </div>
-    </header>
+        <ChevronDown size={14} className={`text-ink-500 transition-transform ${open ? 'rotate-180' : ''}`} />
+      </button>
+
+      {open && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
+          <div className="absolute right-0 mt-2 w-56 z-50 glass-card rounded-xl border border-gold-500/10 p-2 shadow-2xl animate-in fade-in slide-in-from-top-2">
+            <div className="px-3 py-2.5 mb-1 border-b border-white/5">
+              <p className="text-xs font-semibold text-ink-100 truncate">{nome}</p>
+              <p className="text-[10px] text-gold-500/60 tracking-wider uppercase mt-0.5">Administrador</p>
+            </div>
+
+            <div className="flex flex-col gap-0.5">
+              <Link
+                href="/configuracoes"
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-2.5 w-full px-3 py-2 rounded-lg text-xs font-medium text-ink-400 hover:text-gold-500 hover:bg-gold-500/10 transition-all no-underline"
+              >
+                <Settings size={14} />
+                Configurações
+              </Link>
+              
+              <button
+                onClick={() => { logout(); setOpen(false); }}
+                className="flex items-center gap-2.5 w-full px-3 py-2 rounded-lg text-xs font-medium text-ink-400 hover:text-danger-500 hover:bg-danger-500/10 transition-all cursor-pointer border-none bg-transparent"
+              >
+                <LogOut size={14} />
+                Sair da conta
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+    </div>
   );
 }
 

@@ -110,27 +110,9 @@ export default function Sidebar({ isOpen, onClose }) {
             </div>
           )}
 
-          <div className="h-px bg-gold-500/10 mx-1 my-2.5" />
-          <NavItem href="/configuracoes" icon={Settings} label="Configurações" active={isActive("/configuracoes")} onClick={onClose} />
         </nav>
 
 
-        <div className="flex flex-col gap-2.5 px-4 py-3.5 border-t border-gold-500/10">
-          <div className="flex items-center gap-2.5">
-            <div className="w-[30px] h-[30px] rounded shrink-0 flex items-center justify-center font-bold text-xs text-gold-500" style={{ background:"linear-gradient(135deg,#6B1530,#3d0a1a)" }}>
-              {inicial}
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="text-xs font-semibold text-ink-200 overflow-hidden text-ellipsis whitespace-nowrap">{nome}</div>
-              <div className="text-[10px] text-gold-500/40 tracking-wider">Administrador</div>
-            </div>
-          </div>
-          <button onClick={logout}
-            className="flex items-center gap-2 w-full py-2 px-3 rounded text-xs font-medium text-ink-400 bg-gold-500/5 border border-gold-500/10 cursor-pointer transition-all hover:text-gold-500 hover:border-gold-500/20"
-          >
-            <LogOut size={13} /> Sair da conta
-          </button>
-        </div>
       </aside>
     </>
   );

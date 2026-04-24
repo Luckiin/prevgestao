@@ -7,7 +7,7 @@ import ClienteForm from "@/components/clientes/ClienteForm";
 import Modal from "@/components/ui/Modal";
 import Button from "@/components/ui/Button";
 import { Select } from "@/components/ui/Input";
-import { Plus, Search, X } from "lucide-react";
+import { Plus, Search, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 
 const ANO_ATUAL = new Date().getFullYear();
@@ -21,6 +21,9 @@ export default function ClientesPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editando, setEditando] = useState(null);
   const [excluindo, setExcluindo] = useState(null);
+
+  const [pagina, setPagina]             = useState(1);
+  const [itensPorPagina]                = useState(20);
 
 
   const [sortCol, setSortCol] = useState("nome");
@@ -54,13 +57,16 @@ export default function ClientesPage() {
     if (filtroSituacao) params.set("situacao", filtroSituacao);
     if (filtroSubdivisao) params.set("subdivisao_nome", filtroSubdivisao);
     if (filtroAno && filtroAno !== "todos") params.set("ano_referencia", filtroAno);
+    
+    params.set("limit", String(itensPorPagina));
+    params.set("offset", String((pagina - 1) * itensPorPagina));
 
     const res = await fetch(`/api/clientes?${params}`);
     const json = await res.json();
     setClientes(json.data || []);
     setTotal(json.total || 0);
     setLoading(false);
-  }, [busca, filtroStatus, filtroTipo, filtroSituacao, filtroSubdivisao, filtroAno]);
+  }, [busca, filtroStatus, filtroTipo, filtroSituacao, filtroSubdivisao, filtroAno, pagina, itensPorPagina]);
 
   useEffect(() => {
     async function carregarSubdivisoes() {
@@ -158,7 +164,7 @@ export default function ClientesPage() {
           <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-500" />
           <input
             value={busca}
-            onChange={e => setBusca(e.target.value)}
+            onChange={e => { setBusca(e.target.value); setPagina(1); }}
             placeholder="Buscar por nome, CPF ou processo..."
             className="w-full bg-dark-300 border border-dark-50 rounded pl-9 pr-3.5 py-2 text-sm text-ink-100 placeholder-ink-600
                        focus:outline-none focus:border-gold-500 focus:ring-1 focus:ring-gold-500/15"
@@ -167,7 +173,7 @@ export default function ClientesPage() {
 
         <select
           value={filtroStatus}
-          onChange={e => setFiltroStatus(e.target.value)}
+          onChange={e => { setFiltroStatus(e.target.value); setPagina(1); }}
           className="bg-dark-300 border border-dark-50 rounded px-3 py-2 text-sm text-ink-300 focus:outline-none focus:border-gold-500"
         >
           <option value="">Todos os status</option>
@@ -178,7 +184,7 @@ export default function ClientesPage() {
 
         <select
           value={filtroTipo}
-          onChange={e => setFiltroTipo(e.target.value)}
+          onChange={e => { setFiltroTipo(e.target.value); setPagina(1); }}
           className="bg-dark-300 border border-dark-50 rounded px-3 py-2 text-sm text-ink-300 focus:outline-none focus:border-gold-500"
         >
           <option value="">Todos os tipos</option>
@@ -188,7 +194,7 @@ export default function ClientesPage() {
 
         <select
           value={filtroSituacao}
-          onChange={e => setFiltroSituacao(e.target.value)}
+          onChange={e => { setFiltroSituacao(e.target.value); setPagina(1); }}
           className="bg-dark-300 border border-dark-50 rounded px-3 py-2 text-sm text-ink-300 focus:outline-none focus:border-gold-500"
         >
           <option value="">A situação (Todos)</option>
@@ -203,7 +209,7 @@ export default function ClientesPage() {
 
         <select
           value={filtroSubdivisao}
-          onChange={e => setFiltroSubdivisao(e.target.value)}
+          onChange={e => { setFiltroSubdivisao(e.target.value); setPagina(1); }}
           className="bg-dark-300 border border-dark-50 rounded px-3 py-2 text-sm text-ink-300 focus:outline-none focus:border-gold-500 max-w-[180px]"
         >
           <option value="">Subdivisão (Todas)</option>
@@ -214,7 +220,7 @@ export default function ClientesPage() {
 
         <select
           value={filtroAno}
-          onChange={e => setFiltroAno(e.target.value)}
+          onChange={e => { setFiltroAno(e.target.value); setPagina(1); }}
           className="bg-dark-300 border border-dark-50 rounded px-3 py-2 text-sm text-ink-300 focus:outline-none focus:border-gold-500"
         >
           <option value="todos">Todos os anos</option>
@@ -232,6 +238,7 @@ export default function ClientesPage() {
               setFiltroSituacao("");
               setFiltroSubdivisao("");
               setFiltroAno(String(ANO_ATUAL));
+              setPagina(1);
             }}
             className="flex items-center gap-1 text-xs text-ink-500 hover:text-ink-200 transition-colors px-2"
           >
@@ -251,6 +258,37 @@ export default function ClientesPage() {
           sortDir={sortDir}
           onSort={handleSort}
         />
+
+        {total > itensPorPagina && (
+          <div className="px-5 py-4 border-t border-white/[0.05] flex items-center justify-between bg-white/[0.01]">
+            <p className="text-xs text-ink-500">
+              Mostrando <span className="text-ink-300">{(pagina - 1) * itensPorPagina + 1}</span> a <span className="text-ink-300">{Math.min(pagina * itensPorPagina, total)}</span> de <span className="text-ink-300">{total}</span> registros
+            </p>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setPagina(p => Math.max(1, p - 1))}
+                disabled={pagina === 1}
+                className="h-8 w-8 p-0"
+              >
+                <ChevronLeft size={16} />
+              </Button>
+              <span className="text-xs font-medium text-ink-200 px-2">
+                Página {pagina} de {Math.ceil(total / itensPorPagina)}
+              </span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setPagina(p => p + 1)}
+                disabled={pagina * itensPorPagina >= total}
+                className="h-8 w-8 p-0"
+              >
+                <ChevronRight size={16} />
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
 
 

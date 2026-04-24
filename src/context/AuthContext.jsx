@@ -11,18 +11,29 @@ export function AuthProvider({ children }) {
   const supabase                = createClient();
 
   useEffect(() => {
+    let mounted = true;
 
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user) {
-        setUsuario({
-          id:    user.id,
-          email: user.email,
-          nome:  user.user_metadata?.nome || user.email,
-        });
+    async function checkUser() {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) throw error;
+        
+        if (session?.user && mounted) {
+          const user = session.user;
+          setUsuario({
+            id:    user.id,
+            email: user.email,
+            nome:  user.user_metadata?.nome || user.user_metadata?.full_name || user.email,
+          });
+        }
+      } catch (err) {
+        console.error("Erro ao verificar auth:", err);
+      } finally {
+        if (mounted) setLoading(false);
       }
-      setLoading(false);
-    });
+    }
 
+    checkUser();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, session) => {
@@ -30,15 +41,19 @@ export function AuthProvider({ children }) {
           setUsuario({
             id:    session.user.id,
             email: session.user.email,
-            nome:  session.user.user_metadata?.nome || session.user.email,
+            nome:  session.user.user_metadata?.nome || session.user.user_metadata?.full_name || session.user.email,
           });
         } else {
           setUsuario(null);
         }
+        setLoading(false);
       }
     );
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   async function logout() {
@@ -47,8 +62,26 @@ export function AuthProvider({ children }) {
     window.location.href = "/login";
   }
 
+  async function updateProfile(metadata) {
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) throw new Error("Sessão não encontrada ou expirada. Por favor, tente recarregar a página.");
+
+    const { data, error } = await supabase.auth.updateUser({
+      data: metadata
+    });
+    if (error) throw error;
+    if (data.user) {
+      setUsuario({
+        id:    data.user.id,
+        email: data.user.email,
+        nome:  data.user.user_metadata?.nome || data.user.user_metadata?.full_name || data.user.email,
+      });
+    }
+    return data.user;
+  }
+
   return (
-    <AuthContext.Provider value={{ usuario, loading, logout }}>
+    <AuthContext.Provider value={{ usuario, loading, logout, updateProfile }}>
       {children}
     </AuthContext.Provider>
   );
