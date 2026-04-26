@@ -1,5 +1,5 @@
-import { TIPOS_DOC } from "@/lib/contratos/tipos";
-export { TIPOS_DOC };
+import { TIPOS_DOC, TIPOS_ACAO } from "@/lib/contratos/tipos";
+export { TIPOS_DOC, TIPOS_ACAO };
 
 const BUCKET = "modelos-contrato";
 
