@@ -104,7 +104,7 @@ export async function gerarUrlDownloadModelo(supabase, id) {
 
   const { data, error: errUrl } = await supabase.storage
     .from(BUCKET)
-    .createSignedUrl(modelo.storage_path, 3600);
+    .createSignedUrl(modelo.storage_path, 3600, { download: modelo.nome });
 
   if (errUrl) throw new Error("Falha ao gerar URL de acesso.");
   return { url: data.signedUrl, nome: modelo.nome };
@@ -260,7 +260,7 @@ export async function gerarDocx(supabase, clienteId, tipoAcao, tipoDoc) {
   const buffer = doc.getZip().generate({ type: "nodebuffer", compression: "DEFLATE" });
 
   const tipoDocLabel = TIPOS_DOC.find(t => t.value === tipoDoc)?.label || tipoDoc;
-  const nomeArquivo  = `${cliente.nome.replace(/\s+/g, "_")}_${tipoDocLabel}.docx`;
+  const nomeArquivo  = `${cliente.nome} - ${tipoDocLabel}.docx`;
 
   return { buffer, nomeArquivo };
 }

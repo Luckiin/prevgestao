@@ -98,7 +98,7 @@ export async function gerarUrlDownloadModeloPeticao(supabase, id) {
 
   const { data, error: errUrl } = await supabase.storage
     .from(BUCKET)
-    .createSignedUrl(modelo.storage_path, 3600);
+    .createSignedUrl(modelo.storage_path, 3600, { download: modelo.nome });
 
   if (errUrl) throw new Error("Falha ao gerar URL de acesso.");
   return { url: data.signedUrl, nome: modelo.nome };
@@ -246,7 +246,7 @@ export async function gerarPeticao(supabase, clienteId, tipoPeticao) {
   doc.render(variaveis);
 
   const buffer = doc.getZip().generate({ type: "nodebuffer", compression: "DEFLATE" });
-  const nomeArquivo = `${cliente.nome.replace(/\s+/g, "_")}_${modelo.nome}`;
+  const nomeArquivo = `${cliente.nome} - ${modelo.nome}`;
 
   return { buffer, nomeArquivo };
 }
