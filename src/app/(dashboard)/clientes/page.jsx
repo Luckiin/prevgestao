@@ -133,15 +133,24 @@ export default function ClientesPage() {
   const clientesOrdenados = [...clientes].sort((a, b) => {
     let va, vb;
     switch (sortCol) {
-      case "nome":     va = a.nome?.toLowerCase() || ""; vb = b.nome?.toLowerCase() || ""; break;
+      case "nome":     va = a.nome || ""; vb = b.nome || ""; break;
       case "cpf":      va = a.cpf || ""; vb = b.cpf || ""; break;
       case "status":   va = a.status || ""; vb = b.status || ""; break;
       case "situacao": va = a.situacao || ""; vb = b.situacao || ""; break;
       case "ano":      va = a.ano_referencia || 0; vb = b.ano_referencia || 0; break;
       default:         va = ""; vb = "";
     }
-    if (va < vb) return sortDir === "asc" ? -1 : 1;
-    if (va > vb) return sortDir === "asc" ? 1 : -1;
+    
+    if (typeof va === "string" && typeof vb === "string") {
+      const cleanA = va.trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+      const cleanB = vb.trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+      if (cleanA < cleanB) return sortDir === "asc" ? -1 : 1;
+      if (cleanA > cleanB) return sortDir === "asc" ? 1 : -1;
+      return 0;
+    } else {
+      if (va < vb) return sortDir === "asc" ? -1 : 1;
+      if (va > vb) return sortDir === "asc" ? 1 : -1;
+    }
     return 0;
   });
 
