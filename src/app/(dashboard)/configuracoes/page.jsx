@@ -8,7 +8,6 @@ import Badge from "@/components/ui/Badge";
 import { Settings, Plus, Pencil, Power, Upload, Trash2, FileText, CheckCircle2, Info, Download, Eye, Loader2, User, Lock, Mail } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
-import { TIPOS_DOC } from "@/lib/contratos/tipos";
 
 export default function ConfiguracoesPage() {
   const { usuario, updateProfile } = useAuth();
@@ -42,6 +41,14 @@ export default function ConfiguracoesPage() {
   const [savingTipo, setSavingTipo]         = useState(false);
   const [formTipo, setFormTipo]             = useState({ nome: "" });
   const [excluindoTipoId, setExcluindoTipoId] = useState(null);
+
+  const [tiposDoc, setTiposDoc]                 = useState([]);
+  const [modalTipoDoc, setModalTipoDoc]         = useState(false);
+  const [editandoTipoDoc, setEditandoTipoDoc]   = useState(null);
+  const [savingTipoDoc, setSavingTipoDoc]       = useState(false);
+  const [formTipoDoc, setFormTipoDoc]           = useState({ nome: "" });
+  const [excluindoTipoDocId, setExcluindoTipoDocId] = useState(null);
+
 
 
   const [tiposPeticao, setTiposPeticao]           = useState([]);
@@ -99,6 +106,14 @@ export default function ConfiguracoesPage() {
     } catch {}
   }
 
+  async function carregarTiposDoc() {
+    try {
+      const res = await fetch("/api/contratos/tipos-doc");
+      const data = await res.json();
+      setTiposDoc(Array.isArray(data) ? data : []);
+    } catch {}
+  }
+
   async function carregarTiposPeticao() {
     try {
       const res = await fetch("/api/peticoes/tipos");
@@ -119,6 +134,7 @@ export default function ConfiguracoesPage() {
     carregar();
     carregarModelos();
     carregarTipos();
+    carregarTiposDoc();
     carregarTiposPeticao();
     carregarModelosPeticao();
   }, []);
@@ -186,6 +202,67 @@ export default function ConfiguracoesPage() {
     setFormTipo({ nome: t.nome });
     setModalTipo(true);
   }
+
+  async function handleSalvarTipoDoc(e) {
+    e.preventDefault();
+    if (!formTipoDoc.nome.trim()) return;
+    setSavingTipoDoc(true);
+    try {
+      const url    = editandoTipoDoc ? `/api/contratos/tipos-doc/${editandoTipoDoc.id}` : "/api/contratos/tipos-doc";
+      const method = editandoTipoDoc ? "PUT" : "POST";
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nome: formTipoDoc.nome.trim() }),
+      });
+      if (!res.ok) { const j = await res.json(); throw new Error(j.erro); }
+      toast.success(editandoTipoDoc ? "Tipo de documento atualizado" : "Tipo criado com sucesso");
+      setModalTipoDoc(false);
+      setEditandoTipoDoc(null);
+      setFormTipoDoc({ nome: "" });
+      carregarTiposDoc();
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setSavingTipoDoc(false);
+    }
+  }
+
+  async function handleToggleAtivoTipoDoc(t) {
+    try {
+      const res = await fetch(`/api/contratos/tipos-doc/${t.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ativo: !t.ativo }),
+      });
+      if (!res.ok) throw new Error("Falha ao atualizar");
+      toast.success(`Tipo ${!t.ativo ? "ativado" : "desativado"}`);
+      carregarTiposDoc();
+    } catch (err) {
+      toast.error(err.message);
+    }
+  }
+
+  async function handleExcluirTipoDoc(id) {
+    setExcluindoTipoDocId(id);
+    try {
+      const res = await fetch(`/api/contratos/tipos-doc/${id}`, { method: "DELETE" });
+      if (!res.ok) { const j = await res.json(); throw new Error(j.erro); }
+      toast.success("Tipo de documento removido");
+      carregarTiposDoc();
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setExcluindoTipoDocId(null);
+    }
+  }
+
+  function abrirEditarTipoDoc(t) {
+    setEditandoTipoDoc(t);
+    setFormTipoDoc({ nome: t.nome });
+    setModalTipoDoc(true);
+  }
+
 
 
   function iniciarUpload(tipoDoc) {
@@ -832,20 +909,22 @@ export default function ConfiguracoesPage() {
 
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-5">
-              {TIPOS_DOC.map(td => {
-                const modelo      = modelos.find(m => m.tipo_acao === tipoAcaoAtivo && m.tipo_doc === td.value);
-                const uploading   = uploadingSlot === td.value;
+              {tiposDoc.filter(t => t.ativo).map(td => {
+                const tdValue     = td.slug;
+                const tdLabel     = td.nome;
+                const modelo      = modelos.find(m => m.tipo_acao === tipoAcaoAtivo && m.tipo_doc === tdValue);
+                const uploading   = uploadingSlot === tdValue;
                 const excluindo   = excluindoId === modelo?.id;
                 const baixando    = acessandoId === `${modelo?.id}-download`;
                 const visualizando= acessandoId === `${modelo?.id}-preview`;
-                const isDragOver  = dragOver === td.value;
+                const isDragOver  = dragOver === tdValue;
 
                 return (
                   <div
-                    key={td.value}
-                    onDragOver={e => handleDragOver(e, td.value)}
+                    key={tdValue}
+                    onDragOver={e => handleDragOver(e, tdValue)}
                     onDragLeave={handleDragLeave}
-                    onDrop={e => handleDrop(e, td.value)}
+                    onDrop={e => handleDrop(e, tdValue)}
                     className={`relative rounded-xl border p-4 transition-all ${
                       uploading
                         ? "border-gold-500/40 bg-gold-500/5"
@@ -878,7 +957,7 @@ export default function ConfiguracoesPage() {
                         }
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-ink-200">{td.label}</p>
+                        <p className="text-sm font-medium text-ink-200">{tdLabel}</p>
                         {uploading ? (
                           <p className="text-xs text-gold-500 mt-0.5">Enviando...</p>
                         ) : modelo ? (
@@ -893,7 +972,7 @@ export default function ConfiguracoesPage() {
 
                       <div className="flex gap-2">
                         <button
-                          onClick={() => iniciarUpload(td.value)}
+                          onClick={() => iniciarUpload(tdValue)}
                           disabled={uploading}
                           className="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg
                                      border border-dark-50 hover:border-gold-500/30 text-xs text-ink-500 hover:text-ink-200
@@ -957,6 +1036,50 @@ export default function ConfiguracoesPage() {
                   </div>
                 );
               })}
+            </div>
+            <div className="border-t border-white/[0.05] mt-6">
+              <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.05]">
+                <div>
+                  <h2 className="text-sm font-semibold text-ink-200">Tipos de Documento (Configuração)</h2>
+                  <p className="text-xs text-ink-500 mt-0.5">Gerencie os tipos de documentos disponíveis (ex: Contrato, Procuração)</p>
+                </div>
+                <Button size="sm" onClick={() => { setEditandoTipoDoc(null); setFormTipoDoc({ nome: "" }); setModalTipoDoc(true); }}>
+                  <Plus size={13} /> Novo
+                </Button>
+              </div>
+
+              <div className="divide-y divide-white/[0.03]">
+                {tiposDoc.length === 0 ? (
+                  <p className="px-5 py-4 text-xs text-ink-600">Nenhum tipo de documento cadastrado.</p>
+                ) : tiposDoc.map(t => (
+                  <div key={t.id} className="flex items-center gap-3 px-5 py-3 table-row-hover">
+                    <div className="flex-1 min-w-0">
+                      <p className={`text-sm truncate ${t.ativo ? "text-ink-200" : "text-ink-600 line-through"}`}>
+                        {t.nome}
+                      </p>
+                      <p className="text-[10px] font-mono text-ink-600 mt-0.5">{t.slug}</p>
+                    </div>
+                    <Badge variant={t.ativo ? "ativo" : "inativo"}>{t.ativo ? "Ativo" : "Inativo"}</Badge>
+                    <button onClick={() => abrirEditarTipoDoc(t)} className="text-ink-600 hover:text-gold-500 transition-colors">
+                      <Pencil size={13} />
+                    </button>
+                    <button onClick={() => handleToggleAtivoTipoDoc(t)} className="text-ink-600 hover:text-warn-500 transition-colors" title={t.ativo ? "Desativar" : "Ativar"}>
+                      <Power size={13} />
+                    </button>
+                    <button
+                      onClick={() => handleExcluirTipoDoc(t.id)}
+                      disabled={excluindoTipoDocId === t.id}
+                      className="text-ink-600 hover:text-red-400 transition-colors disabled:opacity-50"
+                      title="Excluir"
+                    >
+                      {excluindoTipoDocId === t.id
+                        ? <div className="w-3 h-3 border border-red-400 border-t-transparent rounded-full animate-spin" />
+                        : <Trash2 size={13} />
+                      }
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         );
@@ -1451,6 +1574,28 @@ export default function ConfiguracoesPage() {
           <div className="flex justify-end gap-3 pt-1">
             <Button variant="secondary" type="button" onClick={() => setModalTipoPet(false)}>Cancelar</Button>
             <Button type="submit" loading={savingTipoPet}>Salvar</Button>
+          </div>
+        </form>
+      </Modal>
+
+      <Modal
+        open={modalTipoDoc}
+        onClose={() => { setModalTipoDoc(false); setEditandoTipoDoc(null); }}
+        title={editandoTipoDoc ? "Editar Tipo de Documento" : "Novo Tipo de Documento"}
+        size="sm"
+      >
+        <form onSubmit={handleSalvarTipoDoc} className="space-y-4">
+          <Input
+            label="Nome do tipo (ex: Contrato)"
+            value={formTipoDoc.nome}
+            onChange={e => setFormTipoDoc({ nome: e.target.value })}
+            placeholder="Ex: Contrato"
+            required
+            autoFocus
+          />
+          <div className="flex justify-end gap-3 pt-1">
+            <Button variant="secondary" type="button" onClick={() => setModalTipoDoc(false)}>Cancelar</Button>
+            <Button type="submit" loading={savingTipoDoc}>Salvar</Button>
           </div>
         </form>
       </Modal>

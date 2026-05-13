@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createServerClient } from "@/lib/supabase-server";
+import { createServerClient, createAdminClient } from "@/lib/supabase-server";
 import { gerarDocx } from "@/lib/services/contratoService";
 
 
@@ -14,7 +14,8 @@ export async function POST(request) {
       return NextResponse.json({ erro: "cliente_id, tipo_acao e tipo_doc são obrigatórios" }, { status: 400 });
     }
 
-    const { buffer, nomeArquivo } = await gerarDocx(supabase, cliente_id, tipo_acao, tipo_doc);
+    const adminClient = createAdminClient();
+    const { buffer, nomeArquivo } = await gerarDocx(adminClient, cliente_id, tipo_acao, tipo_doc);
 
     return new NextResponse(buffer, {
       status: 200,

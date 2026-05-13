@@ -8,11 +8,3 @@ export const TIPOS_ACAO = [
   { value: "pensao-morte",           label: "Pensão por Morte"                        },
 ];
 
-export const TIPOS_DOC = [
-  { value: "contrato",                    label: "Contrato"                       },
-  { value: "procuracao",                  label: "Procuração"                     },
-  { value: "declaracao-hipossuficiencia", label: "Declaração de Hipossuficiência" },
-  { value: "termo-responsabilidade",      label: "Termo de Responsabilidade"      },
-  { value: "contrato-completo",           label: "Contrato Completo"              },
-  { value: "contrato-menor-idade",        label: "Contrato Para Menor de Idade"   },
-];

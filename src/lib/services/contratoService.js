@@ -1,5 +1,5 @@
-import { TIPOS_DOC, TIPOS_ACAO } from "@/lib/contratos/tipos";
-export { TIPOS_DOC, TIPOS_ACAO };
+import { TIPOS_ACAO } from "@/lib/contratos/tipos";
+export { TIPOS_ACAO };
 
 const BUCKET = "modelos-contrato";
 
@@ -67,6 +67,57 @@ export async function excluirTipoAcao(supabase, id) {
   if (error) throw error;
 }
 
+export async function listarTiposDoc(supabase) {
+  const { data, error } = await supabase
+    .from("tipos_doc_contrato")
+    .select("*")
+    .order("nome");
+  if (error) throw error;
+  return data;
+}
+
+export async function criarTipoDoc(supabase, { nome }) {
+  const slug = gerarSlug(nome);
+  const { data, error } = await supabase
+    .from("tipos_doc_contrato")
+    .insert({ nome, slug })
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function atualizarTipoDoc(supabase, id, campos) {
+  const updates = { ...campos };
+  if (campos.nome) updates.slug = gerarSlug(campos.nome);
+  const { data, error } = await supabase
+    .from("tipos_doc_contrato")
+    .update(updates)
+    .eq("id", id)
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function excluirTipoDoc(supabase, id) {
+  const { data: tipo } = await supabase
+    .from("tipos_doc_contrato")
+    .select("slug")
+    .eq("id", id)
+    .single();
+
+  if (tipo) {
+    const { count } = await supabase
+      .from("modelos_contrato")
+      .select("id", { count: "exact", head: true })
+      .eq("tipo_doc", tipo.slug);
+    if (count > 0) throw new Error("Não é possível excluir: há modelos vinculados a este tipo de documento.");
+  }
+
+  const { error } = await supabase.from("tipos_doc_contrato").delete().eq("id", id);
+  if (error) throw error;
+}
 
 export async function listarModelos(supabase) {
   const { data, error } = await supabase
@@ -259,7 +310,13 @@ export async function gerarDocx(supabase, clienteId, tipoAcao, tipoDoc) {
 
   const buffer = doc.getZip().generate({ type: "nodebuffer", compression: "DEFLATE" });
 
-  const tipoDocLabel = TIPOS_DOC.find(t => t.value === tipoDoc)?.label || tipoDoc;
+  const { data: tipoDocDB } = await supabase
+    .from("tipos_doc_contrato")
+    .select("nome")
+    .eq("slug", tipoDoc)
+    .single();
+
+  const tipoDocLabel = tipoDocDB?.nome || tipoDoc;
   const nomeArquivo  = `${cliente.nome} - ${tipoDocLabel}.docx`;
 
   return { buffer, nomeArquivo };

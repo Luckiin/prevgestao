@@ -4,11 +4,12 @@ import { useEffect, useState, useCallback } from "react";
 import { FileSignature, Search, FileText, Download, Loader2, X } from "lucide-react";
 import Button from "@/components/ui/Button";
 import { toast } from "sonner";
-import { TIPOS_DOC } from "@/lib/contratos/tipos";
+import { toast } from "sonner";
 
 export default function ContratosPage() {
   const [modelos, setModelos]           = useState([]);
   const [tiposAcao, setTiposAcao]       = useState([]);
+  const [tiposDoc, setTiposDoc]         = useState([]);
   const [clientes, setClientes]         = useState([]);
   const [busca, setBusca]               = useState("");
   const [clienteSel, setClienteSel]     = useState(null);
@@ -27,6 +28,11 @@ export default function ContratosPage() {
     fetch("/api/contratos/tipos")
       .then(r => r.json())
       .then(d => setTiposAcao(Array.isArray(d) ? d.filter(t => t.ativo) : []))
+      .catch(() => {});
+
+    fetch("/api/contratos/tipos-doc")
+      .then(r => r.json())
+      .then(d => setTiposDoc(Array.isArray(d) ? d.filter(t => t.ativo) : []))
       .catch(() => {});
   }, []);
 
@@ -62,7 +68,7 @@ export default function ContratosPage() {
 
 
   const docsDisponiveis = tipoAcao
-    ? TIPOS_DOC.filter(td => modelos.some(m => m.tipo_acao === tipoAcao && m.tipo_doc === td.value))
+    ? tiposDoc.filter(td => modelos.some(m => m.tipo_acao === tipoAcao && m.tipo_doc === td.slug))
     : [];
 
   const tiposAcaoComModelo = tiposAcao.filter(ta =>
@@ -99,7 +105,7 @@ export default function ContratosPage() {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
 
-      toast.success(`${TIPOS_DOC.find(t => t.value === tipoDoc)?.label} gerado com sucesso!`);
+      toast.success(`${tiposDoc.find(t => t.slug === tipoDoc)?.nome} gerado com sucesso!`);
     } catch (err) {
       toast.error(err.message);
     } finally {
@@ -217,24 +223,24 @@ export default function ContratosPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {docsDisponiveis.map(td => (
                   <button
-                    key={td.value}
-                    onClick={() => gerarDocumento(td.value)}
-                    disabled={!!gerando[td.value]}
+                    key={td.slug}
+                    onClick={() => gerarDocumento(td.slug)}
+                    disabled={!!gerando[td.slug]}
                     className="flex items-center gap-3 p-3.5 rounded-xl border border-dark-50 bg-dark-300
                                hover:border-gold-500/30 hover:bg-dark-200 transition-all text-left group
                                disabled:opacity-60 disabled:cursor-not-allowed"
                   >
                     <div className="w-8 h-8 rounded-lg bg-gold-500/10 flex items-center justify-center shrink-0 group-hover:bg-gold-500/15 transition-colors">
-                      {gerando[td.value]
+                      {gerando[td.slug]
                         ? <Loader2 size={15} className="text-gold-500 animate-spin" />
                         : <FileText size={15} className="text-gold-500" />
                       }
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-ink-200 group-hover:text-ink-100 transition-colors">{td.label}</p>
+                      <p className="text-sm font-medium text-ink-200 group-hover:text-ink-100 transition-colors">{td.nome}</p>
                       <p className="text-xs text-ink-600 flex items-center gap-1 mt-0.5">
                         <Download size={10} />
-                        {gerando[td.value] ? "Gerando..." : "Clique para baixar"}
+                        {gerando[td.slug] ? "Gerando..." : "Clique para baixar"}
                       </p>
                     </div>
                   </button>
