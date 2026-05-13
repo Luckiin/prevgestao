@@ -4,7 +4,6 @@ import { useEffect, useState, useCallback } from "react";
 import { FileSignature, Search, FileText, Download, Loader2, X } from "lucide-react";
 import Button from "@/components/ui/Button";
 import { toast } from "sonner";
-import { toast } from "sonner";
 
 export default function ContratosPage() {
   const [modelos, setModelos]           = useState([]);
