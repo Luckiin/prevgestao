@@ -20,6 +20,8 @@ export async function GET(request) {
       busca:          searchParams.get("busca")          || undefined,
       limit:          Math.min(Number(searchParams.get("limit")) || 50, 500),
       offset:         Number(searchParams.get("offset")) || 0,
+      sortCol:        searchParams.get("sortCol")        || undefined,
+      sortDir:        searchParams.get("sortDir")        || undefined,
     });
 
     return NextResponse.json(resultado);

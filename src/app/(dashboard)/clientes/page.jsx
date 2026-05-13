@@ -36,6 +36,7 @@ export default function ClientesPage() {
       setSortCol(col);
       setSortDir("asc");
     }
+    setPagina(1);
   }
 
 
@@ -44,7 +45,7 @@ export default function ClientesPage() {
   const [filtroTipo, setFiltroTipo]     = useState("");
   const [filtroSituacao, setFiltroSituacao] = useState("");
   const [filtroSubdivisao, setFiltroSubdivisao] = useState("");
-  const [filtroAno, setFiltroAno]       = useState(String(ANO_ATUAL));
+  const [filtroAno, setFiltroAno]       = useState("todos");
   const [subdivisoes, setSubdivisoes]   = useState([]);
   const [carregandoDetalhe, setCarregandoDetalhe] = useState(false);
 
@@ -60,13 +61,15 @@ export default function ClientesPage() {
     
     params.set("limit", String(itensPorPagina));
     params.set("offset", String((pagina - 1) * itensPorPagina));
+    params.set("sortCol", sortCol);
+    params.set("sortDir", sortDir);
 
     const res = await fetch(`/api/clientes?${params}`);
     const json = await res.json();
     setClientes(json.data || []);
     setTotal(json.total || 0);
     setLoading(false);
-  }, [busca, filtroStatus, filtroTipo, filtroSituacao, filtroSubdivisao, filtroAno, pagina, itensPorPagina]);
+  }, [busca, filtroStatus, filtroTipo, filtroSituacao, filtroSubdivisao, filtroAno, pagina, itensPorPagina, sortCol, sortDir]);
 
   useEffect(() => {
     async function carregarSubdivisoes() {
@@ -238,7 +241,7 @@ export default function ClientesPage() {
           ))}
         </select>
 
-        {(busca || filtroStatus || filtroTipo || filtroSituacao || filtroSubdivisao || filtroAno !== String(ANO_ATUAL)) && (
+        {(busca || filtroStatus || filtroTipo || filtroSituacao || filtroSubdivisao || filtroAno !== "todos") && (
           <button
             onClick={() => {
               setBusca("");
@@ -246,7 +249,7 @@ export default function ClientesPage() {
               setFiltroTipo("");
               setFiltroSituacao("");
               setFiltroSubdivisao("");
-              setFiltroAno(String(ANO_ATUAL));
+              setFiltroAno("todos");
               setPagina(1);
             }}
             className="flex items-center gap-1 text-xs text-ink-500 hover:text-ink-200 transition-colors px-2"

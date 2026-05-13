@@ -31,12 +31,21 @@ export async function listarClientes(supabase, {
   busca,
   limit  = 50,
   offset = 0,
+  sortCol,
+  sortDir,
 } = {}) {
   let query = supabase
     .from("clientes")
-    .select(SELECT_LISTA, { count: "exact" })
-    .order("atualizado_em", { ascending: false })
-    .range(offset, offset + limit - 1);
+    .select(SELECT_LISTA, { count: "exact" });
+
+  if (sortCol && sortDir) {
+    const dbSortCol = sortCol === "ano" ? "ano_referencia" : sortCol;
+    query = query.order(dbSortCol, { ascending: sortDir === "asc" });
+  } else {
+    query = query.order("atualizado_em", { ascending: false });
+  }
+
+  query = query.range(offset, offset + limit - 1);
 
   if (status)         query = query.eq("status", status);
   if (tipo_processo)  query = query.eq("tipo_processo", tipo_processo);
