@@ -361,7 +361,7 @@ create policy "storage_delete" on storage.objects for delete
 -- ===============================================================
 
 -- View: clientes com subdivisao e contagens
-create or replace view public.v_clientes_completo as
+create or replace view public.v_clientes_completo with (security_invoker = true) as
 select
   c.id,
   c.nome,
@@ -389,7 +389,7 @@ left join public.subdivisoes s on s.id = c.subdivisao_id;
 
 
 -- View: resumo por ano
-create or replace view public.v_resumo_anual as
+create or replace view public.v_resumo_anual with (security_invoker = true) as
 select
   ano_referencia                                            as ano,
   count(*)                                                  as total_clientes,
@@ -405,7 +405,7 @@ order by ano_referencia desc;
 
 
 -- View: prazos proximos (30 dias)
-create or replace view public.v_prazos_proximos as
+create or replace view public.v_prazos_proximos with (security_invoker = true) as
 select
   p.id,
   p.descricao,

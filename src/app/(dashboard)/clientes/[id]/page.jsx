@@ -102,6 +102,10 @@ export default function ClienteDetalhePage() {
   const [docExcluindo, setDocExcluindo] = useState(null);
   const [prazoExcluindo, setPrazoExcluindo] = useState(null);
 
+  const [selectedDocs, setSelectedDocs] = useState(new Set());
+  const [confirmarExclusaoMassa, setConfirmarExclusaoMassa] = useState(false);
+  const [excluindoMassa, setExcluindoMassa] = useState(false);
+
 
   const [novoPrazo, setNovoPrazo] = useState({ descricao: "", data_prazo: "" });
   const [addingPrazo, setAddingPrazo] = useState(false);
@@ -270,6 +274,40 @@ export default function ClienteDetalhePage() {
       carregar();
     } else {
       toast.error("Erro ao excluir arquivo");
+    }
+  }
+
+  function toggleDocSelection(id) {
+    const newSet = new Set(selectedDocs);
+    if (newSet.has(id)) newSet.delete(id);
+    else newSet.add(id);
+    setSelectedDocs(newSet);
+  }
+
+  function toggleAllDocs() {
+    if (selectedDocs.size === documentos.length) {
+      setSelectedDocs(new Set());
+    } else {
+      setSelectedDocs(new Set(documentos.map(d => d.id)));
+    }
+  }
+
+  async function handleExcluirDocumentosSelecionados() {
+    setExcluindoMassa(true);
+    try {
+      let sucessos = 0;
+      for (const docId of selectedDocs) {
+        const res = await fetch(`/api/documentos/${docId}`, { method: "DELETE" });
+        if (res.ok) sucessos++;
+      }
+      toast.success(`${sucessos} documento(s) excluído(s)`);
+      setSelectedDocs(new Set());
+      setConfirmarExclusaoMassa(false);
+      carregar();
+    } catch (error) {
+      toast.error("Erro ao excluir documentos");
+    } finally {
+      setExcluindoMassa(false);
     }
   }
 
@@ -530,8 +568,33 @@ export default function ClienteDetalhePage() {
             {documentos.length === 0 ? (
               <p className="p-10 text-center text-sm text-ink-500">Nenhum documento anexado.</p>
             ) : (
-                documentos.map(d => (
+              <>
+                <div className="flex items-center justify-between px-5 py-3 bg-white/[0.02]">
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="checkbox"
+                      className="w-4 h-4 rounded border-white/[0.1] bg-dark-200 text-gold-500 focus:ring-gold-500/20"
+                      checked={selectedDocs.size === documentos.length && documentos.length > 0}
+                      onChange={toggleAllDocs}
+                    />
+                    <span className="text-sm text-ink-300">
+                      {selectedDocs.size > 0 ? `${selectedDocs.size} selecionados` : "Selecionar todos"}
+                    </span>
+                  </div>
+                  {selectedDocs.size > 0 && (
+                    <Button variant="danger" size="sm" onClick={() => setConfirmarExclusaoMassa(true)}>
+                      <Trash2 size={14} className="mr-2" /> Excluir Selecionados
+                    </Button>
+                  )}
+                </div>
+                {documentos.map(d => (
                   <div key={d.id} className="flex items-center gap-4 px-5 py-4 group hover:bg-white/[0.01] transition-all">
+                    <input
+                      type="checkbox"
+                      className="w-4 h-4 rounded border-white/[0.1] bg-dark-200 text-gold-500 focus:ring-gold-500/20 cursor-pointer"
+                      checked={selectedDocs.has(d.id)}
+                      onChange={() => toggleDocSelection(d.id)}
+                    />
                     <div className="w-10 h-10 rounded-xl bg-gold-500/5 flex items-center justify-center text-gold-500">
                       <FileText size={18} />
                     </div>
@@ -556,9 +619,10 @@ export default function ClienteDetalhePage() {
                       </button>
                     </div>
                   </div>
-                ))
-              )}
-            </div>
+                ))}
+              </>
+            )}
+          </div>
           </div>
       )}
 
@@ -658,6 +722,19 @@ export default function ClienteDetalhePage() {
         <div className="flex gap-3 justify-end">
           <Button variant="secondary" onClick={() => setDocExcluindo(null)}>Cancelar</Button>
           <Button variant="danger" onClick={handleExcluirDocumento}>Excluir Agora</Button>
+        </div>
+      </Modal>
+
+      <Modal open={confirmarExclusaoMassa} onClose={() => setConfirmarExclusaoMassa(false)} title="Excluir documentos" size="sm">
+        <p className="text-sm text-ink-300 mb-6">
+          Tem certeza que deseja excluir os <strong className="text-ink-100">{selectedDocs.size}</strong> documentos selecionados?
+          Esta ação removerá os arquivos permanentemente.
+        </p>
+        <div className="flex gap-3 justify-end">
+          <Button variant="secondary" onClick={() => setConfirmarExclusaoMassa(false)} disabled={excluindoMassa}>Cancelar</Button>
+          <Button variant="danger" onClick={handleExcluirDocumentosSelecionados} loading={excluindoMassa}>
+            {excluindoMassa ? "Excluindo..." : "Excluir Agora"}
+          </Button>
         </div>
       </Modal>
 
